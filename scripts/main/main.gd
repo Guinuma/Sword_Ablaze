@@ -1,5 +1,5 @@
 extends Node2D
-## Small initialization sandbox. Placeholder graphics use logical pixel coordinates.
+## First combat prototype. Placeholder graphics use logical pixel coordinates.
 
 const SPEED: float = 120.0
 const BULLET_SPEED: float = 360.0
@@ -8,21 +8,49 @@ const ARENA := Rect2(24, 64, 592, 272)
 var player_position := Vector2(320, 200)
 var aim := Vector2.RIGHT
 var fire_cooldown: float = 0.0
+const MAX_HEALTH: int = 5
+const ENEMY_HEALTH: int = 2
+const ENEMY_SPEED: float = 46.0
+const MAX_ENEMIES: int = 18
+const SPAWN_INTERVAL: float = 1.6
+const CONTACT_COOLDOWN: float = 0.85
 var bullets: Array[Dictionary] = []
+var enemies: Array[Dictionary] = []
+var health: int = MAX_HEALTH
+var kills: int = 0
+var elapsed: float = 0.0
+var spawn_cooldown: float = 0.8
+var hurt_cooldown: float = 0.0
+var game_over: bool = false
+var hud: Label
+var death_label: Label
+var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
 	_register_input()
+	random.randomize()
 	var title := Label.new()
-	title.text = "SWORD ABLAZE  /  INITIAL SANDBOX"
+	title.text = "SWORD ABLAZE  /  ARENA"
 	title.position = Vector2(24, 12)
-	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_font_size_override("font_size", 16)
 	add_child(title)
 	var instructions := Label.new()
-	instructions.text = "WASD / Arrows: move   |   Mouse: aim   |   Left click / Space: fire   |   R: reset"
+	instructions.text = "WASD / Arrows: move   |   Mouse: aim   |   Click / Space: fire   |   R: restart"
 	instructions.position = Vector2(24, 38)
 	instructions.add_theme_font_size_override("font_size", 12)
 	add_child(instructions)
+	hud = Label.new()
+	hud.position = Vector2(348, 14)
+	hud.add_theme_font_size_override("font_size", 12)
+	add_child(hud)
+	death_label = Label.new()
+	death_label.position = Vector2(120, 152)
+	death_label.size = Vector2(400, 72)
+	death_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	death_label.add_theme_font_size_override("font_size", 20)
+	add_child(death_label)
+	_update_hud()
 
 
 func _register_input() -> void:
@@ -35,6 +63,7 @@ func _register_input() -> void:
 	for action in bindings:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
+		InputMap.action_erase_events(action)
 		for key in bindings[action]:
 			var event := InputEventKey.new()
 			event.physical_keycode = key
@@ -46,9 +75,11 @@ func _register_input() -> void:
 
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("reset_sandbox"):
-		player_position = Vector2(320, 200)
-		bullets.clear()
-		fire_cooldown = 0.0
+		_reset_run()
+	if game_over:
+		return
+	elapsed += delta
+	hurt_cooldown = maxf(0.0, hurt_cooldown - delta)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	player_position += movement * SPEED * delta
 	player_position = player_position.clamp(ARENA.position + Vector2(8, 8), ARENA.end - Vector2(8, 8))
@@ -59,11 +90,95 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_pressed("fire") and fire_cooldown <= 0.0:
 		bullets.append({"position": player_position + aim * 12.0, "direction": aim})
 		fire_cooldown = FIRE_INTERVAL
-	for index in range(bullets.size() - 1, -1, -1):
-		bullets[index]["position"] += bullets[index]["direction"] * BULLET_SPEED * delta
-		if not ARENA.has_point(bullets[index]["position"]):
-			bullets.remove_at(index)
+	spawn_cooldown -= delta
+	if spawn_cooldown <= 0.0:
+		if enemies.size() < MAX_ENEMIES:
+			_spawn_enemy()
+		spawn_cooldown = SPAWN_INTERVAL
+	_update_enemies(delta)
+	_update_bullets(delta)
+	_check_contact()
+	_update_hud()
 	queue_redraw()
+
+
+func _spawn_enemy() -> void:
+	var point: Vector2
+	# Spawn on the opposite half of the perimeter, away from the player.
+	if random.randf() < 0.5:
+		var x := ARENA.position.x + 10.0 if player_position.x > ARENA.get_center().x else ARENA.end.x - 10.0
+		point = Vector2(x, random.randf_range(ARENA.position.y + 10.0, ARENA.end.y - 10.0))
+	else:
+		var y := ARENA.position.y + 10.0 if player_position.y > ARENA.get_center().y else ARENA.end.y - 10.0
+		point = Vector2(random.randf_range(ARENA.position.x + 10.0, ARENA.end.x - 10.0), y)
+	enemies.append({"position": point, "health": ENEMY_HEALTH, "flash": 0.0})
+
+
+func _update_enemies(delta: float) -> void:
+	for enemy in enemies:
+		var point: Vector2 = enemy["position"]
+		enemy["position"] = point.move_toward(player_position, ENEMY_SPEED * delta)
+		enemy["flash"] = maxf(0.0, enemy["flash"] - delta)
+
+
+func _update_bullets(delta: float) -> void:
+	for index in range(bullets.size() - 1, -1, -1):
+		var start: Vector2 = bullets[index]["position"]
+		var end: Vector2 = start + Vector2(bullets[index]["direction"]) * BULLET_SPEED * delta
+		# Segment collision prevents fast bullets from skipping through enemies.
+		var target: int = -1
+		var nearest: float = INF
+		for enemy_index in range(enemies.size()):
+			var point: Vector2 = enemies[enemy_index]["position"]
+			var hit := Geometry2D.segment_intersects_circle(start, end, point, 10.0)
+			if hit >= 0.0 and hit < nearest:
+				target = enemy_index
+				nearest = hit
+		if target >= 0:
+			enemies[target]["health"] -= 1
+			enemies[target]["flash"] = 0.12
+			if enemies[target]["health"] <= 0:
+				enemies.remove_at(target)
+				kills += 1
+			bullets.remove_at(index)
+		elif not ARENA.has_point(end):
+			bullets.remove_at(index)
+		else:
+			bullets[index]["position"] = end
+
+
+func _check_contact() -> void:
+	if hurt_cooldown > 0.0 or game_over:
+		return
+	for enemy in enemies:
+		if player_position.distance_to(enemy["position"]) < 15.0:
+			health -= 1
+			hurt_cooldown = CONTACT_COOLDOWN
+			if health <= 0:
+				game_over = true
+			break
+
+
+func _reset_run() -> void:
+	player_position = Vector2(320, 200)
+	aim = Vector2.RIGHT
+	bullets.clear()
+	enemies.clear()
+	health = MAX_HEALTH
+	kills = 0
+	elapsed = 0.0
+	spawn_cooldown = 0.8
+	hurt_cooldown = 0.0
+	fire_cooldown = 0.0
+	game_over = false
+	_update_hud()
+	queue_redraw()
+
+
+func _update_hud() -> void:
+	hud.text = "HP %d/%d  |  KILLS %d  |  %ds" % [health, MAX_HEALTH, kills, int(elapsed)]
+	death_label.visible = game_over
+	death_label.text = "YOU FELL\n%d kills  /  %ds  /  R to restart" % [kills, int(elapsed)]
 
 
 func _draw() -> void:
@@ -73,7 +188,15 @@ func _draw() -> void:
 	for y in range(64, 337, 16):
 		draw_line(Vector2(24, y), Vector2(616, y), Color("1d2638"))
 	draw_rect(ARENA, Color("61758b"), false, 1.0)
-	draw_rect(Rect2(player_position.round() - Vector2(6, 6), Vector2(12, 12)), Color("65dfc1"))
+	for enemy in enemies:
+		var point: Vector2 = Vector2(enemy["position"]).round()
+		var color := Color("fff0b0") if enemy["flash"] > 0.0 else Color("e76170")
+		draw_rect(Rect2(point - Vector2(8, 8), Vector2(16, 16)), color)
+		draw_rect(Rect2(point + Vector2(-8, -12), Vector2(8 * enemy["health"], 2)), Color("ffb454"))
+	var player_color := Color("ffffff") if hurt_cooldown > 0.0 else Color("65dfc1")
+	draw_rect(Rect2(player_position.round() - Vector2(6, 6), Vector2(12, 12)), player_color)
 	draw_line(player_position.round(), (player_position + aim * 14.0).round(), Color("fff0b0"), 3.0)
 	for bullet in bullets:
 		draw_rect(Rect2(Vector2(bullet["position"]).round() - Vector2(2, 2), Vector2(4, 4)), Color("ffb454"))
+	if game_over:
+		draw_rect(ARENA, Color(0.02, 0.02, 0.04, 0.86))

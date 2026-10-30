@@ -10,7 +10,13 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 Pelo terminal: `godot --editor --path .` ou `godot --path .` (com o executável no PATH).
 
-O sandbox inicial mostra uma arena com placeholders geométricos: WASD/setas para mover, rato para apontar, botão esquerdo/Espaço para disparar e R para repor. Não existem ainda inimigos, dano, XP, menus ou gravação.
+A primeira arena de combate usa placeholders geométricos: WASD/setas para mover, rato para apontar, botão esquerdo/Espaço para disparar e R para reiniciar em qualquer momento.
+
+- Inimigos perseguem o jogador e surgem a cada 1,6 segundos, até 18 em simultâneo, longe da posição do jogador.
+- Cada inimigo precisa de dois tiros; o impacto dá um flash e a morte conta uma eliminação.
+- O jogador tem 5 HP. Contacto causa 1 de dano, com 0,85 segundos de proteção entre impactos.
+- O HUD mostra vida, eliminações e tempo. Ao morrer, a simulação para e R inicia uma nova partida.
+- Ainda não existem XP, ondas, menus, save ou progressão persistente. Os inimigos podem sobrepor-se neste protótipo.
 
 ## Base técnica
 
@@ -26,6 +32,7 @@ O sandbox inicial mostra uma arena com placeholders geométricos: WASD/setas par
 ```text
 scenes/       Cenas, começando por main/main.tscn
 scripts/      GDScript organizado por contexto
+tests/        Verificações automáticas do combate
 assets/       Arte, áudio e fontes
 resources/    Resources (.tres) e dados de configuração
 ```
@@ -39,7 +46,8 @@ O XP será transversal aos modos: jogar nos diferentes modos contribuirá para a
 ## Roadmap
 
 - [x] Init: projeto importável, cena principal, organização e sandbox de controlos.
-- [ ] Protótipo Arena Shooter: jogador e projéteis como cenas próprias, inimigo básico, dano, morte e reinício.
+- [x] Primeiro combate: inimigo básico, colisão de tiros, dano, morte, HUD e reinício.
+- [ ] Separar jogador, projéteis e inimigos em cenas próprias; o primeiro protótipo concentra a simulação em `scripts/main/main.gd`.
 - [ ] Loop de arena: spawns, ondas, feedback de combate e primeira arma equilibrada.
 - [ ] Loop roguelite: runs, escolhas temporárias, recompensas e retorno ao hub.
 - [ ] XP transversal, save versionado e skill trees persistentes no hub roguelite.
@@ -53,9 +61,12 @@ A sequência é uma intenção de desenvolvimento, sem datas comprometidas. Este
 ```sh
 godot --headless --editor --path . --quit
 godot --headless --path . --quit-after 120
+godot --headless --path . --script tests/combat_smoke.gd
 ```
 
-No editor, executar F5 e confirmar movimento nas quatro direções, limites da arena, mira, disparo contínuo e reset. Os comandos headless verificam importação e arranque, mas não substituem esta verificação interativa.
+O teste de combate verifica perseguição, spawn, colisão contínua dos tiros, dano, invulnerabilidade, eliminações, morte e limpeza no reinício.
+
+No editor, executar F5 e confirmar movimento nas quatro direções, limites da arena, mira, disparo contínuo, legibilidade do HUD, impactos, morte e reinício com R. Os comandos headless verificam importação e arranque, mas não substituem esta verificação interativa.
 
 ## Contribuir e licença
 
