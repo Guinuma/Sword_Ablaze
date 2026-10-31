@@ -14,6 +14,17 @@ const ENEMY_SPEED: float = 46.0
 const MAX_ENEMIES: int = 18
 const SPAWN_INTERVAL: float = 1.6
 const CONTACT_COOLDOWN: float = 0.85
+const DASH_SPEED: float = 380.0
+const DASH_DURATION: float = 0.14
+const DASH_COOLDOWN: float = 1.2
+const WAVE_BREAK: float = 3.0
+var dash_time: float = 0.0
+var dash_cooldown: float = 0.0
+var dash_direction := Vector2.RIGHT
+var wave: int = 1
+var wave_remaining: int = 5
+var wave_break: float = 0.0
+var wave_label: Label
 var bullets: Array[Dictionary] = []
 var enemies: Array[Dictionary] = []
 var health: int = MAX_HEALTH
@@ -36,7 +47,7 @@ func _ready() -> void:
 	title.add_theme_font_size_override("font_size", 16)
 	add_child(title)
 	var instructions := Label.new()
-	instructions.text = "WASD / Arrows: move   |   Mouse: aim   |   Click / Space: fire   |   R: restart"
+	instructions.text = "WASD: move | Mouse: aim | Click/Space: fire | Shift: dash | R: restart"
 	instructions.position = Vector2(24, 38)
 	instructions.add_theme_font_size_override("font_size", 12)
 	add_child(instructions)
@@ -50,6 +61,12 @@ func _ready() -> void:
 	death_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	death_label.add_theme_font_size_override("font_size", 20)
 	add_child(death_label)
+	wave_label = Label.new()
+	wave_label.position = Vector2(120, 72)
+	wave_label.size = Vector2(400, 30)
+	wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	wave_label.add_theme_font_size_override("font_size", 14)
+	add_child(wave_label)
 	_update_hud()
 
 
@@ -58,7 +75,7 @@ func _register_input() -> void:
 	var bindings := {
 		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
 		"move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
-		"fire": [KEY_SPACE], "reset_sandbox": [KEY_R],
+		"dash": [KEY_SHIFT], "fire": [KEY_SPACE], "reset_sandbox": [KEY_R],
 	}
 	for action in bindings:
 		if not InputMap.has_action(action):
@@ -81,7 +98,14 @@ func _physics_process(delta: float) -> void:
 	elapsed += delta
 	hurt_cooldown = maxf(0.0, hurt_cooldown - delta)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	player_position += movement * SPEED * delta
+	dash_cooldown = maxf(0.0, dash_cooldown - delta)
+	if Input.is_action_just_pressed("dash"):
+		_try_dash(movement)
+	if dash_time > 0.0:
+		player_position += dash_direction * DASH_SPEED * minf(delta, dash_time)
+		dash_time = maxf(0.0, dash_time - delta)
+	else:
+		player_position += movement * SPEED * delta
 	player_position = player_position.clamp(ARENA.position + Vector2(8, 8), ARENA.end - Vector2(8, 8))
 	var mouse_direction := get_global_mouse_position() - player_position
 	if mouse_direction.length_squared() > 1.0:
@@ -90,16 +114,40 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_pressed("fire") and fire_cooldown <= 0.0:
 		bullets.append({"position": player_position + aim * 12.0, "direction": aim})
 		fire_cooldown = FIRE_INTERVAL
-	spawn_cooldown -= delta
-	if spawn_cooldown <= 0.0:
-		if enemies.size() < MAX_ENEMIES:
-			_spawn_enemy()
-		spawn_cooldown = SPAWN_INTERVAL
+	_update_waves(delta)
 	_update_enemies(delta)
 	_update_bullets(delta)
 	_check_contact()
 	_update_hud()
 	queue_redraw()
+
+
+func _try_dash(movement: Vector2) -> void:
+	if dash_cooldown > 0.0 or game_over:
+		return
+	dash_direction = movement.normalized() if movement.length_squared() > 0.0 else aim
+	dash_time = DASH_DURATION
+	dash_cooldown = DASH_COOLDOWN
+
+
+func _update_waves(delta: float) -> void:
+	if wave_break > 0.0:
+		wave_break = maxf(0.0, wave_break - delta)
+		if wave_break == 0.0:
+			wave += 1
+			wave_remaining = mini(5 + (wave - 1) * 2, 40)
+			spawn_cooldown = 0.3
+		return
+	if wave_remaining == 0 and enemies.is_empty():
+		wave_break = WAVE_BREAK
+		bullets.clear()
+		health = mini(health + 1, MAX_HEALTH)
+		return
+	spawn_cooldown -= delta
+	if spawn_cooldown <= 0.0 and wave_remaining > 0 and enemies.size() < MAX_ENEMIES:
+		_spawn_enemy()
+		wave_remaining -= 1
+		spawn_cooldown = maxf(0.4, SPAWN_INTERVAL - (wave - 1) * 0.1)
 
 
 func _spawn_enemy() -> void:
@@ -117,7 +165,7 @@ func _spawn_enemy() -> void:
 func _update_enemies(delta: float) -> void:
 	for enemy in enemies:
 		var point: Vector2 = enemy["position"]
-		enemy["position"] = point.move_toward(player_position, ENEMY_SPEED * delta)
+		enemy["position"] = point.move_toward(player_position, minf(ENEMY_SPEED + (wave - 1) * 3.0, 90.0) * delta)
 		enemy["flash"] = maxf(0.0, enemy["flash"] - delta)
 
 
@@ -148,7 +196,7 @@ func _update_bullets(delta: float) -> void:
 
 
 func _check_contact() -> void:
-	if hurt_cooldown > 0.0 or game_over:
+	if hurt_cooldown > 0.0 or dash_time > 0.0 or game_over:
 		return
 	for enemy in enemies:
 		if player_position.distance_to(enemy["position"]) < 15.0:
@@ -171,12 +219,20 @@ func _reset_run() -> void:
 	hurt_cooldown = 0.0
 	fire_cooldown = 0.0
 	game_over = false
+	dash_time = 0.0
+	dash_cooldown = 0.0
+	dash_direction = Vector2.RIGHT
+	wave = 1
+	wave_remaining = 5
+	wave_break = 0.0
 	_update_hud()
 	queue_redraw()
 
 
 func _update_hud() -> void:
 	hud.text = "HP %d/%d  |  KILLS %d  |  %ds" % [health, MAX_HEALTH, kills, int(elapsed)]
+	wave_label.visible = not game_over
+	wave_label.text = "WAVE %d CLEAR  |  Next in %d" % [wave, ceili(wave_break)] if wave_break > 0.0 else "WAVE %d  |  Remaining %d  |  DASH %s" % [wave, wave_remaining + enemies.size(), "READY" if dash_cooldown <= 0.0 else "%.1fs" % dash_cooldown]
 	death_label.visible = game_over
 	death_label.text = "YOU FELL\n%d kills  /  %ds  /  R to restart" % [kills, int(elapsed)]
 
@@ -193,7 +249,9 @@ func _draw() -> void:
 		var color := Color("fff0b0") if enemy["flash"] > 0.0 else Color("e76170")
 		draw_rect(Rect2(point - Vector2(8, 8), Vector2(16, 16)), color)
 		draw_rect(Rect2(point + Vector2(-8, -12), Vector2(8 * enemy["health"], 2)), Color("ffb454"))
-	var player_color := Color("ffffff") if hurt_cooldown > 0.0 else Color("65dfc1")
+	if dash_time > 0.0:
+		draw_line(player_position - dash_direction * 26.0, player_position, Color("388fba"), 10.0)
+	var player_color := Color("ffffff") if hurt_cooldown > 0.0 or dash_time > 0.0 else Color("65dfc1")
 	draw_rect(Rect2(player_position.round() - Vector2(6, 6), Vector2(12, 12)), player_color)
 	draw_line(player_position.round(), (player_position + aim * 14.0).round(), Color("fff0b0"), 3.0)
 	for bullet in bullets:
