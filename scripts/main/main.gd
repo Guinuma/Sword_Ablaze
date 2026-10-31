@@ -1,6 +1,9 @@
 extends Node2D
 ## First combat prototype. Placeholder graphics use logical pixel coordinates.
 
+const RunState = preload("res://scripts/run/run_state.gd")
+var run = RunState.new()
+
 const WaveDirector = preload("res://scripts/run/wave_director.gd")
 var waves = WaveDirector.new()
 
@@ -16,7 +19,6 @@ const ARENA := Rect2(24, 64, 592, 272)
 var player_position := Vector2(320, 200)
 var aim := Vector2.RIGHT
 var fire_cooldown: float = 0.0
-const MAX_HEALTH: int = 5
 const ENEMY_HEALTH: int = 2
 const ENEMY_SPEED: float = 46.0
 const CONTACT_COOLDOWN: float = 0.85
@@ -28,20 +30,16 @@ var dash_cooldown: float = 0.0
 var dash_direction := Vector2.RIGHT
 var bullets: Array[Dictionary] = []
 var enemies: Array[Dictionary] = []
-var health: int = MAX_HEALTH
-var kills: int = 0
-var elapsed: float = 0.0
 var hurt_cooldown: float = 0.0
-var paused: bool = false
 var fire_requires_release: bool = false
 var particles: Array[Dictionary] = []
 var muzzle_time: float = 0.0
-var game_over: bool = false
 var hud_view: CanvasLayer
 var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	waves.wave_started.connect(run.start_combat)
 	waves.spawn_requested.connect(_spawn_enemy)
 	waves.wave_cleared.connect(_on_wave_cleared)
 	random.randomize()
@@ -59,21 +57,21 @@ func _ready() -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_node_ready() and not game_over:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_node_ready() and not (run.phase == RunState.Phase.DEAD):
 		_set_paused(true)
 
 
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("reset_sandbox"):
 		_reset_run()
-	if Input.is_action_just_pressed("pause_run") and not game_over:
-		_set_paused(not paused)
+	if Input.is_action_just_pressed("pause_run") and not (run.phase == RunState.Phase.DEAD):
+		_set_paused(not (run.phase == RunState.Phase.PAUSED))
 	if not Input.is_action_pressed("fire"):
 		fire_requires_release = false
-	if game_over or paused:
+	if (run.phase == RunState.Phase.DEAD) or (run.phase == RunState.Phase.PAUSED):
 		return
 	_update_effects(delta)
-	elapsed += delta
+	run.advance(delta)
 	hurt_cooldown = maxf(0.0, hurt_cooldown - delta)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	dash_cooldown = maxf(0.0, dash_cooldown - delta)
@@ -103,7 +101,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _set_paused(value: bool) -> void:
-	paused = value
+	run.set_paused(value)
 	# Require a fresh trigger after any pause, including focus loss.
 	fire_requires_release = true
 	_update_hud()
@@ -129,7 +127,7 @@ func _update_effects(delta: float) -> void:
 
 
 func _try_dash(movement: Vector2) -> void:
-	if dash_cooldown > 0.0 or game_over or paused:
+	if dash_cooldown > 0.0 or (run.phase == RunState.Phase.DEAD) or (run.phase == RunState.Phase.PAUSED):
 		return
 	dash_direction = movement.normalized() if movement.length_squared() > 0.0 else aim
 	dash_time = DASH_DURATION
@@ -142,7 +140,7 @@ func _update_waves(delta: float) -> void:
 
 func _on_wave_cleared() -> void:
 	bullets.clear()
-	health = mini(health + 1, MAX_HEALTH)
+	run.start_intermission()
 
 
 
@@ -202,7 +200,7 @@ func _update_bullets(delta: float) -> void:
 			if enemies[target]["health"] <= 0:
 				_burst(impact, Color("e76170"), 10)
 				enemies.remove_at(target)
-				kills += 1
+				run.record_kill()
 			bullets.remove_at(index)
 		elif not ARENA.has_point(end):
 			bullets.remove_at(index)
@@ -211,15 +209,13 @@ func _update_bullets(delta: float) -> void:
 
 
 func _check_contact() -> void:
-	if hurt_cooldown > 0.0 or dash_time > 0.0 or game_over:
+	if hurt_cooldown > 0.0 or dash_time > 0.0 or (run.phase == RunState.Phase.DEAD):
 		return
 	for enemy in enemies:
 		if player_position.distance_to(enemy["position"]) < 15.0:
-			health -= 1
+			run.take_damage()
 			_burst(player_position, Color("65dfc1"), 10)
 			hurt_cooldown = CONTACT_COOLDOWN
-			if health <= 0:
-				game_over = true
 			break
 
 
@@ -228,13 +224,9 @@ func _reset_run() -> void:
 	aim = Vector2.RIGHT
 	bullets.clear()
 	enemies.clear()
-	health = MAX_HEALTH
-	kills = 0
-	elapsed = 0.0
+	run.reset()
 	hurt_cooldown = 0.0
 	fire_cooldown = 0.0
-	game_over = false
-	paused = false
 	fire_requires_release = true
 	particles.clear()
 	muzzle_time = 0.0
@@ -251,7 +243,7 @@ func _reset_run() -> void:
 func _update_hud() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
-	hud_view.present(health, MAX_HEALTH, kills, elapsed, waves.number, waves.remaining + enemies.size(), waves.break_time, dash_cooldown, game_over, paused)
+	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.size(), waves.break_time, dash_cooldown, (run.phase == RunState.Phase.DEAD), (run.phase == RunState.Phase.PAUSED))
 
 
 func _draw() -> void:
@@ -279,5 +271,5 @@ func _draw() -> void:
 
 
 func _draw_overlay() -> void:
-	if game_over or paused:
+	if (run.phase == RunState.Phase.DEAD) or (run.phase == RunState.Phase.PAUSED):
 		overlay.draw_rect(ARENA, Color(0.02, 0.02, 0.04, 0.86))

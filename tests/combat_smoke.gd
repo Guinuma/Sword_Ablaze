@@ -21,23 +21,23 @@ func _run() -> void:
 	check(arena.bullets.is_empty(), "A bullet must be consumed by one hit")
 	arena.bullets.append({"position": Vector2(100, 200), "direction": Vector2.RIGHT})
 	arena._update_bullets(0.3)
-	check(arena.enemies.is_empty() and arena.kills == 1, "Second hit must kill and count once")
+	check(arena.enemies.is_empty() and arena.run.kills == 1, "Second hit must kill and count once")
 	arena.enemies.append({"position": arena.player_position, "health": 2, "flash": 0.0})
 	arena.enemies.append({"position": arena.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
 	arena._check_contact()
-	check(arena.health == 4, "Overlapping enemies must respect contact invulnerability")
+	check(arena.run.health == 4, "Overlapping enemies must respect contact invulnerability")
 	for index in range(4):
 		arena.hurt_cooldown = 0.0
 		arena._check_contact()
-	check(arena.health == 0 and arena.game_over, "Contact damage must trigger death at zero HP")
+	check(arena.run.health == 0 and (arena.run.phase == arena.RunState.Phase.DEAD), "Contact damage must trigger death at zero HP")
 	var before: Vector2 = arena.player_position
-	var time_before: float = arena.elapsed
+	var time_before: float = arena.run.elapsed
 	arena._physics_process(1.0)
-	check(arena.player_position == before and arena.elapsed == time_before, "Death must freeze the simulation")
+	check(arena.player_position == before and arena.run.elapsed == time_before, "Death must freeze the simulation")
 	arena._reset_run()
-	check(arena.health == 5 and not arena.game_over, "Restart must restore health and alive state")
-	check(arena.enemies.is_empty() and arena.bullets.is_empty() and arena.kills == 0, "Restart must clear combat state")
+	check(arena.run.health == 5 and not (arena.run.phase == arena.RunState.Phase.DEAD), "Restart must restore health and alive state")
+	check(arena.enemies.is_empty() and arena.bullets.is_empty() and arena.run.kills == 0, "Restart must clear combat state")
 	for index in range(100):
 		arena._spawn_enemy()
 		var point: Vector2 = arena.enemies.back()["position"]
@@ -65,20 +65,20 @@ func _run() -> void:
 	arena._physics_process(0.016)
 	check(arena.enemies.size() == arena.waves.MAX_ENEMIES, "Automatic spawning must respect enemy cap")
 	arena._reset_run()
-	check(arena.elapsed == 0.0 and arena.hurt_cooldown == 0.0 and arena.fire_cooldown == 0.0 and arena.waves.spawn_cooldown == 0.8, "Restart must reset timers")
-	arena.health = 3
+	check(arena.run.elapsed == 0.0 and arena.hurt_cooldown == 0.0 and arena.fire_cooldown == 0.0 and arena.waves.spawn_cooldown == 0.8, "Restart must reset timers")
+	arena.run.health = 3
 	arena.waves.remaining = 0
 	arena._update_waves(0.016)
-	check(arena.waves.break_time == arena.waves.WAVE_BREAK and arena.health == 4, "Cleared wave must start break and heal once")
+	check(arena.waves.break_time == arena.waves.WAVE_BREAK and arena.run.health == 4, "Cleared wave must start break and heal once")
 	arena._update_waves(1.0)
-	check(arena.waves.number == 1 and arena.health == 4, "Break must delay next wave and not repeat healing")
+	check(arena.waves.number == 1 and arena.run.health == 4, "Break must delay next wave and not repeat healing")
 	arena._update_waves(2.0)
 	check(arena.waves.number == 2 and arena.waves.remaining == 7, "Next wave must increase enemy budget")
 	arena._try_dash(Vector2.UP)
 	check(arena.dash_direction == Vector2.UP and arena.dash_time > 0.0, "Dash must follow movement")
 	arena.enemies.append({"position": arena.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
-	check(arena.health == 4, "Dash must protect against contact")
+	check(arena.run.health == 4, "Dash must protect against contact")
 	arena._try_dash(Vector2.DOWN)
 	check(arena.dash_direction == Vector2.UP, "Cooldown must prevent a second dash")
 	arena._physics_process(0.2)
@@ -105,15 +105,15 @@ func _run() -> void:
 	arena._set_paused(true)
 	var paused_position: Vector2 = arena.enemies[0]["position"]
 	arena._physics_process(1.0)
-	check(arena.elapsed == 0.0 and arena.enemies[0]["position"] == paused_position and arena.particles.size() == 160, "Pause must freeze timers, enemies and effects")
+	check(arena.run.elapsed == 0.0 and arena.enemies[0]["position"] == paused_position and arena.particles.size() == 160, "Pause must freeze timers, enemies and effects")
 	arena._try_dash(Vector2.UP)
 	check(arena.dash_time == 0.0, "Pause must prevent dash")
 	arena._set_paused(false)
 	arena._physics_process(0.01)
-	check(arena.elapsed > 0.0, "Resume must continue simulation")
+	check(arena.run.elapsed > 0.0, "Resume must continue simulation")
 	arena._set_paused(true)
 	arena._reset_run()
-	check(not arena.paused and arena.particles.is_empty() and arena.muzzle_time == 0.0, "Restart must clear pause and effects")
+	check(not (arena.run.phase == arena.RunState.Phase.PAUSED) and arena.particles.is_empty() and arena.muzzle_time == 0.0, "Restart must clear pause and effects")
 	# Project bindings must survive scene creation without being overwritten.
 	var expected_keys := {"move_left": KEY_LEFT, "move_right": KEY_RIGHT, "move_up": KEY_UP, "move_down": KEY_DOWN, "pause_run": KEY_ESCAPE, "dash": KEY_SHIFT}
 	for action in expected_keys:
@@ -122,11 +122,11 @@ func _run() -> void:
 		check(InputMap.action_has_event(action, event), "Project must define binding for " + action)
 	Input.action_press("fire")
 	arena._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
-	var focus_time: float = arena.elapsed
+	var focus_time: float = arena.run.elapsed
 	arena._physics_process(0.1)
-	check(arena.paused and arena.elapsed == focus_time, "Focus loss must pause and freeze combat")
+	check((arena.run.phase == arena.RunState.Phase.PAUSED) and arena.run.elapsed == focus_time, "Focus loss must pause and freeze combat")
 	arena._notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
-	check(arena.paused, "Focus gain must wait for explicit resume")
+	check((arena.run.phase == arena.RunState.Phase.PAUSED), "Focus gain must wait for explicit resume")
 	arena._set_paused(false)
 	arena._physics_process(0.01)
 	check(arena.bullets.is_empty(), "Held fire must not shoot when resuming")
@@ -144,20 +144,20 @@ func _run() -> void:
 	check(arena.hud_view.status.visible and arena.hud_view.status.text.begins_with("PAUSED"), "HUD must present pause state")
 	arena._reset_run()
 	check(not arena.hud_view.status.visible and arena.hud_view.stats.text.contains("HP 5/5"), "HUD must refresh after restart")
-	arena.health = 1
+	arena.run.health = 1
 	arena.enemies.append({"position": arena.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
 	arena._update_hud()
 	check(arena.hud_view.status.visible and arena.hud_view.status.text.begins_with("YOU FELL") and not arena.hud_view.wave_status.visible, "HUD must present death and hide wave prompt")
 	arena._reset_run()
-	arena.health = 3
+	arena.run.health = 3
 	arena.waves.remaining = 0
 	arena.bullets.append({"position": Vector2(100, 100), "direction": Vector2.RIGHT})
 	arena._update_waves(0.01)
 	check(arena.bullets.is_empty(), "Wave clear event must remove projectiles")
 	arena._set_paused(true)
 	arena._physics_process(10.0)
-	check(arena.waves.break_time == 3.0 and arena.health == 4, "Pause must freeze intermission without duplicate healing")
+	check(arena.waves.break_time == 3.0 and arena.run.health == 4, "Pause must freeze intermission without duplicate healing")
 	arena._set_paused(false)
 	arena._update_waves(3.0)
 	check(arena.waves.number == 2 and arena.enemies.is_empty(), "Intermission must end before spawning next wave")
@@ -168,11 +168,36 @@ func _run() -> void:
 		arena.waves.remaining = 0
 		arena._update_waves(0.01)
 		arena._update_waves(3.0)
-	check(arena.waves.number == 31 and arena.waves.remaining == 40 and arena.health == arena.MAX_HEALTH, "Long runs must cap budget and healing")
+	check(arena.waves.number == 31 and arena.waves.remaining == 40 and arena.run.health == arena.run.MAX_HEALTH, "Long runs must cap budget and healing")
 	arena._update_waves(0.3)
 	check(is_equal_approx(arena.waves.spawn_cooldown, 0.4), "Advanced waves must respect minimum spawn interval")
 	arena._reset_run()
 	check(arena.waves.number == 1 and arena.waves.remaining == 5 and arena.waves.spawn_cooldown == 0.8, "Director must reset after advanced rounds")
+	var lifecycle = arena.RunState.new()
+	var events := {"damage": 0, "kills": 0}
+	lifecycle.damaged.connect(func(_hp): events["damage"] += 1)
+	lifecycle.enemy_defeated.connect(func(_total): events["kills"] += 1)
+	lifecycle.start_intermission()
+	lifecycle.set_paused(true)
+	lifecycle.set_paused(true)
+	lifecycle.advance(10.0)
+	lifecycle.take_damage()
+	check(lifecycle.elapsed == 0.0 and lifecycle.health == 5, "Paused lifecycle must reject time and damage")
+	lifecycle.set_paused(false)
+	check(lifecycle.phase == lifecycle.Phase.INTERMISSION, "Repeated pause must preserve intermission resume state")
+	lifecycle.start_combat(2)
+	lifecycle.record_kill()
+	for hit in range(8):
+		lifecycle.take_damage()
+	lifecycle.set_paused(true)
+	lifecycle.set_paused(false)
+	lifecycle.start_combat(3)
+	lifecycle.start_intermission()
+	lifecycle.record_kill()
+	check(lifecycle.phase == lifecycle.Phase.DEAD and lifecycle.health == 0, "Death must reject pause, wave transitions and extra damage")
+	check(events["damage"] == 5 and events["kills"] == 1, "Lifecycle events must count actual damage and kills only")
+	lifecycle.reset()
+	check(lifecycle.phase == lifecycle.Phase.COMBAT and lifecycle.health == 5 and lifecycle.kills == 0, "Reset must restore lifecycle from death")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

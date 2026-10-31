@@ -58,10 +58,12 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Separar simulação do jogador, inimigos e projéteis em cenas/scripts próprios.
 - [x] Separar HUD da simulação num componente de apresentação.
 - [x] Separar gestão de ondas num componente com eventos de spawn e fim/início de ronda.
-- [ ] Separar estado da run da cena principal.
-- [ ] Definir estados explícitos: combate, intervalo, escolha de melhoria, pausa e morte.
+- [x] Separar estado, vida, eliminações e tempo da run da cena principal.
+- [x] Definir estados explícitos de combate, intervalo, pausa e morte, preservando o estado ao retomar.
+- [ ] Integrar estado de escolha de melhoria quando existir esse fluxo.
 - [ ] Mover atributos de armas, inimigos, ondas e melhorias para Resources reutilizáveis.
-- [ ] Centralizar eventos de dano, eliminação e fim de ronda para ligar UI, áudio e recompensas.
+- [x] Centralizar eventos de dano recebido, eliminação e fim/início de ronda.
+- [ ] Ligar os eventos aos futuros sistemas de áudio e recompensas.
 - [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.
 - [ ] Guardar e carregar preferências e remapeamentos do jogador.
 - [ ] Definir camadas de colisão, grupos, ordem de desenho e convenções de pivôs.
