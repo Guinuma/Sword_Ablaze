@@ -1,6 +1,10 @@
 extends Node2D
 ## First combat prototype. Placeholder graphics use logical pixel coordinates.
 
+const ExileVisual = preload("res://scripts/player/exile_visual.gd")
+var player_visual: Node2D
+var overlay: Node2D
+
 const SPEED: float = 120.0
 const BULLET_SPEED: float = 360.0
 const FIRE_INTERVAL: float = 0.16
@@ -70,6 +74,15 @@ func _ready() -> void:
 	wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	wave_label.add_theme_font_size_override("font_size", 14)
 	add_child(wave_label)
+	player_visual = ExileVisual.new()
+	player_visual.z_index = 1
+	add_child(player_visual)
+	overlay = Node2D.new()
+	overlay.z_index = 2
+	overlay.draw.connect(_draw_overlay)
+	add_child(overlay)
+	death_label.z_index = 3
+	player_visual.present(player_position, aim, Vector2.ZERO, 0.0, false, false, false)
 	_update_hud()
 
 
@@ -125,6 +138,7 @@ func _physics_process(delta: float) -> void:
 	_update_enemies(delta)
 	_update_bullets(delta)
 	_check_contact()
+	player_visual.present(player_position, aim, dash_direction if dash_time > 0.0 else movement, delta, dash_time > 0.0, hurt_cooldown > 0.0, muzzle_time > 0.0)
 	_update_hud()
 	queue_redraw()
 
@@ -279,11 +293,15 @@ func _reset_run() -> void:
 	wave = 1
 	wave_remaining = 5
 	wave_break = 0.0
+	player_visual.reset_pose()
+	player_visual.present(player_position, aim, Vector2.ZERO, 0.0, false, false, false)
 	_update_hud()
 	queue_redraw()
 
 
 func _update_hud() -> void:
+	if is_instance_valid(overlay):
+		overlay.queue_redraw()
 	hud.text = "HP %d/%d  |  KILLS %d  |  %ds" % [health, MAX_HEALTH, kills, int(elapsed)]
 	wave_label.visible = not game_over
 	wave_label.text = "WAVE %d CLEAR  |  Next in %d" % [wave, ceili(wave_break)] if wave_break > 0.0 else "WAVE %d  |  Remaining %d  |  DASH %s" % [wave, wave_remaining + enemies.size(), "READY" if dash_cooldown <= 0.0 else "%.1fs" % dash_cooldown]
@@ -307,9 +325,6 @@ func _draw() -> void:
 		draw_rect(Rect2(point + Vector2(-8, -12), Vector2(8 * enemy["health"], 2)), Color("ffb454"))
 	if dash_time > 0.0:
 		draw_line(player_position - dash_direction * 26.0, player_position, Color("388fba"), 10.0)
-	var player_color := Color("ffffff") if hurt_cooldown > 0.0 or dash_time > 0.0 else Color("65dfc1")
-	draw_rect(Rect2(player_position.round() - Vector2(6, 6), Vector2(12, 12)), player_color)
-	draw_line(player_position.round(), (player_position + aim * 14.0).round(), Color("fff0b0"), 3.0)
 	if muzzle_time > 0.0:
 		draw_circle((player_position + aim * 17.0).round(), 4.0, Color("fff0b0"))
 	for particle in particles:
@@ -318,5 +333,8 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2(particle["position"]).round(), Vector2(2, 2)), tint)
 	for bullet in bullets:
 		draw_rect(Rect2(Vector2(bullet["position"]).round() - Vector2(2, 2), Vector2(4, 4)), Color("ffb454"))
+
+
+func _draw_overlay() -> void:
 	if game_over or paused:
-		draw_rect(ARENA, Color(0.02, 0.02, 0.04, 0.86))
+		overlay.draw_rect(ARENA, Color(0.02, 0.02, 0.04, 0.86))
