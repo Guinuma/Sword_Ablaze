@@ -1,6 +1,9 @@
 extends Node2D
 ## First combat prototype. Placeholder graphics use logical pixel coordinates.
 
+const WaveDirector = preload("res://scripts/run/wave_director.gd")
+var waves = WaveDirector.new()
+
 const ArenaHud = preload("res://scripts/ui/arena_hud.gd")
 const ExileVisual = preload("res://scripts/player/exile_visual.gd")
 var player_visual: Node2D
@@ -16,25 +19,18 @@ var fire_cooldown: float = 0.0
 const MAX_HEALTH: int = 5
 const ENEMY_HEALTH: int = 2
 const ENEMY_SPEED: float = 46.0
-const MAX_ENEMIES: int = 18
-const SPAWN_INTERVAL: float = 1.6
 const CONTACT_COOLDOWN: float = 0.85
 const DASH_SPEED: float = 380.0
 const DASH_DURATION: float = 0.14
 const DASH_COOLDOWN: float = 1.2
-const WAVE_BREAK: float = 3.0
 var dash_time: float = 0.0
 var dash_cooldown: float = 0.0
 var dash_direction := Vector2.RIGHT
-var wave: int = 1
-var wave_remaining: int = 5
-var wave_break: float = 0.0
 var bullets: Array[Dictionary] = []
 var enemies: Array[Dictionary] = []
 var health: int = MAX_HEALTH
 var kills: int = 0
 var elapsed: float = 0.0
-var spawn_cooldown: float = 0.8
 var hurt_cooldown: float = 0.0
 var paused: bool = false
 var fire_requires_release: bool = false
@@ -46,6 +42,8 @@ var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	waves.spawn_requested.connect(_spawn_enemy)
+	waves.wave_cleared.connect(_on_wave_cleared)
 	random.randomize()
 	hud_view = ArenaHud.new()
 	add_child(hud_view)
@@ -139,23 +137,13 @@ func _try_dash(movement: Vector2) -> void:
 
 
 func _update_waves(delta: float) -> void:
-	if wave_break > 0.0:
-		wave_break = maxf(0.0, wave_break - delta)
-		if wave_break == 0.0:
-			wave += 1
-			wave_remaining = mini(5 + (wave - 1) * 2, 40)
-			spawn_cooldown = 0.3
-		return
-	if wave_remaining == 0 and enemies.is_empty():
-		wave_break = WAVE_BREAK
-		bullets.clear()
-		health = mini(health + 1, MAX_HEALTH)
-		return
-	spawn_cooldown -= delta
-	if spawn_cooldown <= 0.0 and wave_remaining > 0 and enemies.size() < MAX_ENEMIES:
-		_spawn_enemy()
-		wave_remaining -= 1
-		spawn_cooldown = maxf(0.4, SPAWN_INTERVAL - (wave - 1) * 0.1)
+	waves.advance(delta, enemies.size())
+
+
+func _on_wave_cleared() -> void:
+	bullets.clear()
+	health = mini(health + 1, MAX_HEALTH)
+
 
 
 func _spawn_enemy() -> void:
@@ -173,7 +161,7 @@ func _spawn_enemy() -> void:
 func _update_enemies(delta: float) -> void:
 	for enemy in enemies:
 		var point: Vector2 = enemy["position"]
-		enemy["position"] = point.move_toward(player_position, minf(ENEMY_SPEED + (wave - 1) * 3.0, 90.0) * delta)
+		enemy["position"] = point.move_toward(player_position, minf(ENEMY_SPEED + (waves.number - 1) * 3.0, 90.0) * delta)
 		var knockback: Vector2 = enemy.get("knockback", Vector2.ZERO)
 		enemy["position"] += knockback * delta
 		enemy["knockback"] = knockback.move_toward(Vector2.ZERO, 600.0 * delta)
@@ -243,7 +231,6 @@ func _reset_run() -> void:
 	health = MAX_HEALTH
 	kills = 0
 	elapsed = 0.0
-	spawn_cooldown = 0.8
 	hurt_cooldown = 0.0
 	fire_cooldown = 0.0
 	game_over = false
@@ -254,9 +241,7 @@ func _reset_run() -> void:
 	dash_time = 0.0
 	dash_cooldown = 0.0
 	dash_direction = Vector2.RIGHT
-	wave = 1
-	wave_remaining = 5
-	wave_break = 0.0
+	waves.reset()
 	player_visual.reset_pose()
 	player_visual.present(player_position, aim, Vector2.ZERO, 0.0, false, false, false)
 	_update_hud()
@@ -266,7 +251,7 @@ func _reset_run() -> void:
 func _update_hud() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
-	hud_view.present(health, MAX_HEALTH, kills, elapsed, wave, wave_remaining + enemies.size(), wave_break, dash_cooldown, game_over, paused)
+	hud_view.present(health, MAX_HEALTH, kills, elapsed, waves.number, waves.remaining + enemies.size(), waves.break_time, dash_cooldown, game_over, paused)
 
 
 func _draw() -> void:

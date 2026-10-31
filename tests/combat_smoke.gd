@@ -46,7 +46,7 @@ func _run() -> void:
 	arena.bullets.append({"position": Vector2(610, 200), "direction": Vector2.RIGHT})
 	arena._update_bullets(1.0)
 	check(arena.bullets.is_empty(), "Offscreen bullets must be removed")
-	arena.spawn_cooldown = 0.0
+	arena.waves.spawn_cooldown = 0.0
 	arena._physics_process(0.016)
 	check(arena.enemies.size() == 1, "The run must spawn enemies automatically")
 	var distance_before: float = arena.enemies[0]["position"].distance_to(arena.player_position)
@@ -59,21 +59,21 @@ func _run() -> void:
 	arena._update_bullets(0.4)
 	check(arena.enemies[0]["health"] == 2 and arena.enemies[1]["health"] == 1, "A bullet must hit only the nearest enemy")
 	arena._reset_run()
-	for index in range(arena.MAX_ENEMIES):
+	for index in range(arena.waves.MAX_ENEMIES):
 		arena._spawn_enemy()
-	arena.spawn_cooldown = 0.0
+	arena.waves.spawn_cooldown = 0.0
 	arena._physics_process(0.016)
-	check(arena.enemies.size() == arena.MAX_ENEMIES, "Automatic spawning must respect enemy cap")
+	check(arena.enemies.size() == arena.waves.MAX_ENEMIES, "Automatic spawning must respect enemy cap")
 	arena._reset_run()
-	check(arena.elapsed == 0.0 and arena.hurt_cooldown == 0.0 and arena.fire_cooldown == 0.0 and arena.spawn_cooldown == 0.8, "Restart must reset timers")
+	check(arena.elapsed == 0.0 and arena.hurt_cooldown == 0.0 and arena.fire_cooldown == 0.0 and arena.waves.spawn_cooldown == 0.8, "Restart must reset timers")
 	arena.health = 3
-	arena.wave_remaining = 0
+	arena.waves.remaining = 0
 	arena._update_waves(0.016)
-	check(arena.wave_break == arena.WAVE_BREAK and arena.health == 4, "Cleared wave must start break and heal once")
+	check(arena.waves.break_time == arena.waves.WAVE_BREAK and arena.health == 4, "Cleared wave must start break and heal once")
 	arena._update_waves(1.0)
-	check(arena.wave == 1 and arena.health == 4, "Break must delay next wave and not repeat healing")
+	check(arena.waves.number == 1 and arena.health == 4, "Break must delay next wave and not repeat healing")
 	arena._update_waves(2.0)
-	check(arena.wave == 2 and arena.wave_remaining == 7, "Next wave must increase enemy budget")
+	check(arena.waves.number == 2 and arena.waves.remaining == 7, "Next wave must increase enemy budget")
 	arena._try_dash(Vector2.UP)
 	check(arena.dash_direction == Vector2.UP and arena.dash_time > 0.0, "Dash must follow movement")
 	arena.enemies.append({"position": arena.player_position, "health": 2, "flash": 0.0})
@@ -84,7 +84,7 @@ func _run() -> void:
 	arena._physics_process(0.2)
 	check(arena.ARENA.has_point(arena.player_position) and arena.dash_time == 0.0, "Dash must end and stay inside arena")
 	arena._reset_run()
-	check(arena.wave == 1 and arena.wave_remaining == 5 and arena.wave_break == 0.0 and arena.dash_cooldown == 0.0, "Restart must clear wave and dash state")
+	check(arena.waves.number == 1 and arena.waves.remaining == 5 and arena.waves.break_time == 0.0 and arena.dash_cooldown == 0.0, "Restart must clear wave and dash state")
 	arena._try_dash(Vector2.ZERO)
 	check(arena.dash_direction == arena.aim, "Stationary dash must follow aim")
 	arena._reset_run()
@@ -149,6 +149,30 @@ func _run() -> void:
 	arena._check_contact()
 	arena._update_hud()
 	check(arena.hud_view.status.visible and arena.hud_view.status.text.begins_with("YOU FELL") and not arena.hud_view.wave_status.visible, "HUD must present death and hide wave prompt")
+	arena._reset_run()
+	arena.health = 3
+	arena.waves.remaining = 0
+	arena.bullets.append({"position": Vector2(100, 100), "direction": Vector2.RIGHT})
+	arena._update_waves(0.01)
+	check(arena.bullets.is_empty(), "Wave clear event must remove projectiles")
+	arena._set_paused(true)
+	arena._physics_process(10.0)
+	check(arena.waves.break_time == 3.0 and arena.health == 4, "Pause must freeze intermission without duplicate healing")
+	arena._set_paused(false)
+	arena._update_waves(3.0)
+	check(arena.waves.number == 2 and arena.enemies.is_empty(), "Intermission must end before spawning next wave")
+	arena._update_waves(0.3)
+	check(arena.enemies.size() == 1 and arena.waves.remaining == 6, "Spawn event must create exactly one enemy and consume budget")
+	arena._reset_run()
+	for round_index in range(30):
+		arena.waves.remaining = 0
+		arena._update_waves(0.01)
+		arena._update_waves(3.0)
+	check(arena.waves.number == 31 and arena.waves.remaining == 40 and arena.health == arena.MAX_HEALTH, "Long runs must cap budget and healing")
+	arena._update_waves(0.3)
+	check(is_equal_approx(arena.waves.spawn_cooldown, 0.4), "Advanced waves must respect minimum spawn interval")
+	arena._reset_run()
+	check(arena.waves.number == 1 and arena.waves.remaining == 5 and arena.waves.spawn_cooldown == 0.8, "Director must reset after advanced rounds")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

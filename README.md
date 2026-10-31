@@ -57,7 +57,8 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Criar repositório, licença MIT e guia de contribuição.
 - [ ] Separar simulação do jogador, inimigos e projéteis em cenas/scripts próprios.
 - [x] Separar HUD da simulação num componente de apresentação.
-- [ ] Separar gestão de ondas e estado da run da cena principal.
+- [x] Separar gestão de ondas num componente com eventos de spawn e fim/início de ronda.
+- [ ] Separar estado da run da cena principal.
 - [ ] Definir estados explícitos: combate, intervalo, escolha de melhoria, pausa e morte.
 - [ ] Mover atributos de armas, inimigos, ondas e melhorias para Resources reutilizáveis.
 - [ ] Centralizar eventos de dano, eliminação e fim de ronda para ligar UI, áudio e recompensas.
