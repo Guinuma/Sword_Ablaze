@@ -38,10 +38,10 @@ func _draw() -> void:
 	draw_line(neck, tip + Vector2(0, 2), Color("2ca6ad"), 3.0)
 	var tint := Color("fff0b0") if hurt or dashing else Color.WHITE
 	var body_rect := Rect2(Vector2(-18, -23 + bob), Vector2(36, 36))
-	if facing.x < 0.0:
-		body_rect.position.x = 18
-		body_rect.size.x = -36
+	# Mirror around the shared origin; negative Rect2 sizes shift the image.
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < 0.0 else 1.0, 1.0))
 	draw_texture_rect(BODY, body_rect, false, tint)
+	draw_set_transform(Vector2.ZERO)
 	# Rotate only the weapon, preserving the body's upright silhouette.
 	var grip := Vector2(0, -2 + bob)
 	var recoil := -2.0 if firing else 0.0
