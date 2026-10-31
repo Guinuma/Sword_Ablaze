@@ -41,6 +41,8 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 - Dash: duração de 0,14 s e recarga de 1,2 s; proteção de contacto enquanto o dash está ativo.
 - Morte e pausa congelam a simulação. R limpa a partida e regressa à primeira onda.
 
+Perder foco pausa o jogo; Escape retoma. Após pausa ou reinício, largar o disparo antes de voltar a disparar.
+
 Os valores são provisórios e precisam de playtesting.
 
 ## Checklist de desenvolvimento
@@ -54,11 +56,13 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Criar cena principal funcional e pastas para cenas, scripts, assets e recursos.
 - [x] Criar repositório, licença MIT e guia de contribuição.
 - [ ] Separar simulação do jogador, inimigos e projéteis em cenas/scripts próprios.
-- [ ] Separar HUD, gestão de ondas e estado da run da cena principal.
+- [x] Separar HUD da simulação num componente de apresentação.
+- [ ] Separar gestão de ondas e estado da run da cena principal.
 - [ ] Definir estados explícitos: combate, intervalo, escolha de melhoria, pausa e morte.
 - [ ] Mover atributos de armas, inimigos, ondas e melhorias para Resources reutilizáveis.
 - [ ] Centralizar eventos de dano, eliminação e fim de ronda para ligar UI, áudio e recompensas.
-- [ ] Configurar ações no Input Map e preservar futuras preferências do jogador.
+- [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.
+- [ ] Guardar e carregar preferências e remapeamentos do jogador.
 - [ ] Definir camadas de colisão, grupos, ordem de desenho e convenções de pivôs.
 - [ ] Definir limites de entidades e medir desempenho antes de introduzir pooling.
 
@@ -74,8 +78,9 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Afinar velocidade, alcance do dash, hitboxes e intervalo dos disparos em playtests.
 - [ ] Verificar proteção de dash nos frames de início/fim e sob diferentes taxas de atualização.
 - [ ] Definir origem dos tiros e alinhar muzzle flash, arma, mãos e hitbox.
-- [ ] Evitar disparos acidentais ao fechar menus ou escolher melhorias.
-- [ ] Pausar ao perder foco e permitir retomar de forma previsível.
+- [x] Exigir largar o disparo antes de disparar após pausa ou reinício.
+- [ ] Aplicar a proteção de disparo aos futuros menus e escolhas de melhorias.
+- [x] Pausar ao perder foco e exigir retoma explícita com Escape.
 - [ ] **Decidir:** se a lâmina terá ataque corpo a corpo ou será apenas identidade visual.
 - [ ] **Decidir:** necessidade de munições, recarga, dano crítico e efeitos de estado.
 

@@ -1,6 +1,7 @@
 extends Node2D
 ## First combat prototype. Placeholder graphics use logical pixel coordinates.
 
+const ArenaHud = preload("res://scripts/ui/arena_hud.gd")
 const ExileVisual = preload("res://scripts/player/exile_visual.gd")
 var player_visual: Node2D
 var overlay: Node2D
@@ -28,7 +29,6 @@ var dash_direction := Vector2.RIGHT
 var wave: int = 1
 var wave_remaining: int = 5
 var wave_break: float = 0.0
-var wave_label: Label
 var bullets: Array[Dictionary] = []
 var enemies: Array[Dictionary] = []
 var health: int = MAX_HEALTH
@@ -37,43 +37,18 @@ var elapsed: float = 0.0
 var spawn_cooldown: float = 0.8
 var hurt_cooldown: float = 0.0
 var paused: bool = false
+var fire_requires_release: bool = false
 var particles: Array[Dictionary] = []
 var muzzle_time: float = 0.0
 var game_over: bool = false
-var hud: Label
-var death_label: Label
+var hud_view: CanvasLayer
 var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	_register_input()
 	random.randomize()
-	var title := Label.new()
-	title.text = "SWORD ABLAZE  /  ARENA"
-	title.position = Vector2(24, 12)
-	title.add_theme_font_size_override("font_size", 16)
-	add_child(title)
-	var instructions := Label.new()
-	instructions.text = "WASD: move | Click/Space: fire | Shift: dash | Esc: pause | R: restart"
-	instructions.position = Vector2(24, 38)
-	instructions.add_theme_font_size_override("font_size", 12)
-	add_child(instructions)
-	hud = Label.new()
-	hud.position = Vector2(348, 14)
-	hud.add_theme_font_size_override("font_size", 12)
-	add_child(hud)
-	death_label = Label.new()
-	death_label.position = Vector2(120, 152)
-	death_label.size = Vector2(400, 72)
-	death_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	death_label.add_theme_font_size_override("font_size", 20)
-	add_child(death_label)
-	wave_label = Label.new()
-	wave_label.position = Vector2(120, 72)
-	wave_label.size = Vector2(400, 30)
-	wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	wave_label.add_theme_font_size_override("font_size", 14)
-	add_child(wave_label)
+	hud_view = ArenaHud.new()
+	add_child(hud_view)
 	player_visual = ExileVisual.new()
 	player_visual.z_index = 1
 	add_child(player_visual)
@@ -81,29 +56,13 @@ func _ready() -> void:
 	overlay.z_index = 2
 	overlay.draw.connect(_draw_overlay)
 	add_child(overlay)
-	death_label.z_index = 3
 	player_visual.present(player_position, aim, Vector2.ZERO, 0.0, false, false, false)
 	_update_hud()
 
 
-func _register_input() -> void:
-	# Define physical keys at startup so the sandbox works on different layouts.
-	var bindings := {
-		"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT],
-		"move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
-		"pause_run": [KEY_ESCAPE], "dash": [KEY_SHIFT], "fire": [KEY_SPACE], "reset_sandbox": [KEY_R],
-	}
-	for action in bindings:
-		if not InputMap.has_action(action):
-			InputMap.add_action(action)
-		InputMap.action_erase_events(action)
-		for key in bindings[action]:
-			var event := InputEventKey.new()
-			event.physical_keycode = key
-			InputMap.action_add_event(action, event)
-	var mouse := InputEventMouseButton.new()
-	mouse.button_index = MOUSE_BUTTON_LEFT
-	InputMap.action_add_event("fire", mouse)
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_node_ready() and not game_over:
+		_set_paused(true)
 
 
 func _physics_process(delta: float) -> void:
@@ -111,6 +70,8 @@ func _physics_process(delta: float) -> void:
 		_reset_run()
 	if Input.is_action_just_pressed("pause_run") and not game_over:
 		_set_paused(not paused)
+	if not Input.is_action_pressed("fire"):
+		fire_requires_release = false
 	if game_over or paused:
 		return
 	_update_effects(delta)
@@ -130,7 +91,7 @@ func _physics_process(delta: float) -> void:
 	if mouse_direction.length_squared() > 1.0:
 		aim = mouse_direction.normalized()
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
-	if Input.is_action_pressed("fire") and fire_cooldown <= 0.0:
+	if Input.is_action_pressed("fire") and not fire_requires_release and fire_cooldown <= 0.0:
 		bullets.append({"position": player_position + aim * 12.0, "direction": aim})
 		fire_cooldown = FIRE_INTERVAL
 		muzzle_time = 0.06
@@ -145,6 +106,8 @@ func _physics_process(delta: float) -> void:
 
 func _set_paused(value: bool) -> void:
 	paused = value
+	# Require a fresh trigger after any pause, including focus loss.
+	fire_requires_release = true
 	_update_hud()
 	queue_redraw()
 
@@ -285,6 +248,7 @@ func _reset_run() -> void:
 	fire_cooldown = 0.0
 	game_over = false
 	paused = false
+	fire_requires_release = true
 	particles.clear()
 	muzzle_time = 0.0
 	dash_time = 0.0
@@ -302,13 +266,7 @@ func _reset_run() -> void:
 func _update_hud() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
-	hud.text = "HP %d/%d  |  KILLS %d  |  %ds" % [health, MAX_HEALTH, kills, int(elapsed)]
-	wave_label.visible = not game_over
-	wave_label.text = "WAVE %d CLEAR  |  Next in %d" % [wave, ceili(wave_break)] if wave_break > 0.0 else "WAVE %d  |  Remaining %d  |  DASH %s" % [wave, wave_remaining + enemies.size(), "READY" if dash_cooldown <= 0.0 else "%.1fs" % dash_cooldown]
-	death_label.visible = game_over or paused
-	death_label.text = "YOU FELL\n%d kills  /  %ds  /  R to restart" % [kills, int(elapsed)]
-	if paused:
-		death_label.text = "PAUSED\nEsc to resume  /  R to restart"
+	hud_view.present(health, MAX_HEALTH, kills, elapsed, wave, wave_remaining + enemies.size(), wave_break, dash_cooldown, game_over, paused)
 
 
 func _draw() -> void:
