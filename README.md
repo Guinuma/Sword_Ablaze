@@ -6,13 +6,21 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Protótipo de combate jogável, com pausa, resumo e recordes locais; ainda sem menu principal, áudio, XP ou hub. O jogador já usa um primeiro visual do Exilado; a arena usa um pátio celestial ilustrado e os inimigos têm sprites próprios. A arte gerada serve como referência e base provisória, não como atlas de animação final.
+Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Ainda não existem menu principal, áudio, XP global, hub, boss ou condição de vitória.
 
-- Movimento, mira, disparo, colisão contínua dos tiros, dano, morte e reinício.
-- Ondas crescentes, pausa entre rondas, recuperação de vida, dash e melhorias temporárias a cada três ondas.
-- Recuo dos inimigos, separação, partículas, flash de disparo e pausa manual.
-- Corpo do Exilado espelhado, capa reativa e arma com mira independente.
-- Testes automáticos do combate e capturas reais do motor para verificar o visual.
+- Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
+- Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
+- Ondas crescentes, avisos de spawn, recuperação de vida entre rondas, dash e cinco melhorias temporárias.
+- HUD com vida em losangos e valor numérico, ronda, inimigos restantes, relógio, eliminações e barra de recarga do dash.
+- Ícones das melhorias adquiridas, com rank e efeito acumulado ao passar o rato; menus de pausa, escolha e resultados com foco visível.
+- Preferências de redução de flashes/movimento e recordes locais com validação e backup.
+- Importação, regressões de combate, arranque e simulação prolongada automatizados no GitHub Actions.
+
+A arte gerada já está integrada em texturas e atlas de animação. É uma base visual do protótipo; limpeza à resolução nativa, poses dedicadas e refinamento das mãos/capa/arma continuam pendentes.
+
+![Arena e HUD no motor](docs/art/celestial-courtyard-gameplay-01.png)
+
+HUD e menus: [notas de apresentação](docs/hud.md). Arte, prompts e limitações: [direção de arte](docs/art/README.md).
 
 ## Abrir e executar
 
@@ -28,8 +36,10 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 | Rato | Apontar |
 | Botão esquerdo / Espaço | Disparar |
 | Shift | Dash na direção do movimento, ou da mira quando parado |
-| Escape | Pausar / retomar |
+| Escape / botão II no HUD | Pausar; Escape ou Resume para retomar |
 | R | Reiniciar, incluindo durante pausa ou após morrer |
+| Tab / Enter | Navegar e ativar os botões dos menus |
+| Rato sobre os ícones inferiores | Consultar rank e efeito acumulado das melhorias |
 
 ### Regras do protótipo
 
@@ -41,9 +51,13 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 - Spawns: longe do jogador; intervalo começa em 1,6 s e desce até 0,4 s. A velocidade dos inimigos também aumenta, até um limite.
 - Limpar uma onda: recupera 1 HP, até ao máximo, e inicia uma pausa de 3 s.
 - Dash: duração de 0,14 s e recarga de 1,2 s; proteção de contacto enquanto o dash está ativo.
-- Morte e pausa congelam a simulação. R limpa a partida e regressa à primeira onda.
+- A cada terceira onda, escolher uma de até três melhorias elegíveis. A simulação e o intervalo ficam parados durante a escolha. Os efeitos acumulam até ao limite indicado e são removidos ao reiniciar.
+- Morte e pausa congelam a simulação. A animação de queda dura 0,64 s antes dos resultados; R pode reiniciar durante a queda.
+- Tiros são limitados a 128 do jogador e 64 hostis; expiram após 5 s ou ao sair da arena. Partículas limitadas a 160.
 
-Perder foco pausa o jogo; Escape retoma. Após pausa ou reinício, largar o disparo antes de voltar a disparar.
+Perder foco pausa o jogo; Escape retoma. Após pausa, reinício, escolha de melhoria ou interação com os indicadores do HUD, largar o disparo antes de voltar a disparar.
+
+Os recordes de onda, eliminações e sobrevivência são máximos independentes e ficam em `user://arena_records.json`. As preferências visuais ficam em `user://preferences.json`. As melhorias da partida não são progresso persistente. Detalhes: [recordes e recuperação](docs/arena-records.md).
 
 Os valores são provisórios e precisam de playtesting.
 
@@ -163,9 +177,11 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Desenvolver o conceito da aberração.
 - [ ] Criar arte de elites e boss após validar os respetivos comportamentos.
 - [x] Distinguir projéteis do jogador (quadrados dourados) e inimigos (losangos magenta).
-- [ ] Criar ícones coerentes para armas, melhorias, recursos e habilidades.
+- [x] Criar cinco ícones de melhorias no HUD, com rank e descrição do efeito acumulado.
+- [ ] Criar os restantes ícones de armas, recursos e habilidades.
 - [ ] Rever escala e contraste de todos os assets no jogo, não apenas nas pranchas.
-- [ ] Registar autoria, ferramenta de geração, prompts e licenças dos assets utilizados.
+- [x] Registar origem, ferramenta, prompts e hashes da arte integrada; incluir licença da fonte.
+- [ ] Consolidar créditos e condições de distribuição de toda a arte antes de publicar.
 
 ### 7. Feedback e áudio
 
@@ -226,10 +242,12 @@ Os valores são provisórios e precisam de playtesting.
 ### 11. Menus, HUD e acessibilidade
 
 - [x] HUD funcional e mensagens de morte/pausa.
-- [ ] Criar menu principal, seleção de modo e ecrã de resultados.
+- [x] Integrar ecrã de derrota com resultados, recordes e reinício.
+- [ ] Criar menu principal e seleção de modo.
 - [x] Criar botões de pausa para retomar, reiniciar e sair, com foco por teclado.
 - [ ] Acrescentar configurações ao menu de pausa quando existir esse ecrã.
-- [ ] Integrar menus de melhorias, skill tree e recompensas.
+- [x] Integrar escolha de melhorias e indicadores das melhorias adquiridas no HUD.
+- [ ] Integrar futuros menus de skill tree e recompensas.
 - [x] Aplicar HUD e menus em marinho, ouro e marfim, com fonte pixel e hierarquia de informação.
 - [ ] Oferecer remapeamento de teclas e guardar preferências.
 - [ ] **Decidir:** suporte de comando; se incluído, implementar mira, foco e navegação completos.
@@ -248,8 +266,9 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Testar transições de ondas, recuperação de vida, dash e reset.
 - [x] Testar pausa/retoma, recuo, separação e limite/expiração de partículas.
 - [x] Executar importação e arranque gráfico no Godot 4.5.1.
-- [ ] Acrescentar testes de regressão relevantes à medida que os sistemas forem separados.
-- [ ] Criar testes de melhorias, recompensas únicas, skill trees, saves e migrações.
+- [x] Acrescentar regressões de simulação separada, estados, ataques à distância, animações e HUD.
+- [x] Testar melhorias temporárias e recordes locais, incluindo backup, corrupção e versão futura.
+- [ ] Criar testes de recompensas, skill trees, perfil global e migrações.
 - [ ] Testar a run completa: hub → combate → resultado → recompensa → hub.
 - [ ] Verificar alinhamento visual e hitboxes nas quatro direções e junto aos limites.
 - [x] Registar baseline de tempo de simulação e memória com entidades no limite.
@@ -286,23 +305,24 @@ Os valores são provisórios e precisam de playtesting.
 
 ### Próxima sequência recomendada
 
-1. Corrigir e simplificar a arte do Exilado à escala real, com animações direcionais.
-2. Separar jogador, inimigos, projéteis, HUD e ondas para facilitar as próximas mudanças.
-3. Finalizar uma arena e um inimigo visualmente coerentes.
-4. Adicionar inimigo à distância e equilibrar encontros com os dois tipos.
-5. Criar uma primeira run com escolhas temporárias e resultado.
-6. Implementar save, XP global e um hub mínimo com uma pequena skill tree.
-7. Fechar e testar a vertical slice antes de expandir conteúdo ou Campaign.
+1. Recolher feedback sobre o HUD e fazer playtesting real de legibilidade, controlos e dificuldade.
+2. Afinar animações, mãos, arma, capa e leitura em combate denso; preparar sprites limpos à resolução nativa.
+3. Equilibrar os dois inimigos, composição das ondas e combinações de melhorias.
+4. Criar menu principal, fluxo de entrada/saída da arena e primeiros efeitos sonoros.
+5. Definir estrutura, duração e condição de vitória da primeira run antes de acrescentar boss e recompensas.
+6. Desenhar o perfil persistente, XP global, hub mínimo e pequena skill tree.
+7. Validar e exportar uma vertical slice antes de expandir conteúdo ou Campaign.
 
 ## Organização
 
 ```text
 scenes/       Cenas; atualmente main/main.tscn
-scripts/      Simulação principal e visual do jogador
+scripts/      Simulação, apresentação, UI e persistência
 assets/       Arte, áudio e fontes
 resources/    Dados e Resources reutilizáveis
-tests/       Verificações automáticas do combate
-docs/art/    Referências, prompts e capturas reais do jogo
+tests/        Regressões de combate e simulação prolongada
+tools/        Validação, benchmark e capturas do motor
+docs/art/     Referências, prompts, proveniência e capturas do jogo
 ```
 
 Referência visual e limitações atuais: [direção de arte](docs/art/README.md).
@@ -313,12 +333,15 @@ Referência visual e limitações atuais: [direção de arte](docs/art/README.md
 godot --headless --editor --path . --quit
 godot --headless --path . --quit-after 120
 godot --headless --path . --script tests/combat_smoke.gd
+godot --headless --path . --script tests/run_soak.gd
 ```
 
-Validação completa: `python tools/validate.py --godot <caminho-do-godot>`. O mesmo comando corre no GitHub Actions; deteta erros de script mesmo com código de saída zero e impõe um limite de tempo por etapa.
+Validação completa: `python tools/validate.py --godot <caminho-do-godot>`. O mesmo comando corre no GitHub Actions; deteta erros de script mesmo com código de saída zero e impõe um limite de tempo por etapa. A simulação prolongada cobre 20 minutos simulados, chegou à onda 49 e verificou escolhas, pausas, limites e reinício; não é um playtest de dificuldade.
+
+Capturas reproduzíveis: `tools/capture_arena.gd`, `tools/capture_walk.gd`, `tools/capture_directions.gd`, `tools/capture_defeat.gd` e `tools/capture_hud.gd`. Consultar [arte](docs/art/README.md) e [HUD](docs/hud.md) para argumentos e exemplos.
 
 Os testes verificam a lógica do protótipo. Não substituem playtesting nem revisão visual. No editor, verificar movimento, mira em todos os ângulos, corpo/capa/arma alinhados, dash, colisões, HUD, transição de ondas, pausa, morte e reinício.
 
 ## Contribuir e licença
 
-Consultar [CONTRIBUTING.md](CONTRIBUTING.md). Código distribuído sob a [licença MIT](LICENSE). Registar origem e licença dos assets adicionados; não presumir que referências visuais têm automaticamente a mesma licença do código.
+Consultar [CONTRIBUTING.md](CONTRIBUTING.md). Código distribuído sob a [licença MIT](LICENSE). A fonte Silkscreen inclui a sua [licença própria](assets/fonts/Silkscreen-OFL.txt). Registar origem e licença dos assets adicionados; não presumir que referências visuais têm automaticamente a mesma licença do código.

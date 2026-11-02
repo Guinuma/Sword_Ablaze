@@ -7,6 +7,7 @@ signal resume_requested
 signal restart_requested
 signal quit_requested
 
+const BlessingBadge = preload("res://scripts/ui/blessing_badge.gd")
 const PIXEL_FONT = preload("res://assets/fonts/Silkscreen-Regular.ttf")
 const INK := Color("0a111c")
 const IVORY := Color("ede3c9")
@@ -29,7 +30,8 @@ var dash_meter: ProgressBar
 var dash_fill: StyleBoxFlat
 var control_hint: Label
 var pause_hint: Label
-var blessing_count: Label
+var blessing_tray: HBoxContainer
+var badge_stacks: Dictionary = {}
 var pause_button: Button
 var menu_backdrop: Panel
 var status: Label
@@ -106,8 +108,12 @@ func _build_status_bar() -> void:
 	control_hint = _label(Vector2(176, 336), Vector2(310, 14), 8, true, IVORY)
 	control_hint.text = "WASD MOVE   MOUSE AIM   CLICK FIRE"
 	control_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	blessing_count = _label(Vector2(210, 336), Vector2(220, 14), 8, true, GOLD)
-	blessing_count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	blessing_tray = HBoxContainer.new()
+	blessing_tray.position = Vector2(220, 329)
+	blessing_tray.size = Vector2(200, 24)
+	blessing_tray.alignment = BoxContainer.ALIGNMENT_CENTER
+	blessing_tray.add_theme_constant_override("separation", 5)
+	add_child(blessing_tray)
 	pause_hint = _label(Vector2(514, 336), Vector2(112, 14), 8, true, IVORY)
 	pause_hint.text = "ESC PAUSE"
 	pause_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -208,9 +214,8 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 	dash_label.visible = not modal
 	dash_meter.visible = not modal
 	dash_key.visible = not modal
-	control_hint.visible = elapsed < 20.0 and not modal
-	blessing_count.text = "%02d BLESSINGS" % stack_total
-	blessing_count.visible = elapsed >= 20.0 and stack_total > 0 and not modal
+	control_hint.visible = elapsed < 20.0 and stack_total == 0 and not modal
+	blessing_tray.visible = stack_total > 0 and not modal
 	pause_hint.visible = not modal
 	pause_button.disabled = paused or game_over
 	var was_open := menu.visible
@@ -247,7 +252,8 @@ func present_records(records: Dictionary, save_failed: bool) -> void:
 		record_label.text += "\nCould not save records"
 
 
-func present_upgrades(choices: Array[Resource], choosing: bool, stacks: Dictionary) -> void:
+func present_upgrades(choices: Array[Resource], choosing: bool, stacks: Dictionary, definitions: Array[Resource] = []) -> void:
+	_sync_badges(stacks, definitions)
 	var was_visible := upgrade_panel.visible
 	_set_upgrade_visible(choosing)
 	shown_choices = choices.duplicate()
@@ -348,3 +354,23 @@ func _toggle(text: String, point: Vector2) -> CheckButton:
 	toggle.toggled.connect(func(_pressed): preferences_changed.emit(flashes_toggle.button_pressed, motion_toggle.button_pressed))
 	add_child(toggle)
 	return toggle
+
+
+func _sync_badges(stacks: Dictionary, definitions: Array[Resource]) -> void:
+	if stacks == badge_stacks:
+		return
+	badge_stacks = stacks.duplicate()
+	for child in blessing_tray.get_children():
+		blessing_tray.remove_child(child)
+		child.queue_free()
+	for definition in definitions:
+		var count: int = stacks.get(definition.id, 0)
+		if count > 0:
+			var badge = BlessingBadge.new()
+			badge.configure(definition, count, pixel_font)
+			blessing_tray.add_child(badge)
+
+
+func blocks_fire() -> bool:
+	var hovered := get_viewport().gui_get_hovered_control()
+	return hovered != null and (hovered == pause_button or blessing_tray.is_ancestor_of(hovered))

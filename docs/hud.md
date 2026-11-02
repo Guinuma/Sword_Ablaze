@@ -9,3 +9,7 @@ Pause, defeat and blessing choices share the panel and focus styles. Resume is t
 Silkscreen Regular is bundled unmodified from the official Google Fonts repository, with its SIL Open Font License in `assets/fonts/`. See that directory's README for source URLs. Body descriptions retain the engine fallback font for readability.
 
 Visual review: `godot --path . --script tools/capture_hud.gd -- <absolute-output-directory>`. The review covers combat, critical health with larger counters, pause, blessings and defeat. It uses isolated records. Both 640x360 and 1280x720 captures were inspected. Automated checks cover pause/resume, keyboard focus, choices and result transitions; they do not replace human usability feedback.
+
+Acquired blessings now appear as five compact emblem types with rank numbers. Hover details show the combined modifier (for example, two Quick Trigger ranks reduce shot delay by 22.6%). Clicking these read-only indicators blocks firing until release. The tray clears on restart and hides behind modal menus.
+
+![Blessing ranks and accumulated effects](art/hud-blessings-01.png)

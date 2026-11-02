@@ -90,6 +90,8 @@ func _physics_process(delta: float) -> void:
 		player.fire_requires_release = false
 	if not run.is_active():
 		return
+	if Input.is_action_pressed("fire") and hud_view.blocks_fire():
+		player.fire_requires_release = true
 	_update_effects(delta)
 	run.advance(delta)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -263,7 +265,7 @@ func _update_hud() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
 	hud_view.present_preferences(preferences.reduced_flashes, preferences.reduced_motion, preferences.last_error != OK)
-	hud_view.present_upgrades(upgrades.offered, run.phase == RunState.Phase.UPGRADE, upgrades.stacks)
+	hud_view.present_upgrades(upgrades.offered, run.phase == RunState.Phase.UPGRADE, upgrades.stacks, upgrades.definitions)
 	hud_view.present_records(records.data, records.last_error != OK)
 	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD and player_visual.defeat_done), (run.phase == RunState.Phase.PAUSED), player.dash_recharge)
 
