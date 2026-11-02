@@ -249,7 +249,8 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Substituir placeholders que prejudiquem a avaliação da experiência.
 - [ ] **Decidir:** plataformas alvo e canal de distribuição.
 - [ ] Criar presets de exportação e ícone do jogo para as plataformas escolhidas.
-- [ ] Automatizar importação, testes e build de validação no CI.
+- [x] Automatizar importação, testes de combate e arranque headless no GitHub Actions.
+- [ ] Automatizar build de validação após definir plataformas e presets de exportação.
 - [ ] Testar um export numa máquina limpa, sem depender do editor ou caminhos locais.
 - [ ] Preparar créditos, licenças de assets, changelog e instruções de instalação.
 - [ ] Rever gestão de versões, backups e conteúdo incluído no pacote.
@@ -295,6 +296,8 @@ godot --headless --editor --path . --quit
 godot --headless --path . --quit-after 120
 godot --headless --path . --script tests/combat_smoke.gd
 ```
+
+Validação completa: `python tools/validate.py --godot <caminho-do-godot>`. O mesmo comando corre no GitHub Actions; deteta erros de script mesmo com código de saída zero e impõe um limite de tempo por etapa.
 
 Os testes verificam a lógica do protótipo. Não substituem playtesting nem revisão visual. No editor, verificar movimento, mira em todos os ângulos, corpo/capa/arma alinhados, dash, colisões, HUD, transição de ondas, pausa, morte e reinício.
 
