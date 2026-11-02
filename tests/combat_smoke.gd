@@ -59,17 +59,17 @@ func _run() -> void:
 	arena._update_bullets(0.4)
 	check(arena.enemies.items[0]["health"] == 2 and arena.enemies.items[1]["health"] == 1, "A bullet must hit only the nearest enemy")
 	arena._reset_run()
-	for index in range(arena.waves.MAX_ENEMIES):
+	for index in range(arena.waves.settings.max_enemies):
 		arena._spawn_enemy()
 	arena.waves.spawn_cooldown = 0.0
 	arena._physics_process(0.016)
-	check(arena.enemies.items.size() == arena.waves.MAX_ENEMIES, "Automatic spawning must respect enemy cap")
+	check(arena.enemies.items.size() == arena.waves.settings.max_enemies, "Automatic spawning must respect enemy cap")
 	arena._reset_run()
 	check(arena.run.elapsed == 0.0 and arena.player.hurt_cooldown == 0.0 and arena.player.fire_cooldown == 0.0 and arena.waves.spawn_cooldown == 0.8, "Restart must reset timers")
 	arena.run.health = 3
 	arena.waves.remaining = 0
 	arena._update_waves(0.016)
-	check(arena.waves.break_time == arena.waves.WAVE_BREAK and arena.run.health == 4, "Cleared wave must start break and heal once")
+	check(arena.waves.break_time == arena.waves.settings.break_duration and arena.run.health == 4, "Cleared wave must start break and heal once")
 	arena._update_waves(1.0)
 	check(arena.waves.number == 1 and arena.run.health == 4, "Break must delay next wave and not repeat healing")
 	arena._update_waves(2.0)
@@ -220,6 +220,28 @@ func _run() -> void:
 	isolated.advance(0.01, Vector2.ZERO, Vector2(600, 200), false, false, arena.ARENA)
 	isolated.advance(0.01, Vector2.ZERO, Vector2(600, 200), false, true, arena.ARENA)
 	check(shots["count"] == 1, "Standalone player must resume firing after release")
+	# Alternative tuning must affect simulation without changing shared defaults.
+	var custom_shots = arena.ProjectileSystem.new()
+	custom_shots.weapon = custom_shots.weapon.duplicate()
+	custom_shots.weapon.damage = 3
+	custom_shots.weapon.projectile_speed = 100.0
+	var targets: Array[Dictionary] = [{"position": Vector2(150, 200), "health": 3, "flash": 0.0}]
+	custom_shots.fire(Vector2(100, 200), Vector2.RIGHT)
+	custom_shots.advance(0.1, targets, arena.ARENA)
+	check(targets.size() == 1 and custom_shots.items[0]["position"] == Vector2(110, 200), "Projectile speed must come from weapon resource")
+	custom_shots.advance(0.5, targets, arena.ARENA)
+	check(targets.is_empty() and arena.projectiles.weapon.damage == 1, "Custom weapon damage must apply without mutating default resource")
+	var custom_waves = arena.WaveDirector.new()
+	custom_waves.settings = custom_waves.settings.duplicate()
+	custom_waves.settings.initial_budget = 2
+	custom_waves.settings.budget_growth = 3
+	custom_waves.settings.max_budget = 4
+	custom_waves.reset()
+	check(custom_waves.remaining == 2, "Wave reset must use configured initial budget")
+	custom_waves.remaining = 0
+	custom_waves.advance(0.01, 0)
+	custom_waves.advance(custom_waves.settings.break_duration, 0)
+	check(custom_waves.remaining == 4, "Wave growth must obey configured budget cap")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

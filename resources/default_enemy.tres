@@ -1,0 +1,14 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+health = 2
+speed = 46.0
+speed_per_wave = 3.0
+max_speed = 90.0
+hit_radius = 10.0
+contact_radius = 15.0
+separation_distance = 18.0
+body_margin = 8.0

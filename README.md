@@ -63,7 +63,8 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Separar estado, vida, eliminações e tempo da run da cena principal.
 - [x] Definir estados explícitos de combate, intervalo, pausa e morte, preservando o estado ao retomar.
 - [ ] Integrar estado de escolha de melhoria quando existir esse fluxo.
-- [ ] Mover atributos de armas, inimigos, ondas e melhorias para Resources reutilizáveis.
+- [x] Mover atributos da arma, inimigo e ondas para Resources reutilizáveis em `resources/default_*.tres`.
+- [ ] Criar Resources de melhorias quando existir esse sistema.
 - [x] Centralizar eventos de dano recebido, eliminação e fim/início de ronda.
 - [ ] Ligar os eventos aos futuros sistemas de áudio e recompensas.
 - [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.

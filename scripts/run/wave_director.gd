@@ -4,20 +4,19 @@ signal spawn_requested
 signal wave_cleared
 signal wave_started(number: int)
 
-const MAX_ENEMIES: int = 18
-const SPAWN_INTERVAL: float = 1.6
-const WAVE_BREAK: float = 3.0
+const WaveSettings = preload("res://scripts/data/wave_settings.gd")
+var settings: WaveSettings = load("res://resources/default_wave.tres")
 var number: int = 1
-var remaining: int = 5
+var remaining: int = settings.initial_budget
 var break_time: float = 0.0
-var spawn_cooldown: float = 0.8
+var spawn_cooldown: float = settings.initial_delay
 
 
 func reset() -> void:
 	number = 1
-	remaining = 5
+	remaining = settings.initial_budget
 	break_time = 0.0
-	spawn_cooldown = 0.8
+	spawn_cooldown = settings.initial_delay
 
 
 func advance(delta: float, living_enemies: int) -> void:
@@ -25,16 +24,16 @@ func advance(delta: float, living_enemies: int) -> void:
 		break_time = maxf(0.0, break_time - delta)
 		if break_time == 0.0:
 			number += 1
-			remaining = mini(5 + (number - 1) * 2, 40)
-			spawn_cooldown = 0.3
+			remaining = mini(settings.initial_budget + (number - 1) * settings.budget_growth, settings.max_budget)
+			spawn_cooldown = settings.next_wave_delay
 			wave_started.emit(number)
 		return
 	if remaining == 0 and living_enemies == 0:
-		break_time = WAVE_BREAK
+		break_time = settings.break_duration
 		wave_cleared.emit()
 		return
 	spawn_cooldown -= delta
-	if spawn_cooldown <= 0.0 and remaining > 0 and living_enemies < MAX_ENEMIES:
+	if spawn_cooldown <= 0.0 and remaining > 0 and living_enemies < settings.max_enemies:
 		remaining -= 1
-		spawn_cooldown = maxf(0.4, SPAWN_INTERVAL - (number - 1) * 0.1)
+		spawn_cooldown = maxf(settings.min_spawn_interval, settings.spawn_interval - (number - 1) * settings.interval_reduction)
 		spawn_requested.emit()

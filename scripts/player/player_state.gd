@@ -3,7 +3,8 @@ extends RefCounted
 signal shot(origin: Vector2, direction: Vector2)
 
 const SPEED: float = 120.0
-const FIRE_INTERVAL: float = 0.16
+const WeaponSettings = preload("res://scripts/data/weapon_settings.gd")
+var weapon: WeaponSettings = load("res://resources/default_weapon.tres")
 var player_position := Vector2(320, 200)
 var aim := Vector2.RIGHT
 var fire_cooldown: float = 0.0
@@ -38,8 +39,8 @@ func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pres
 		aim = mouse_direction.normalized()
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	if fire_pressed and not fire_requires_release and fire_cooldown <= 0.0:
-		shot.emit(player_position + aim * 12.0, aim)
-		fire_cooldown = FIRE_INTERVAL
+		shot.emit(player_position + aim * weapon.muzzle_offset, aim)
+		fire_cooldown = weapon.fire_interval
 		muzzle_time = 0.06
 
 

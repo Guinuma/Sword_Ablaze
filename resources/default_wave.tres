@@ -1,0 +1,16 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/wave_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+max_enemies = 18
+initial_budget = 5
+budget_growth = 2
+max_budget = 40
+spawn_interval = 1.6
+interval_reduction = 0.1
+min_spawn_interval = 0.4
+break_duration = 3.0
+initial_delay = 0.8
+next_wave_delay = 0.3

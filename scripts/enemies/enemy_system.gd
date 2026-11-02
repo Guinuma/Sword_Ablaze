@@ -1,7 +1,7 @@
 extends RefCounted
 ## Owns enemy spawning, pursuit, separation and contact queries.
-const HEALTH: int = 2
-const SPEED: float = 46.0
+const EnemySettings = preload("res://scripts/data/enemy_settings.gd")
+var settings: EnemySettings = load("res://resources/default_enemy.tres")
 var items: Array[Dictionary] = []
 
 
@@ -18,13 +18,13 @@ func spawn(target: Vector2, bounds: Rect2, random: RandomNumberGenerator) -> voi
 	else:
 		var y := bounds.position.y + 10.0 if target.y > bounds.get_center().y else bounds.end.y - 10.0
 		point = Vector2(random.randf_range(bounds.position.x + 10.0, bounds.end.x - 10.0), y)
-	items.append({"position": point, "health": HEALTH, "flash": 0.0})
+	items.append({"position": point, "health": settings.health, "flash": 0.0})
 
 
 func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 	for enemy in items:
 		var point: Vector2 = enemy["position"]
-		enemy["position"] = point.move_toward(target, minf(SPEED + (wave - 1) * 3.0, 90.0) * delta)
+		enemy["position"] = point.move_toward(target, minf(settings.speed + (wave - 1) * settings.speed_per_wave, settings.max_speed) * delta)
 		var knockback: Vector2 = enemy.get("knockback", Vector2.ZERO)
 		enemy["position"] += knockback * delta
 		enemy["knockback"] = knockback.move_toward(Vector2.ZERO, 600.0 * delta)
@@ -34,17 +34,17 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 		for second in range(first + 1, items.size()):
 			var offset: Vector2 = items[second]["position"] - items[first]["position"]
 			var distance := offset.length()
-			if distance < 18.0:
+			if distance < settings.separation_distance:
 				var normal := offset / distance if distance > 0.001 else Vector2.RIGHT.rotated(float(first) * 2.4)
-				var push := normal * (18.0 - distance) * 0.5
+				var push := normal * (settings.separation_distance - distance) * 0.5
 				items[first]["position"] -= push
 				items[second]["position"] += push
 	for enemy in items:
-		enemy["position"] = Vector2(enemy["position"]).clamp(bounds.position + Vector2(8, 8), bounds.end - Vector2(8, 8))
+		enemy["position"] = Vector2(enemy["position"]).clamp(bounds.position + Vector2.ONE * settings.body_margin, bounds.end - Vector2.ONE * settings.body_margin)
 
 
 func touches(point: Vector2) -> bool:
 	for enemy in items:
-		if point.distance_to(enemy["position"]) < 15.0:
+		if point.distance_to(enemy["position"]) < settings.contact_radius:
 			return true
 	return false
