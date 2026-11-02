@@ -61,5 +61,14 @@
     "prompt": "docs/art/exile-back-walk-01-prompt.txt",
     "reference": "Original Exile body and side walk sheet",
     "rights_note": "Generated project artwork; code MIT license does not automatically apply."
+  },
+  {
+    "asset": "assets/art/player/exile-defeat-01.png",
+    "sha256": "d329c0bf73aec9915b7868ed0e528d6f54c6511760cc1ad5db22c6fcd9e74751",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/exile-defeat-01-prompt.txt",
+    "reference": "Original Exile body and side walk sheet",
+    "rights_note": "Generated project artwork; code MIT license does not automatically apply."
   }
 ]

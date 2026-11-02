@@ -157,6 +157,8 @@ func _run() -> void:
 	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
 	arena._update_hud()
+	check(not arena.hud_view.status.visible, "Defeat must show the fall before covering it with results")
+	arena.player_visual.advance_defeat(1.0)
 	check(arena.hud_view.status.visible and arena.hud_view.status.text.begins_with("YOU FELL") and not arena.hud_view.wave_status.visible, "HUD must present death and hide wave prompt")
 	arena._reset_run()
 	arena.run.health = 3
@@ -345,6 +347,7 @@ func _run() -> void:
 	arena.player.hurt_cooldown = 0.0
 	arena._take_player_damage()
 	arena._update_hud()
+	arena.player_visual.advance_defeat(1.0)
 	check(arena.hud_view.status.text.contains("Wave 4") and arena.hud_view.status.text.contains("2:05"), "Defeat summary must show wave and formatted duration")
 	check(not arena.hud_view.resume_button.visible and arena.hud_view.restart_button.has_focus(), "Defeat menu must focus Restart and hide Resume")
 	arena.hud_view.restart_button.pressed.emit()
@@ -510,6 +513,19 @@ func _run() -> void:
 		arena.player_visual.present(arena.player.player_position, facing_direction, facing_direction, 0.15, false, false, false)
 		var expected: StringName = &"back" if facing_direction == Vector2.UP else &"front" if facing_direction == Vector2.DOWN else &"side"
 		check(arena.player_visual.body_direction == expected, "Player view must match cardinal aim direction")
+	arena._reset_run()
+	arena.run.health = 1
+	arena._take_player_damage()
+	arena.player_visual.advance_defeat(0.2)
+	check(arena.player_visual.defeated and not arena.player_visual.defeat_done, "Defeat animation must advance while combat stays frozen")
+	var frozen_time: float = arena.run.elapsed
+	arena._physics_process(5.0)
+	check(arena.run.elapsed == frozen_time, "Playing defeat animation must not advance combat")
+	arena._reset_run()
+	arena.player_visual.advance_defeat(1.0)
+	check(not arena.player_visual.defeated and not arena.hud_view.menu.visible, "Restart during defeat animation must cancel it and keep results closed")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(arena.records.path + suffix)
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

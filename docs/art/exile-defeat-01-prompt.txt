@@ -1,0 +1,11 @@
+Use case: identity-preserve.
+Asset type: four-frame non-looping DEFEAT animation sprite sheet for the Exile in Sword Ablaze, transparent PNG.
+Reference images establish the exact character: ivory hood and pale mask, turquoise neck scarf, slim dark fitted clothes, small ivory and tarnished-gold armor, asymmetrical golden knee armor. Preserve the same adult proportions and low-resolution pixel style. No gun or blade; these are separate in game.
+EXACT 2 by 2 grid of equal square cells, no grid lines. One complete character pose in each cell. Keep the same scale and a common ground reference point around the center of each cell. Full pose stays inside each cell with padding.
+Frames in reading order:
+1. Hurt and recoiling: upright right-facing three-quarter view, knees beginning to buckle, one hand at chest.
+2. Dropping to one knee: body clearly lower, one knee on ground, one hand bracing, hood tilted.
+3. Collapsing: both knees fold, torso falls toward screen right, one arm reaching toward floor.
+4. Fully fallen: lying on side on the ground, body oriented horizontally, ivory hood at screen right, legs toward screen left, short turquoise scarf/cape cloth resting nearby. This last pose must be unmistakably lying down, not kneeling or still standing.
+Visible physical progression and changing silhouette, not four standing copies. Stable character scale across frames, limited ivory/turquoise/charcoal/gold palette. Crisp deliberate pixel clusters, dark outline, simplified readable shapes at around 32 logical pixels tall in standing pose. No blood or gore.
+True transparent background, no scenery or ground shadow, no text, labels, numbers, borders, extra sprites or weapons. Exactly four poses.

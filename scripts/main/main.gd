@@ -1,5 +1,5 @@
 extends Node2D
-## First combat prototype. Placeholder graphics use logical pixel coordinates.
+## Coordinates use logical pixels; simulation and art presentation are separate.
 
 const RunState = preload("res://scripts/run/run_state.gd")
 var run = RunState.new()
@@ -63,6 +63,7 @@ func _ready() -> void:
 	world.z_index = 1
 	add_child(world)
 	player_visual = ExileVisual.new()
+	player_visual.defeat_finished.connect(_update_hud)
 	player_visual.reduced_flashes = preferences.reduced_flashes
 	player_visual.reduced_motion = preferences.reduced_motion
 	world.add_child(player_visual)
@@ -222,6 +223,7 @@ func _choose_upgrade(id: StringName) -> void:
 func _on_run_phase_changed(phase: RunState.Phase) -> void:
 	if phase == RunState.Phase.DEAD and not run_recorded:
 		run_recorded = true
+		player_visual.begin_defeat()
 		records.record(waves.number, run.kills, run.elapsed)
 
 
@@ -262,7 +264,10 @@ func _update_hud() -> void:
 	hud_view.present_preferences(preferences.reduced_flashes, preferences.reduced_motion, preferences.last_error != OK)
 	hud_view.present_upgrades(upgrades.offered, run.phase == RunState.Phase.UPGRADE, upgrades.stacks)
 	hud_view.present_records(records.data, records.last_error != OK)
-	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD), (run.phase == RunState.Phase.PAUSED))
+	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD and player_visual.defeat_done), (run.phase == RunState.Phase.PAUSED))
+
+	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
+		hud_view.wave_status.hide()
 
 
 func _draw() -> void:
@@ -286,5 +291,7 @@ func _draw() -> void:
 
 
 func _draw_overlay() -> void:
+	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
+		return
 	if not run.is_active():
 		overlay.draw_rect(ARENA, Color(0.02, 0.02, 0.04, 0.86))

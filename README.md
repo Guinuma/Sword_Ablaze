@@ -141,7 +141,8 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Integrar vistas de frente, costas e lateral do Exilado, verificadas no motor.
 - [x] Integrar ciclo de caminhada de quatro frames com pernas alternadas e idle separado.
 - [ ] Completar idle e movimento com vistas direcionais coerentes.
-- [ ] Criar animações de dash, dano e morte.
+- [x] Animar derrota com quatro poses e mostrar resultados após a queda.
+- [ ] Criar animações dedicadas de dash e dano não fatal.
 - [ ] Finalizar capa e arma com estilo consistente com o corpo.
 - [ ] Ajustar mãos, pivôs, pés, sombra e ponto de saída dos tiros por direção.
 - [ ] Verificar leitura contra pisos claros/escuros e com muitos efeitos em simultâneo.

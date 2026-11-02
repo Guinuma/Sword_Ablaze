@@ -1,5 +1,13 @@
 extends Node2D
 ## Layered prototype: generated body, responsive cape and independently aimed weapon.
+signal defeat_finished
+const DEFEAT = preload("res://assets/art/player/exile-defeat-01-frames.tres")
+const DEFEAT_DURATION: float = 0.64
+const DEFEAT_Y_OFFSETS = [0.0, 0.26, 4.59, 5.87]
+var defeated: bool = false
+var defeat_done: bool = false
+var defeat_time: float = 0.0
+
 const BODY = preload("res://assets/art/player/exile-body-01.png")
 const WALK = preload("res://assets/art/player/exile-walk-01-frames.tres")
 const WALK_FRONT = preload("res://assets/art/player/exile-front-walk-01-frames.tres")
@@ -17,6 +25,33 @@ var firing: bool = false
 var reduced_flashes: bool = false
 var reduced_motion: bool = false
 var cape_tip := Vector2(-10, 3)
+
+func _ready() -> void:
+	set_process(false)
+
+
+func _process(delta: float) -> void:
+	advance_defeat(delta)
+
+
+func begin_defeat() -> void:
+	defeated = true
+	defeat_done = false
+	defeat_time = 0.0
+	set_process(true)
+	queue_redraw()
+
+
+func advance_defeat(delta: float) -> void:
+	if not defeated or defeat_done:
+		return
+	defeat_time = minf(DEFEAT_DURATION, defeat_time + delta)
+	queue_redraw()
+	if defeat_time >= DEFEAT_DURATION:
+		defeat_done = true
+		set_process(false)
+		defeat_finished.emit()
+
 
 func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash: bool, damaged: bool, shot: bool) -> void:
 	position = point.round()
@@ -46,6 +81,10 @@ func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash
 	queue_redraw()
 
 func reset_pose() -> void:
+	defeated = false
+	defeat_done = false
+	defeat_time = 0.0
+	set_process(false)
 	clock = 0.0
 	body_direction = &"side"
 	walk_clock = 0.0
@@ -55,6 +94,9 @@ func reset_pose() -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	if defeated:
+		_draw_defeat()
+		return
 	draw_ellipse_shadow()
 	var bob := roundf(sin(clock * 16.0)) if travel.length_squared() > 0.01 and not reduced_motion else 0.0
 	var neck := Vector2(0, -9 + bob)
@@ -93,4 +135,12 @@ func _draw_weapon(bob: float) -> void:
 func draw_ellipse_shadow() -> void:
 	draw_set_transform(Vector2(0, 8), 0.0, Vector2(1.0, 0.35))
 	draw_circle(Vector2.ZERO, 10.0, Color(0.02, 0.03, 0.06, 0.45))
+	draw_set_transform(Vector2.ZERO)
+
+
+func _draw_defeat() -> void:
+	draw_ellipse_shadow()
+	var frame := mini(3, int(defeat_time * 8.0))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < 0.0 else 1.0, 1.0))
+	draw_texture_rect(DEFEAT.get_frame_texture(&"defeat", frame), Rect2(-20, -26 + DEFEAT_Y_OFFSETS[frame], 40, 40), false)
 	draw_set_transform(Vector2.ZERO)

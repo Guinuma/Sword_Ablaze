@@ -51,3 +51,9 @@ The generated boards are concept references, not animation atlases or production
 - Exact original and correction prompts are in `exile-walk-01-prompt.txt` and `fractured-sentinel-walk-01-prompt.txt`. The corrected Exile sheet replaces repeated leg silhouettes with opposite-legged poses. No raster assets were edited by a Python image pipeline.
 
 Front/back sources: `assets/art/player/exile-front-walk-01.png` and `exile-back-walk-01.png`, with matching `-frames.tres` resources. The weapon is drawn behind the torso for upward aim using a shared right-hand grip offset; shot origins and muzzle flash share that pivot. Review all views with `tools/capture_directions.gd`; the captured comparison is `docs/art/exile-directions-02.png`.
+
+## Defeat presentation
+
+`assets/art/player/exile-defeat-01.png` contains four non-looping hurt/kneel/fall/lying poses. `exile-defeat-01-frames.tres` supplies the regions; per-frame draw offsets preserve the ground baseline. Only presentation advances during this 0.64 s sequence; combat time, enemies and shots remain frozen. Results appear after the fall. Restart cancels the sequence. It currently uses one mirrored side-view fall for all aim directions.
+
+Review with `tools/capture_defeat.gd -- <absolute-output-directory>`. The tool uses isolated review records and cleans them afterward. `docs/art/exile-defeat-gameplay-01.png` captures the fallen pose before the menu covers it.
