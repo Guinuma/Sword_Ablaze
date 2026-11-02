@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"swift"
+title = "Fleet Foot"
+description = "Movement speed +10% per stack."
+attribute = "move_speed"
+multiplier = 1.1
+addition = 0.0
+max_stacks = 3

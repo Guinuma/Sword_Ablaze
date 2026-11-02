@@ -9,7 +9,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 Protótipo de combate jogável, com pausa, resumo e recordes locais; ainda sem menu principal, áudio, XP ou hub. O jogador já usa um primeiro visual do Exilado; arena e inimigos mantêm placeholders. A arte gerada serve como referência e base provisória, não como atlas de animação final.
 
 - Movimento, mira, disparo, colisão contínua dos tiros, dano, morte e reinício.
-- Ondas crescentes, pausa entre rondas, recuperação de vida e dash.
+- Ondas crescentes, pausa entre rondas, recuperação de vida, dash e melhorias temporárias a cada três ondas.
 - Recuo dos inimigos, separação, partículas, flash de disparo e pausa manual.
 - Corpo do Exilado espelhado, capa reativa e arma com mira independente.
 - Testes automáticos do combate e capturas reais do motor para verificar o visual.
@@ -64,9 +64,9 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Separar gestão de ondas num componente com eventos de spawn e fim/início de ronda.
 - [x] Separar estado, vida, eliminações e tempo da run da cena principal.
 - [x] Definir estados explícitos de combate, intervalo, pausa e morte, preservando o estado ao retomar.
-- [ ] Integrar estado de escolha de melhoria quando existir esse fluxo.
+- [x] Integrar escolha de melhoria, congelamento da simulação e pausa/retoma desse estado.
 - [x] Mover atributos da arma, inimigo e ondas para Resources reutilizáveis em `resources/default_*.tres`.
-- [ ] Criar Resources de melhorias quando existir esse sistema.
+- [x] Definir melhorias temporárias como Resources reutilizáveis em `resources/upgrades/`.
 - [x] Centralizar eventos de dano recebido, eliminação e fim/início de ronda.
 - [ ] Ligar os eventos aos futuros sistemas de áudio e recompensas.
 - [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.
@@ -87,7 +87,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Verificar proteção de dash nos frames de início/fim e sob diferentes taxas de atualização.
 - [ ] Definir origem dos tiros e alinhar muzzle flash, arma, mãos e hitbox.
 - [x] Exigir largar o disparo antes de disparar após pausa ou reinício.
-- [ ] Aplicar a proteção de disparo aos futuros menus e escolhas de melhorias.
+- [x] Exigir largar o disparo ao retomar, reiniciar ou escolher melhorias.
 - [x] Pausar ao perder foco e exigir retoma explícita com Escape.
 - [ ] **Decidir:** se a lâmina terá ataque corpo a corpo ou será apenas identidade visual.
 - [ ] **Decidir:** necessidade de munições, recarga, dano crítico e efeitos de estado.
@@ -174,17 +174,19 @@ Os valores são provisórios e precisam de playtesting.
 
 ### 8. Primeira run roguelite
 
-- [ ] **Decidir:** duração alvo, estrutura de salas/ondas e frequência das escolhas.
+- [x] Prototipar escolhas a cada três ondas, configuráveis no Resource de ondas.
+- [ ] **Decidir:** duração alvo e estrutura final da run.
 - [ ] Definir início, vitória, derrota e retorno ao hub da run.
-- [ ] Definir atributos temporários e regras de acumulação de modificadores.
-- [ ] Criar escolha de melhorias entre encontros, com descrição do efeito real.
-- [ ] Criar primeiro conjunto pequeno de melhorias com estilos de jogo diferentes.
+- [x] Aplicar modificadores temporários a partir dos valores base, com limites por melhoria.
+- [x] Oferecer três melhorias elegíveis após cada terceira onda, com descrição e limite de stacks.
+- [x] Criar cinco melhorias: movimento, cadência, dano, recuo e recarga do dash.
 - [ ] Criar segunda arma e validar que oferece uma alternativa real à primeira.
 - [ ] Definir raridade, pré-requisitos e exclusões de melhorias, se necessários.
-- [ ] Garantir aplicação e remoção correta de todos os modificadores ao terminar/reiniciar.
+- [x] Recalcular melhorias sem duplicação e removê-las ao reiniciar.
 - [ ] **Decidir:** recuperação, moeda temporária, lojas, rerolls e outros sistemas de economia.
 - [ ] Definir recompensas de vitória e derrota antes de ligar progressão persistente.
-- [ ] Testar combinações fortes, escolhas sem efeito e situações sem opções válidas.
+- [x] Testar acumulação, seleção repetida/inválida, reset e esgotamento de opções.
+- [ ] Equilibrar combinações fortes em playtests.
 
 ### 9. XP transversal, hub e skill trees
 

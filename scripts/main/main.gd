@@ -6,6 +6,8 @@ var run = RunState.new()
 const ArenaRecords = preload("res://scripts/run/arena_records.gd")
 var records = ArenaRecords.new()
 var run_recorded: bool = false
+const UpgradeSystem = preload("res://scripts/run/upgrade_system.gd")
+var upgrades = UpgradeSystem.new()
 
 const WaveDirector = preload("res://scripts/run/wave_director.gd")
 var waves = WaveDirector.new()
@@ -30,6 +32,7 @@ var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	_apply_upgrades()
 	records.load_records()
 	run.phase_changed.connect(_on_run_phase_changed)
 	enemies.shot.connect(hostile_projectiles.fire)
@@ -42,6 +45,7 @@ func _ready() -> void:
 	waves.wave_cleared.connect(_on_wave_cleared)
 	random.randomize()
 	hud_view = ArenaHud.new()
+	hud_view.upgrade_selected.connect(_choose_upgrade)
 	hud_view.resume_requested.connect(func(): _set_paused(false))
 	hud_view.restart_requested.connect(_reset_run)
 	hud_view.quit_requested.connect(func(): get_tree().quit())
@@ -69,7 +73,7 @@ func _physics_process(delta: float) -> void:
 		_set_paused(not (run.phase == RunState.Phase.PAUSED))
 	if not Input.is_action_pressed("fire"):
 		player.fire_requires_release = false
-	if (run.phase == RunState.Phase.DEAD) or (run.phase == RunState.Phase.PAUSED):
+	if not run.is_active():
 		return
 	_update_effects(delta)
 	run.advance(delta)
@@ -123,6 +127,9 @@ func _on_wave_cleared() -> void:
 	projectiles.clear()
 	hostile_projectiles.clear()
 	run.start_intermission()
+	if waves.number % waves.settings.upgrade_every == 0 and not upgrades.offer(random).is_empty():
+		run.start_upgrade()
+		player.fire_requires_release = true
 
 
 
@@ -160,6 +167,28 @@ func _take_player_damage() -> void:
 	player.hurt_cooldown = player.CONTACT_COOLDOWN
 
 
+func _apply_upgrades() -> void:
+	var base = load("res://resources/default_weapon.tres")
+	var weapon = base.duplicate()
+	weapon.fire_interval = upgrades.value("fire_interval", base.fire_interval)
+	weapon.damage = int(upgrades.value("damage", base.damage))
+	weapon.knockback = upgrades.value("knockback", base.knockback)
+	player.weapon = weapon
+	projectiles.weapon = weapon
+	player.move_speed = upgrades.value("move_speed", player.SPEED)
+	player.dash_recharge = upgrades.value("dash_cooldown", player.DASH_COOLDOWN)
+
+
+func _choose_upgrade(id: StringName) -> void:
+	if run.phase != RunState.Phase.UPGRADE or not upgrades.choose(id):
+		return
+	_apply_upgrades()
+	player.fire_requires_release = true
+	run.finish_upgrade()
+	_update_hud()
+	queue_redraw()
+
+
 func _on_run_phase_changed(phase: RunState.Phase) -> void:
 	if phase == RunState.Phase.DEAD and not run_recorded:
 		run_recorded = true
@@ -168,7 +197,9 @@ func _on_run_phase_changed(phase: RunState.Phase) -> void:
 
 func _reset_run() -> void:
 	run_recorded = false
+	upgrades.reset()
 	player.reset()
+	_apply_upgrades()
 	projectiles.clear()
 	hostile_projectiles.clear()
 	enemies.clear()
@@ -184,6 +215,7 @@ func _reset_run() -> void:
 func _update_hud() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
+	hud_view.present_upgrades(upgrades.offered, run.phase == RunState.Phase.UPGRADE, upgrades.stacks)
 	hud_view.present_records(records.data, records.last_error != OK)
 	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD), (run.phase == RunState.Phase.PAUSED))
 
@@ -230,5 +262,5 @@ func _draw() -> void:
 
 
 func _draw_overlay() -> void:
-	if (run.phase == RunState.Phase.DEAD) or (run.phase == RunState.Phase.PAUSED):
+	if not run.is_active():
 		overlay.draw_rect(ARENA, Color(0.02, 0.02, 0.04, 0.86))

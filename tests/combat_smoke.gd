@@ -393,6 +393,45 @@ func _run() -> void:
 	for store in [storage, arena.records]:
 		for suffix in ["", ".bak", ".tmp"]:
 			DirAccess.remove_absolute(store.path + suffix)
+	arena._reset_run()
+	arena.waves.number = 3
+	arena.waves.remaining = 0
+	arena._update_waves(0.01)
+	arena._update_hud()
+	check(arena.run.phase == arena.RunState.Phase.UPGRADE and arena.upgrades.offered.size() == 3, "Third wave clear must offer three temporary upgrades")
+	var choice_time: float = arena.run.elapsed
+	var choice_break: float = arena.waves.break_time
+	arena._physics_process(10.0)
+	check(arena.run.elapsed == choice_time and arena.waves.break_time == choice_break, "Upgrade choice must freeze run and wave countdown")
+	arena._choose_upgrade(&"invalid")
+	check(arena.run.phase == arena.RunState.Phase.UPGRADE, "Invalid upgrade must not advance the run")
+	arena._set_paused(true)
+	arena._set_paused(false)
+	check(arena.run.phase == arena.RunState.Phase.UPGRADE and arena.hud_view.choice_buttons[0].has_focus(), "Pause must return to upgrade choice with keyboard focus")
+	var selected: StringName = arena.upgrades.offered[0].id
+	Input.action_press("fire")
+	arena.hud_view.choice_buttons[0].pressed.emit()
+	arena._choose_upgrade(selected)
+	check(arena.upgrades.stacks[selected] == 1 and arena.run.phase == arena.RunState.Phase.INTERMISSION, "Upgrade must apply once and return to intermission")
+	arena._physics_process(0.01)
+	check(arena.projectiles.items.is_empty(), "Selecting an upgrade must block held fire")
+	Input.action_release("fire")
+	arena.upgrades.stacks = {&"swift": 2, &"rapid": 2, &"heavy": 1, &"force": 1, &"dash": 1}
+	arena._apply_upgrades()
+	check(absf(arena.player.move_speed - 145.2) < 0.01 and arena.projectiles.weapon.damage == 2, "Multiple upgrade types must combine from base values")
+	var upgraded_speed: float = arena.player.move_speed
+	arena._apply_upgrades()
+	check(arena.player.move_speed == upgraded_speed and arena.projectiles.weapon.damage == 2, "Reapplying upgrades must not compound already modified stats")
+	check(load("res://resources/default_weapon.tres").damage == 1, "Upgrades must leave shared default resources untouched")
+	arena._reset_run()
+	check(arena.upgrades.stacks.is_empty() and arena.player.move_speed == 120.0 and arena.projectiles.weapon.damage == 1, "Restart must remove all temporary upgrades")
+	for definition in arena.upgrades.definitions:
+		arena.upgrades.stacks[definition.id] = definition.max_stacks
+	check(arena.upgrades.offer(arena.random).is_empty(), "Exhausted upgrade pool must return no choices")
+	arena.waves.number = 3
+	arena._on_wave_cleared()
+	check(arena.run.phase == arena.RunState.Phase.INTERMISSION, "Exhausted pool must continue without trapping the run in a menu")
+	arena._reset_run()
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"heavy"
+title = "Heavy Rounds"
+description = "Each projectile deals +1 damage."
+attribute = "damage"
+multiplier = 1.0
+addition = 1.0
+max_stacks = 2

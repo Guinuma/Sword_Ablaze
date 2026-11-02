@@ -1,9 +1,12 @@
 extends CanvasLayer
 ## Presentation only: combat owns all timers and run state.
+signal upgrade_selected(id: StringName)
 signal resume_requested
 signal restart_requested
 signal quit_requested
 
+var upgrade_panel: VBoxContainer
+var choice_buttons: Array[Button] = []
 var menu: HBoxContainer
 var resume_button: Button
 var restart_button: Button
@@ -42,6 +45,24 @@ func _ready() -> void:
 	record_label.size = Vector2(440, 20)
 	record_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	record_label.hide()
+	upgrade_panel = VBoxContainer.new()
+	upgrade_panel.position = Vector2(100, 108)
+	upgrade_panel.size = Vector2(440, 200)
+	upgrade_panel.add_theme_constant_override("separation", 10)
+	add_child(upgrade_panel)
+	var heading := Label.new()
+	heading.text = "CHOOSE A TEMPORARY UPGRADE"
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.add_theme_font_size_override("font_size", 16)
+	upgrade_panel.add_child(heading)
+	for index in range(3):
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(440, 44)
+		button.add_theme_font_size_override("font_size", 12)
+		button.pressed.connect(_select_upgrade.bind(index))
+		upgrade_panel.add_child(button)
+		choice_buttons.append(button)
+	upgrade_panel.hide()
 
 
 func _label(point: Vector2, font_size: int) -> Label:
@@ -57,6 +78,8 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 	stats.text = "HP %d/%d  |  KILLS %d  |  %ds" % [health, max_health, kills, int(elapsed)]
 	wave_status.visible = not game_over
 	wave_status.text = "WAVE %d CLEAR  |  Next in %d" % [wave, ceili(break_time)] if break_time > 0.0 else "WAVE %d  |  Remaining %d  |  DASH %s" % [wave, remaining, "READY" if dash_cooldown <= 0.0 else "%.1fs" % dash_cooldown]
+	if upgrade_panel.visible:
+		wave_status.text = "WAVE %d CLEAR  |  Choose an upgrade" % wave
 	var was_open := menu.visible
 	var was_dead := not resume_button.visible
 	record_label.visible = game_over
@@ -73,7 +96,7 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 			restart_button.grab_focus()
 	elif not menu.visible and was_open:
 		var focused := get_viewport().gui_get_focus_owner()
-		if focused:
+		if focused and menu.is_ancestor_of(focused):
 			focused.release_focus()
 
 
@@ -102,3 +125,25 @@ func present_records(records: Dictionary, save_failed: bool) -> void:
 	record_label.text = "BEST  Wave %d  |  %d kills  |  %d:%02d" % [records["best_wave"], records["best_kills"], int(records["best_seconds"]) / 60, int(records["best_seconds"]) % 60]
 	if save_failed:
 		record_label.text += "  |  Save failed"
+
+
+var shown_choices: Array[Resource] = []
+
+
+func present_upgrades(choices: Array[Resource], choosing: bool, stacks: Dictionary) -> void:
+	var was_visible := upgrade_panel.visible
+	upgrade_panel.visible = choosing
+	shown_choices = choices.duplicate()
+	for index in range(choice_buttons.size()):
+		var button: Button = choice_buttons[index]
+		button.visible = index < choices.size()
+		if button.visible:
+			var definition = choices[index]
+			button.text = "%s  [%d/%d]\n%s" % [definition.title, stacks.get(definition.id, 0) + 1, definition.max_stacks, definition.description]
+	if choosing and not was_visible and not choices.is_empty():
+		choice_buttons[0].grab_focus()
+
+
+func _select_upgrade(index: int) -> void:
+	if upgrade_panel.visible and index < shown_choices.size():
+		upgrade_selected.emit(shown_choices[index].id)

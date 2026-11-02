@@ -1,0 +1,13 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"rapid"
+title = "Quick Trigger"
+description = "Shot delay reduced by 12% per stack."
+attribute = "fire_interval"
+multiplier = 0.88
+addition = 0.0
+max_stacks = 3

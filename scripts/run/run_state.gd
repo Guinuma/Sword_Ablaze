@@ -4,7 +4,7 @@ signal phase_changed(phase: Phase)
 signal damaged(health: int)
 signal enemy_defeated(total: int)
 
-enum Phase { COMBAT, INTERMISSION, PAUSED, DEAD }
+enum Phase { COMBAT, INTERMISSION, PAUSED, DEAD, UPGRADE }
 const MAX_HEALTH: int = 5
 var phase: Phase = Phase.COMBAT
 var resume_phase: Phase = Phase.COMBAT
@@ -25,7 +25,7 @@ func advance(delta: float) -> void:
 func set_paused(value: bool) -> void:
 	if phase == Phase.DEAD:
 		return
-	if value and is_active():
+	if value and (is_active() or phase == Phase.UPGRADE):
 		resume_phase = phase
 		_set_phase(Phase.PAUSED)
 	elif not value and phase == Phase.PAUSED:
@@ -42,6 +42,16 @@ func start_intermission() -> void:
 func start_combat(_wave: int) -> void:
 	if phase == Phase.INTERMISSION:
 		_set_phase(Phase.COMBAT)
+
+
+func start_upgrade() -> void:
+	if phase == Phase.INTERMISSION:
+		_set_phase(Phase.UPGRADE)
+
+
+func finish_upgrade() -> void:
+	if phase == Phase.UPGRADE:
+		_set_phase(Phase.INTERMISSION)
 
 
 func take_damage() -> void:

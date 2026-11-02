@@ -3,6 +3,7 @@ extends RefCounted
 signal shot(origin: Vector2, direction: Vector2)
 
 const SPEED: float = 120.0
+var move_speed: float = SPEED
 const WeaponSettings = preload("res://scripts/data/weapon_settings.gd")
 var weapon: WeaponSettings = load("res://resources/default_weapon.tres")
 var player_position := Vector2(320, 200)
@@ -12,6 +13,7 @@ const CONTACT_COOLDOWN: float = 0.85
 const DASH_SPEED: float = 380.0
 const DASH_DURATION: float = 0.14
 const DASH_COOLDOWN: float = 1.2
+var dash_recharge: float = DASH_COOLDOWN
 var dash_time: float = 0.0
 var dash_cooldown: float = 0.0
 var dash_direction := Vector2.RIGHT
@@ -32,7 +34,7 @@ func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pres
 		player_position += dash_direction * DASH_SPEED * minf(delta, dash_time)
 		dash_time = maxf(0.0, dash_time - delta)
 	else:
-		player_position += movement * SPEED * delta
+		player_position += movement * move_speed * delta
 	player_position = player_position.clamp(bounds.position + Vector2(8, 8), bounds.end - Vector2(8, 8))
 	var mouse_direction := mouse_position - player_position
 	if mouse_direction.length_squared() > 1.0:
@@ -49,10 +51,12 @@ func try_dash(movement: Vector2) -> void:
 		return
 	dash_direction = movement.normalized() if movement.length_squared() > 0.0 else aim
 	dash_time = DASH_DURATION
-	dash_cooldown = DASH_COOLDOWN
+	dash_cooldown = dash_recharge
 
 
 func reset() -> void:
+	move_speed = SPEED
+	dash_recharge = DASH_COOLDOWN
 	player_position = Vector2(320, 200)
 	aim = Vector2.RIGHT
 	fire_cooldown = 0.0
