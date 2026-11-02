@@ -5,4 +5,4 @@ extends Resource
 @export_range(0.001, 1000.0) var projectile_speed: float = 360.0
 @export_range(1, 1000) var damage: int = 1
 @export_range(0.001, 1000.0) var knockback: float = 135.0
-@export_range(0.001, 1000.0) var muzzle_offset: float = 12.0
+@export_range(0.001, 1000.0) var muzzle_offset: float = 16.0

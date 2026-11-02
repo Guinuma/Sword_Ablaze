@@ -43,5 +43,23 @@
     "prompt": "docs/art/exile-walk-01-prompt.txt",
     "reference": "Project art direction or original character image; no external asset pack",
     "rights_note": "Generated project artwork; the code MIT license does not automatically apply to these images."
+  },
+  {
+    "asset": "assets/art/player/exile-front-walk-01.png",
+    "sha256": "1d15dac5b55b0be0ea5a45328fbe16108adcf05caad5f94b0990b70999475e7b",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/exile-front-walk-01-prompt.txt",
+    "reference": "Original Exile body and side walk sheet",
+    "rights_note": "Generated project artwork; code MIT license does not automatically apply."
+  },
+  {
+    "asset": "assets/art/player/exile-back-walk-01.png",
+    "sha256": "83c40abe21729a3675740707270d49be3789f19fee535ff1cc8c20c7c131b575",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/exile-back-walk-01-prompt.txt",
+    "reference": "Original Exile body and side walk sheet",
+    "rights_note": "Generated project artwork; code MIT license does not automatically apply."
   }
 ]

@@ -1,4 +1,4 @@
-# Art direction â€” The Exile
+# Art direction — The Exile
 
 Selected protagonist: **The Exile** (concept C in art-direction-01.png).
 
@@ -11,7 +11,7 @@ Selected protagonist: **The Exile** (concept C in art-direction-01.png).
 
 ## Gameplay targets
 
-- Explore a 32 Ã— 32 logical-pixel character footprint against the current 640 Ã— 360 viewport.
+- Explore a 32 × 32 logical-pixel character footprint against the current 640 × 360 viewport.
 - Keep the mask, cape and weapon recognizable at actual gameplay size.
 - Separate the weapon from the body when producing usable sprites so it can follow the mouse.
 - Start with idle and movement in four directions, then dash, damage and death.
@@ -19,7 +19,7 @@ Selected protagonist: **The Exile** (concept C in art-direction-01.png).
 
 ## Reference status
 
-The generated boards are concept references, not animation atlases or production-ready sprites. Their views and pixel scale require cleanup before integration. The arena now uses exile-body-01.png for the player, with a code-drawn responsive cape and independently aimed weapon. The arena now uses an illustrated celestial courtyard, with corrupted-wisp and fractured-sentinel sprites. The player now uses four real walk frames with alternating legs, mirrored for left/right movement, plus the original idle pose. Front/back directional sets remain future work. The generated source textures are reduced at draw time with nearest filtering. Atlas regions align the frames; a hand-cleaned native-resolution sprite set remains future work.
+The generated boards are concept references, not animation atlases or production-ready sprites. Their views and pixel scale require cleanup before integration. The arena now uses exile-body-01.png for the player, with a code-drawn responsive cape and independently aimed weapon. The arena now uses an illustrated celestial courtyard, with corrupted-wisp and fractured-sentinel sprites. The player now uses four real walk frames with alternating legs, mirrored for left/right facing, plus the original idle pose. Front/back walk sets are now integrated; aim selects the view with a threshold gap near diagonals. The generated source textures are reduced at draw time with nearest filtering. Atlas regions align the frames; a hand-cleaned native-resolution sprite set remains future work.
 
 
 ## First playable visual
@@ -44,8 +44,10 @@ The generated boards are concept references, not animation atlases or production
 
 ## Walking animation
 
-- Exile walk sheet: `assets/art/player/exile-walk-01.png`; four aligned frames in `exile-walk-01-frames.tres`. The visible legs alternate contact and passing poses at eight frames per second. Movement upgrades increase the playback rate. Idle and dash retain their separate presentation; weapon aiming remains independent.
+- Exile walk sheet: `assets/art/player/exile-walk-01.png`; four aligned frames in `exile-walk-01-frames.tres`. The visible legs alternate contact and passing poses at eight frames per second. Front and back each have their own sheet; walking backward reverses playback. Movement upgrades increase the playback rate. Idle and dash retain their separate presentation; weapon aiming remains independent.
 - Sentinel walk sheet: `assets/art/enemies/fractured-sentinel-walk-01.png`; four frames in `fractured-sentinel-walk-01-frames.tres`, played during movement. Casting holds the idle/cast silhouette instead of stepping. The wisp floats and has no legs.
 - Pause freezes animation time. Reduced-motion mode removes bobbing, cape oscillation, recoil and particles while retaining leg frames because they communicate locomotion.
 - Render a movement review with `godot --path . --script tools/capture_walk.gd -- <absolute-output-directory>`. It captures PNG frames from the real game renderer. The movement path in this review is scripted; it is not a human playtest.
 - Exact original and correction prompts are in `exile-walk-01-prompt.txt` and `fractured-sentinel-walk-01-prompt.txt`. The corrected Exile sheet replaces repeated leg silhouettes with opposite-legged poses. No raster assets were edited by a Python image pipeline.
+
+Front/back sources: `assets/art/player/exile-front-walk-01.png` and `exile-back-walk-01.png`, with matching `-frames.tres` resources. The weapon is drawn behind the torso for upward aim using a shared right-hand grip offset; shot origins and muzzle flash share that pivot. Review all views with `tools/capture_directions.gd`; the captured comparison is `docs/art/exile-directions-02.png`.

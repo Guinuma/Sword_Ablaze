@@ -272,7 +272,7 @@ func _draw() -> void:
 	if player.dash_time > 0.0 and not preferences.reduced_motion:
 		draw_line(player.player_position - player.dash_direction * 26.0, player.player_position, Color("388fba"), 10.0)
 	if player.muzzle_time > 0.0 and not preferences.reduced_flashes:
-		draw_circle((player.player_position + player.aim * 17.0).round(), 4.0, Color("fff0b0"))
+		draw_circle(player.muzzle_position().round(), 4.0, Color("fff0b0"))
 	for particle in particles:
 		var tint: Color = particle["color"]
 		tint.a = clampf(particle["life"] / 0.3, 0.0, 1.0)

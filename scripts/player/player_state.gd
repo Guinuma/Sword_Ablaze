@@ -41,9 +41,14 @@ func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pres
 		aim = mouse_direction.normalized()
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	if fire_pressed and not fire_requires_release and fire_cooldown <= 0.0:
-		shot.emit(player_position + aim * weapon.muzzle_offset, aim)
+		shot.emit(muzzle_position(), aim)
 		fire_cooldown = weapon.fire_interval
 		muzzle_time = 0.06
+
+
+func muzzle_position() -> Vector2:
+	var grip := Vector2(7 if aim.y < -0.6 else 0, -2)
+	return player_position + grip + aim * weapon.muzzle_offset
 
 
 func try_dash(movement: Vector2) -> void:

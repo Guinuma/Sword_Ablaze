@@ -8,4 +8,4 @@ fire_interval = 0.16
 projectile_speed = 360.0
 damage = 1
 knockback = 135.0
-muzzle_offset = 12.0
+muzzle_offset = 16.0

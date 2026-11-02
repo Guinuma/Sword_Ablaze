@@ -501,6 +501,15 @@ func _run() -> void:
 	check(arena.enemy_views[0].walk_frame == enemy_frame, "Pausing must preserve sentinel animation pose")
 	arena._reset_run()
 	check(arena.enemy_views.is_empty(), "Reset must remove enemy visual nodes from the presentation list")
+	arena._reset_run()
+	for direction in [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]:
+		arena.player.aim = direction
+		var muzzle: Vector2 = arena.player.muzzle_position()
+		check(muzzle == arena.player.player_position + Vector2(7 if direction.y < -0.6 else 0, -2) + direction * 16.0, "Shot origin and visual muzzle must share the weapon pivot")
+	for facing_direction in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+		arena.player_visual.present(arena.player.player_position, facing_direction, facing_direction, 0.15, false, false, false)
+		var expected: StringName = &"back" if facing_direction == Vector2.UP else &"front" if facing_direction == Vector2.DOWN else &"side"
+		check(arena.player_visual.body_direction == expected, "Player view must match cardinal aim direction")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

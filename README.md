@@ -86,7 +86,8 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Pausa e retoma com Escape.
 - [ ] Afinar velocidade, alcance do dash, hitboxes e intervalo dos disparos em playtests.
 - [ ] Verificar proteção de dash nos frames de início/fim e sob diferentes taxas de atualização.
-- [ ] Definir origem dos tiros e alinhar muzzle flash, arma, mãos e hitbox.
+- [x] Partilhar pivô de arma, origem do tiro e flash, incluindo mira para cima.
+- [ ] Refinar ligação visual das mãos e arma em todos os ângulos.
 - [x] Exigir largar o disparo antes de disparar após pausa ou reinício.
 - [x] Exigir largar o disparo ao retomar, reiniciar ou escolher melhorias.
 - [x] Pausar ao perder foco e exigir retoma explícita com Escape.
@@ -137,7 +138,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Guardar referências, prompt de geração e capturas do jogo em `docs/art/`.
 - [ ] Fixar grelha, paleta e tamanho final do sprite à escala real do jogo.
 - [ ] Simplificar o corpo atual num sprite de baixa resolução com pixels consistentes.
-- [ ] Produzir vistas frente, costas e laterais com silhuetas coerentes.
+- [x] Integrar vistas de frente, costas e lateral do Exilado, verificadas no motor.
 - [x] Integrar ciclo de caminhada de quatro frames com pernas alternadas e idle separado.
 - [ ] Completar idle e movimento com vistas direcionais coerentes.
 - [ ] Criar animações de dash, dano e morte.
@@ -156,7 +157,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Integrar uma primeira arena ilustrada com mármore partido, ouro antigo e abismo, mantendo o interior aberto.
 - [x] Substituir formas geométricas por sprites do wisp corrompido e sentinela fraturado.
 - [x] Animar passos com quatro frames de pernas no Exilado e sentinela; wisp com flutuação.
-- [ ] Produzir conjuntos direcionais de frente/costas e validar transições.
+- [x] Integrar vistas de caminhada de frente/costas e selecionar vistas pela mira, com histerese nas diagonais.
 - [x] Integrar visuais do wisp corrompido e sentinela fraturado.
 - [ ] Desenvolver o conceito da aberração.
 - [ ] Criar arte de elites e boss após validar os respetivos comportamentos.
