@@ -57,7 +57,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Criar repositório, licença MIT e guia de contribuição.
 - [x] Separar simulação de projéteis num componente com eventos de impacto e eliminação.
 - [x] Separar spawn, movimento, separação e contacto dos inimigos num componente próprio.
-- [ ] Separar simulação do jogador num script próprio.
+- [x] Separar movimento, dash e temporização de disparo do jogador num script próprio.
 - [x] Separar HUD da simulação num componente de apresentação.
 - [x] Separar gestão de ondas num componente com eventos de spawn e fim/início de ronda.
 - [x] Separar estado, vida, eliminações e tempo da run da cena principal.

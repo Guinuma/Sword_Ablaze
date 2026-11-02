@@ -22,26 +22,26 @@ func _run() -> void:
 	arena.projectiles.items.append({"position": Vector2(100, 200), "direction": Vector2.RIGHT})
 	arena._update_bullets(0.3)
 	check(arena.enemies.items.is_empty() and arena.run.kills == 1, "Second hit must kill and count once")
-	arena.enemies.items.append({"position": arena.player_position, "health": 2, "flash": 0.0})
-	arena.enemies.items.append({"position": arena.player_position, "health": 2, "flash": 0.0})
+	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
+	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
 	arena._check_contact()
 	check(arena.run.health == 4, "Overlapping enemies must respect contact invulnerability")
 	for index in range(4):
-		arena.hurt_cooldown = 0.0
+		arena.player.hurt_cooldown = 0.0
 		arena._check_contact()
 	check(arena.run.health == 0 and (arena.run.phase == arena.RunState.Phase.DEAD), "Contact damage must trigger death at zero HP")
-	var before: Vector2 = arena.player_position
+	var before: Vector2 = arena.player.player_position
 	var time_before: float = arena.run.elapsed
 	arena._physics_process(1.0)
-	check(arena.player_position == before and arena.run.elapsed == time_before, "Death must freeze the simulation")
+	check(arena.player.player_position == before and arena.run.elapsed == time_before, "Death must freeze the simulation")
 	arena._reset_run()
 	check(arena.run.health == 5 and not (arena.run.phase == arena.RunState.Phase.DEAD), "Restart must restore health and alive state")
 	check(arena.enemies.items.is_empty() and arena.projectiles.items.is_empty() and arena.run.kills == 0, "Restart must clear combat state")
 	for index in range(100):
 		arena._spawn_enemy()
 		var point: Vector2 = arena.enemies.items.back()["position"]
-		check(arena.ARENA.has_point(point) and point.distance_to(arena.player_position) > 100, "Spawns must be inside arena and away from player")
+		check(arena.ARENA.has_point(point) and point.distance_to(arena.player.player_position) > 100, "Spawns must be inside arena and away from player")
 	arena._reset_run()
 	arena.projectiles.items.append({"position": Vector2(610, 200), "direction": Vector2.RIGHT})
 	arena._update_bullets(1.0)
@@ -49,9 +49,9 @@ func _run() -> void:
 	arena.waves.spawn_cooldown = 0.0
 	arena._physics_process(0.016)
 	check(arena.enemies.items.size() == 1, "The run must spawn enemies automatically")
-	var distance_before: float = arena.enemies.items[0]["position"].distance_to(arena.player_position)
+	var distance_before: float = arena.enemies.items[0]["position"].distance_to(arena.player.player_position)
 	arena._update_enemies(0.1)
-	check(arena.enemies.items[0]["position"].distance_to(arena.player_position) < distance_before, "Enemies must pursue player")
+	check(arena.enemies.items[0]["position"].distance_to(arena.player.player_position) < distance_before, "Enemies must pursue player")
 	arena._reset_run()
 	arena.enemies.items.append({"position": Vector2(180, 200), "health": 2, "flash": 0.0})
 	arena.enemies.items.append({"position": Vector2(140, 200), "health": 2, "flash": 0.0})
@@ -65,7 +65,7 @@ func _run() -> void:
 	arena._physics_process(0.016)
 	check(arena.enemies.items.size() == arena.waves.MAX_ENEMIES, "Automatic spawning must respect enemy cap")
 	arena._reset_run()
-	check(arena.run.elapsed == 0.0 and arena.hurt_cooldown == 0.0 and arena.fire_cooldown == 0.0 and arena.waves.spawn_cooldown == 0.8, "Restart must reset timers")
+	check(arena.run.elapsed == 0.0 and arena.player.hurt_cooldown == 0.0 and arena.player.fire_cooldown == 0.0 and arena.waves.spawn_cooldown == 0.8, "Restart must reset timers")
 	arena.run.health = 3
 	arena.waves.remaining = 0
 	arena._update_waves(0.016)
@@ -75,18 +75,18 @@ func _run() -> void:
 	arena._update_waves(2.0)
 	check(arena.waves.number == 2 and arena.waves.remaining == 7, "Next wave must increase enemy budget")
 	arena._try_dash(Vector2.UP)
-	check(arena.dash_direction == Vector2.UP and arena.dash_time > 0.0, "Dash must follow movement")
-	arena.enemies.items.append({"position": arena.player_position, "health": 2, "flash": 0.0})
+	check(arena.player.dash_direction == Vector2.UP and arena.player.dash_time > 0.0, "Dash must follow movement")
+	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
 	check(arena.run.health == 4, "Dash must protect against contact")
 	arena._try_dash(Vector2.DOWN)
-	check(arena.dash_direction == Vector2.UP, "Cooldown must prevent a second dash")
+	check(arena.player.dash_direction == Vector2.UP, "Cooldown must prevent a second dash")
 	arena._physics_process(0.2)
-	check(arena.ARENA.has_point(arena.player_position) and arena.dash_time == 0.0, "Dash must end and stay inside arena")
+	check(arena.ARENA.has_point(arena.player.player_position) and arena.player.dash_time == 0.0, "Dash must end and stay inside arena")
 	arena._reset_run()
-	check(arena.waves.number == 1 and arena.waves.remaining == 5 and arena.waves.break_time == 0.0 and arena.dash_cooldown == 0.0, "Restart must clear wave and dash state")
+	check(arena.waves.number == 1 and arena.waves.remaining == 5 and arena.waves.break_time == 0.0 and arena.player.dash_cooldown == 0.0, "Restart must clear wave and dash state")
 	arena._try_dash(Vector2.ZERO)
-	check(arena.dash_direction == arena.aim, "Stationary dash must follow aim")
+	check(arena.player.dash_direction == arena.player.aim, "Stationary dash must follow aim")
 	arena._reset_run()
 	arena.enemies.items.append({"position": Vector2(150, 200), "health": 2, "flash": 0.0})
 	arena.projectiles.items.append({"position": Vector2(100, 200), "direction": Vector2.RIGHT})
@@ -107,13 +107,13 @@ func _run() -> void:
 	arena._physics_process(1.0)
 	check(arena.run.elapsed == 0.0 and arena.enemies.items[0]["position"] == paused_position and arena.particles.size() == 160, "Pause must freeze timers, enemies and effects")
 	arena._try_dash(Vector2.UP)
-	check(arena.dash_time == 0.0, "Pause must prevent dash")
+	check(arena.player.dash_time == 0.0, "Pause must prevent dash")
 	arena._set_paused(false)
 	arena._physics_process(0.01)
 	check(arena.run.elapsed > 0.0, "Resume must continue simulation")
 	arena._set_paused(true)
 	arena._reset_run()
-	check(not (arena.run.phase == arena.RunState.Phase.PAUSED) and arena.particles.is_empty() and arena.muzzle_time == 0.0, "Restart must clear pause and effects")
+	check(not (arena.run.phase == arena.RunState.Phase.PAUSED) and arena.particles.is_empty() and arena.player.muzzle_time == 0.0, "Restart must clear pause and effects")
 	# Project bindings must survive scene creation without being overwritten.
 	var expected_keys := {"move_left": KEY_LEFT, "move_right": KEY_RIGHT, "move_up": KEY_UP, "move_down": KEY_DOWN, "pause_run": KEY_ESCAPE, "dash": KEY_SHIFT}
 	for action in expected_keys:
@@ -145,7 +145,7 @@ func _run() -> void:
 	arena._reset_run()
 	check(not arena.hud_view.status.visible and arena.hud_view.stats.text.contains("HP 5/5"), "HUD must refresh after restart")
 	arena.run.health = 1
-	arena.enemies.items.append({"position": arena.player_position, "health": 2, "flash": 0.0})
+	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
 	arena._update_hud()
 	check(arena.hud_view.status.visible and arena.hud_view.status.text.begins_with("YOU FELL") and not arena.hud_view.wave_status.visible, "HUD must present death and hide wave prompt")
@@ -198,6 +198,28 @@ func _run() -> void:
 	check(events["damage"] == 5 and events["kills"] == 1, "Lifecycle events must count actual damage and kills only")
 	lifecycle.reset()
 	check(lifecycle.phase == lifecycle.Phase.COMBAT and lifecycle.health == 5 and lifecycle.kills == 0, "Reset must restore lifecycle from death")
+	# Exercise player simulation without scene input or rendering.
+	for rate in [30, 60, 144]:
+		var simulation = arena.PlayerState.new()
+		var start: Vector2 = simulation.player_position
+		for frame in range(rate):
+			simulation.advance(1.0 / rate, Vector2.RIGHT, Vector2(600, 200), false, false, arena.ARENA)
+		check(absf(simulation.player_position.x - start.x - 120.0) < 0.01, "Movement distance must be stable at %d Hz" % rate)
+		simulation.reset()
+		start = simulation.player_position
+		simulation.try_dash(Vector2.RIGHT)
+		for frame in range(rate):
+			simulation.advance(1.0 / rate, Vector2.ZERO, Vector2(600, 200), false, false, arena.ARENA)
+		check(absf(simulation.player_position.x - start.x - 53.2) < 0.01, "Dash distance must be stable at %d Hz" % rate)
+	var isolated = arena.PlayerState.new()
+	var shots := {"count": 0}
+	isolated.shot.connect(func(_origin, _direction): shots["count"] += 1)
+	isolated.reset()
+	isolated.advance(0.01, Vector2.ZERO, Vector2(600, 200), false, true, arena.ARENA)
+	check(shots["count"] == 0, "Reset must require releasing fire in standalone player simulation")
+	isolated.advance(0.01, Vector2.ZERO, Vector2(600, 200), false, false, arena.ARENA)
+	isolated.advance(0.01, Vector2.ZERO, Vector2(600, 200), false, true, arena.ARENA)
+	check(shots["count"] == 1, "Standalone player must resume firing after release")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)
