@@ -18,12 +18,18 @@ func spawn(target: Vector2, bounds: Rect2, random: RandomNumberGenerator) -> voi
 	else:
 		var y := bounds.position.y + 10.0 if target.y > bounds.get_center().y else bounds.end.y - 10.0
 		point = Vector2(random.randf_range(bounds.position.x + 10.0, bounds.end.x - 10.0), y)
-	items.append({"position": point, "health": settings.health, "flash": 0.0})
+	items.append({"position": point, "health": settings.health, "flash": 0.0, "spawn_time": settings.spawn_warning})
 
 
 func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 	for enemy in items:
 		var point: Vector2 = enemy["position"]
+		if enemy.get("spawn_time", 0.0) > 0.0:
+			enemy["spawn_time"] = maxf(0.0, enemy["spawn_time"] - delta)
+			# Never activate on top of a player who moved into the warning.
+			if point.distance_to(target) < settings.spawn_safe_distance:
+				enemy["spawn_time"] = maxf(0.001, enemy["spawn_time"])
+			continue
 		enemy["position"] = point.move_toward(target, minf(settings.speed + (wave - 1) * settings.speed_per_wave, settings.max_speed) * delta)
 		var knockback: Vector2 = enemy.get("knockback", Vector2.ZERO)
 		enemy["position"] += knockback * delta
@@ -31,7 +37,11 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 		enemy["flash"] = maxf(0.0, enemy["flash"] - delta)
 	# Resolve each pair once; a stable fallback separates coincident centers.
 	for first in range(items.size()):
+		if items[first].get("spawn_time", 0.0) > 0.0:
+			continue
 		for second in range(first + 1, items.size()):
+			if items[second].get("spawn_time", 0.0) > 0.0:
+				continue
 			var offset: Vector2 = items[second]["position"] - items[first]["position"]
 			var distance := offset.length()
 			if distance < settings.separation_distance:
@@ -45,6 +55,6 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 
 func touches(point: Vector2) -> bool:
 	for enemy in items:
-		if point.distance_to(enemy["position"]) < settings.contact_radius:
+		if enemy.get("spawn_time", 0.0) <= 0.0 and point.distance_to(enemy["position"]) < settings.contact_radius:
 			return true
 	return false

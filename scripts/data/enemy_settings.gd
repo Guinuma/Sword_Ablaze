@@ -9,3 +9,5 @@ extends Resource
 @export_range(0.001, 1000.0) var contact_radius: float = 15.0
 @export_range(0.001, 1000.0) var separation_distance: float = 18.0
 @export_range(0.001, 1000.0) var body_margin: float = 8.0
+@export_range(0.1, 5.0) var spawn_warning: float = 0.7
+@export_range(16.0, 200.0) var spawn_safe_distance: float = 56.0

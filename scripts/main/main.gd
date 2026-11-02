@@ -170,6 +170,12 @@ func _draw() -> void:
 	draw_rect(ARENA, Color("61758b"), false, 1.0)
 	for enemy in enemies.items:
 		var point: Vector2 = Vector2(enemy["position"]).round()
+		if enemy.get("spawn_time", 0.0) > 0.0:
+			var progress: float = 1.0 - enemy["spawn_time"] / enemies.settings.spawn_warning
+			draw_arc(point, 13.0 - progress * 4.0, 0.0, TAU, 16, Color("ffb454"), 1.0)
+			draw_line(point - Vector2(4, 0), point + Vector2(4, 0), Color("ffb454"))
+			draw_line(point - Vector2(0, 4), point + Vector2(0, 4), Color("ffb454"))
+			continue
 		var color := Color("fff0b0") if enemy["flash"] > 0.0 else Color("e76170")
 		draw_rect(Rect2(point - Vector2(8, 8), Vector2(16, 16)), color)
 		draw_rect(Rect2(point + Vector2(-8, -12), Vector2(8 * enemy["health"], 2)), Color("ffb454"))

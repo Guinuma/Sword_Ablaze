@@ -36,6 +36,7 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 - Jogador: 5 HP; contacto causa 1 de dano, com 0,85 s de proteção entre impactos.
 - Inimigo básico: 2 HP; persegue o jogador e sofre recuo ao receber tiros.
 - Ondas: 5 inimigos inicialmente, mais 2 por ronda até 40 por onda; máximo de 18 em simultâneo.
+- Spawns: marcador de aviso de 0,7 s, sem dano ou movimento durante a preparação; ativação adiada a menos de 56 px do jogador. Contam para o limite e orçamento da onda.
 - Spawns: longe do jogador; intervalo começa em 1,6 s e desce até 0,4 s. A velocidade dos inimigos também aumenta, até um limite.
 - Limpar uma onda: recupera 1 HP, até ao máximo, e inicia uma pausa de 3 s.
 - Dash: duração de 0,14 s e recarga de 1,2 s; proteção de contacto enquanto o dash está ativo.
@@ -96,7 +97,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Separação entre inimigos, incluindo quando ocupam a mesma posição.
 - [x] Recuo ao receber tiros e contagem de eliminações.
 - [x] Spawns afastados do jogador e limite de inimigos simultâneos.
-- [ ] Criar sinais visuais de spawn e impedir aparecimentos injustos.
+- [x] Avisar spawns com um marcador de 0,7 s; adiar ativação enquanto o jogador estiver demasiado perto.
 - [ ] Melhorar separação junto às paredes e em grupos densos.
 - [ ] Adicionar navegação quando existirem obstáculos reais.
 - [ ] Criar primeiro inimigo de ataque à distância, com projéteis e aviso legível.

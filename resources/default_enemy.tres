@@ -12,3 +12,5 @@ hit_radius = 10.0
 contact_radius = 15.0
 separation_distance = 18.0
 body_margin = 8.0
+spawn_warning = 0.7
+spawn_safe_distance = 56.0

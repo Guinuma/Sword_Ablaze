@@ -26,6 +26,8 @@ func advance(delta: float, enemies: Array[Dictionary], bounds: Rect2) -> void:
 		var target: int = -1
 		var nearest: float = INF
 		for enemy_index in range(enemies.size()):
+			if enemies[enemy_index].get("spawn_time", 0.0) > 0.0:
+				continue
 			var point: Vector2 = enemies[enemy_index]["position"]
 			var hit := Geometry2D.segment_intersects_circle(start, end, point, enemy_settings.hit_radius)
 			if hit >= 0.0 and hit < nearest:
