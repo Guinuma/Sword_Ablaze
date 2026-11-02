@@ -120,7 +120,8 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Mostrar ronda, inimigos restantes, HP, eliminações, tempo e recarga do dash.
 - [ ] Substituir escalada uniforme por configurações de encontros e composição de ondas.
 - [ ] **Decidir:** condição de vitória, duração alvo e eventual variante endless.
-- [ ] Criar resumo da partida com ronda, tempo, eliminações e recompensas.
+- [x] Mostrar resumo de derrota com ronda, tempo, eliminações e opção de repetir.
+- [ ] Acrescentar recompensas ao resumo quando existir progressão.
 - [ ] Criar fluxo completo: iniciar arena, jogar, terminar, repetir ou regressar ao hub.
 - [ ] Guardar recordes locais e apresentar resultados de forma clara.
 - [ ] Fazer playtests da primeira ronda, meio da partida e rondas avançadas.
@@ -215,7 +216,8 @@ Os valores são provisórios e precisam de playtesting.
 
 - [x] HUD funcional e mensagens de morte/pausa.
 - [ ] Criar menu principal, seleção de modo e ecrã de resultados.
-- [ ] Criar menu de pausa com retomar, configurações, reiniciar e sair.
+- [x] Criar botões de pausa para retomar, reiniciar e sair, com foco por teclado.
+- [ ] Acrescentar configurações ao menu de pausa quando existir esse ecrã.
 - [ ] Integrar menus de melhorias, skill tree e recompensas.
 - [ ] Criar hierarquia visual e tipografia coerentes com a direção artística.
 - [ ] Oferecer remapeamento de teclas e guardar preferências.

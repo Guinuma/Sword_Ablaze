@@ -321,6 +321,28 @@ func _run() -> void:
 	for index in range(9):
 		composition.advance(2.0, 0)
 	check(spawned.count(&"ranged") == 3 and spawned.count(&"chaser") == 6, "Wave three must introduce one ranged enemy per three spawns")
+	arena._reset_run()
+	arena._set_paused(true)
+	check(arena.hud_view.menu.visible and arena.hud_view.resume_button.has_focus(), "Opening pause must focus Resume")
+	Input.action_press("fire")
+	arena.hud_view.resume_button.pressed.emit()
+	arena._physics_process(0.01)
+	check(arena.run.is_active() and not arena.hud_view.menu.visible and arena.projectiles.items.is_empty(), "Resume button must close menu and block held fire")
+	arena._set_paused(true)
+	arena.hud_view.restart_button.pressed.emit()
+	arena._physics_process(0.01)
+	check(arena.run.health == 5 and not arena.hud_view.menu.visible and arena.projectiles.items.is_empty(), "Restart button must reset run and block held fire")
+	Input.action_release("fire")
+	arena.run.health = 1
+	arena.run.elapsed = 125.0
+	arena.waves.number = 4
+	arena.player.hurt_cooldown = 0.0
+	arena._take_player_damage()
+	arena._update_hud()
+	check(arena.hud_view.status.text.contains("Wave 4") and arena.hud_view.status.text.contains("2:05"), "Defeat summary must show wave and formatted duration")
+	check(not arena.hud_view.resume_button.visible and arena.hud_view.restart_button.has_focus(), "Defeat menu must focus Restart and hide Resume")
+	arena.hud_view.restart_button.pressed.emit()
+	check(arena.run.is_active() and arena.run.elapsed == 0.0, "Defeat restart must begin a fresh run")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

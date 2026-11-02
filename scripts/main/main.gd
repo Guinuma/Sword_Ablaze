@@ -37,6 +37,9 @@ func _ready() -> void:
 	waves.wave_cleared.connect(_on_wave_cleared)
 	random.randomize()
 	hud_view = ArenaHud.new()
+	hud_view.resume_requested.connect(func(): _set_paused(false))
+	hud_view.restart_requested.connect(_reset_run)
+	hud_view.quit_requested.connect(func(): get_tree().quit())
 	add_child(hud_view)
 	player_visual = ExileVisual.new()
 	player_visual.z_index = 1

@@ -1,5 +1,13 @@
 extends CanvasLayer
 ## Presentation only: combat owns all timers and run state.
+signal resume_requested
+signal restart_requested
+signal quit_requested
+
+var menu: HBoxContainer
+var resume_button: Button
+var restart_button: Button
+var quit_button: Button
 var stats: Label
 var wave_status: Label
 var status: Label
@@ -15,9 +23,19 @@ func _ready() -> void:
 	wave_status = _label(Vector2(120, 72), 14)
 	wave_status.size = Vector2(400, 30)
 	wave_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	status = _label(Vector2(120, 152), 20)
-	status.size = Vector2(400, 72)
+	status = _label(Vector2(120, 128), 18)
+	status.size = Vector2(400, 110)
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	menu = HBoxContainer.new()
+	menu.position = Vector2(130, 256)
+	menu.size = Vector2(380, 32)
+	menu.alignment = BoxContainer.ALIGNMENT_CENTER
+	menu.add_theme_constant_override("separation", 12)
+	add_child(menu)
+	resume_button = _button("Resume", func(): resume_requested.emit())
+	restart_button = _button("Restart", func(): restart_requested.emit())
+	quit_button = _button("Quit", func(): quit_requested.emit())
+	menu.hide()
 
 
 func _label(point: Vector2, font_size: int) -> Label:
@@ -33,7 +51,40 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 	stats.text = "HP %d/%d  |  KILLS %d  |  %ds" % [health, max_health, kills, int(elapsed)]
 	wave_status.visible = not game_over
 	wave_status.text = "WAVE %d CLEAR  |  Next in %d" % [wave, ceili(break_time)] if break_time > 0.0 else "WAVE %d  |  Remaining %d  |  DASH %s" % [wave, remaining, "READY" if dash_cooldown <= 0.0 else "%.1fs" % dash_cooldown]
+	var was_open := menu.visible
+	var was_dead := not resume_button.visible
 	status.visible = game_over or paused
-	status.text = "YOU FELL\n%d kills  /  %ds  /  R to restart" % [kills, int(elapsed)]
+	status.text = "YOU FELL\nWave %d  /  %d kills\nTime %d:%02d\nR to restart" % [wave, kills, int(elapsed) / 60, int(elapsed) % 60]
 	if paused:
 		status.text = "PAUSED\nEsc to resume  /  R to restart"
+	menu.visible = game_over or paused
+	resume_button.visible = paused and not game_over
+	if menu.visible and (not was_open or was_dead != game_over):
+		if resume_button.visible:
+			resume_button.grab_focus()
+		else:
+			restart_button.grab_focus()
+	elif not menu.visible and was_open:
+		var focused := get_viewport().gui_get_focus_owner()
+		if focused:
+			focused.release_focus()
+
+
+func _button(text: String, action: Callable) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(112, 32)
+	button.add_theme_font_size_override("font_size", 14)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color("1d2638")
+	normal.border_color = Color("61758b")
+	normal.set_border_width_all(1)
+	button.add_theme_stylebox_override("normal", normal)
+	var focus := StyleBoxFlat.new()
+	focus.bg_color = Color(0.0, 0.0, 0.0, 0.0)
+	focus.border_color = Color("ffb454")
+	focus.set_border_width_all(2)
+	button.add_theme_stylebox_override("focus", focus)
+	button.pressed.connect(action)
+	menu.add_child(button)
+	return button
