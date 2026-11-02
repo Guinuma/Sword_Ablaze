@@ -1,12 +1,16 @@
 extends CanvasLayer
 ## Presentation only: combat owns all timers and run state.
 signal upgrade_selected(id: StringName)
+signal preferences_changed(reduced_flashes: bool, reduced_motion: bool)
 signal resume_requested
 signal restart_requested
 signal quit_requested
 
 var upgrade_panel: VBoxContainer
 var choice_buttons: Array[Button] = []
+var flashes_toggle: CheckButton
+var motion_toggle: CheckButton
+var preference_error: Label
 var menu: HBoxContainer
 var resume_button: Button
 var restart_button: Button
@@ -63,6 +67,11 @@ func _ready() -> void:
 		upgrade_panel.add_child(button)
 		choice_buttons.append(button)
 	upgrade_panel.hide()
+	flashes_toggle = _toggle("Reduce flashes", Vector2(198, 190))
+	motion_toggle = _toggle("Reduce visual motion", Vector2(198, 220))
+	preference_error = _label(Vector2(198, 300), 9)
+	preference_error.text = "Preferences could not be saved"
+	preference_error.hide()
 
 
 func _label(point: Vector2, font_size: int) -> Label:
@@ -83,6 +92,9 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 	var was_open := menu.visible
 	var was_dead := not resume_button.visible
 	record_label.visible = game_over
+	flashes_toggle.visible = paused and not game_over
+	motion_toggle.visible = paused and not game_over
+	preference_error.visible = paused and preference_error.get_meta("failed", false)
 	status.visible = game_over or paused
 	status.text = "YOU FELL\nWave %d  /  %d kills\nTime %d:%02d\nR to restart" % [wave, kills, int(elapsed) / 60, int(elapsed) % 60]
 	if paused:
@@ -147,3 +159,21 @@ func present_upgrades(choices: Array[Resource], choosing: bool, stacks: Dictiona
 func _select_upgrade(index: int) -> void:
 	if upgrade_panel.visible and index < shown_choices.size():
 		upgrade_selected.emit(shown_choices[index].id)
+
+
+func _toggle(text: String, point: Vector2) -> CheckButton:
+	var toggle := CheckButton.new()
+	toggle.text = text
+	toggle.position = point
+	toggle.size = Vector2(244, 26)
+	toggle.add_theme_font_size_override("font_size", 12)
+	toggle.toggled.connect(func(_pressed): preferences_changed.emit(flashes_toggle.button_pressed, motion_toggle.button_pressed))
+	add_child(toggle)
+	toggle.hide()
+	return toggle
+
+
+func present_preferences(reduced_flashes: bool, reduced_motion: bool, save_failed: bool) -> void:
+	flashes_toggle.set_pressed_no_signal(reduced_flashes)
+	motion_toggle.set_pressed_no_signal(reduced_motion)
+	preference_error.set_meta("failed", save_failed)

@@ -12,6 +12,9 @@ func check(condition: bool, description: String) -> void:
 
 func _run() -> void:
 	var arena = load("res://scenes/main/main.tscn").instantiate()
+	arena.preferences = arena.Preferences.new("user://combat_smoke_preferences.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(arena.preferences.path + suffix)
 	arena.records = arena.ArenaRecords.new("user://combat_smoke_records.json")
 	for suffix in ["", ".bak", ".tmp"]:
 		DirAccess.remove_absolute(arena.records.path + suffix)
@@ -432,6 +435,25 @@ func _run() -> void:
 	arena._on_wave_cleared()
 	check(arena.run.phase == arena.RunState.Phase.INTERMISSION, "Exhausted pool must continue without trapping the run in a menu")
 	arena._reset_run()
+	arena._reset_run()
+	arena._set_paused(true)
+	arena.hud_view.flashes_toggle.button_pressed = true
+	arena.hud_view.motion_toggle.button_pressed = true
+	check(arena.preferences.reduced_flashes and arena.preferences.reduced_motion and arena.player_visual.reduced_motion, "Pause toggles must apply visual preferences")
+	var loaded_preferences = arena.Preferences.new(arena.preferences.path)
+	loaded_preferences.load_preferences()
+	check(loaded_preferences.reduced_flashes and loaded_preferences.reduced_motion, "Visual preferences must survive reload")
+	arena._burst(Vector2.ZERO, Color.WHITE, 10)
+	check(arena.particles.is_empty(), "Reduced motion must suppress decorative particles")
+	arena._reset_run()
+	check(arena.preferences.reduced_motion and arena.player.move_speed == 120.0 and arena.projectiles.weapon.damage == 1, "Visual preferences must survive restart without changing combat stats")
+	var invalid_preferences := FileAccess.open(arena.preferences.path, FileAccess.WRITE)
+	invalid_preferences.store_string('{"version":1,"reduced_flashes":"yes","reduced_motion":false}')
+	invalid_preferences.close()
+	loaded_preferences.load_preferences()
+	check(loaded_preferences.reduced_flashes and not loaded_preferences.reduced_motion, "Invalid preference types must recover backup values")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(arena.preferences.path + suffix)
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

@@ -5,6 +5,8 @@ const RunState = preload("res://scripts/run/run_state.gd")
 var run = RunState.new()
 const ArenaRecords = preload("res://scripts/run/arena_records.gd")
 var records = ArenaRecords.new()
+const Preferences = preload("res://scripts/settings/preferences.gd")
+var preferences = Preferences.new()
 var run_recorded: bool = false
 const UpgradeSystem = preload("res://scripts/run/upgrade_system.gd")
 var upgrades = UpgradeSystem.new()
@@ -32,6 +34,7 @@ var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	preferences.load_preferences()
 	_apply_upgrades()
 	records.load_records()
 	run.phase_changed.connect(_on_run_phase_changed)
@@ -45,12 +48,15 @@ func _ready() -> void:
 	waves.wave_cleared.connect(_on_wave_cleared)
 	random.randomize()
 	hud_view = ArenaHud.new()
+	hud_view.preferences_changed.connect(_change_preferences)
 	hud_view.upgrade_selected.connect(_choose_upgrade)
 	hud_view.resume_requested.connect(func(): _set_paused(false))
 	hud_view.restart_requested.connect(_reset_run)
 	hud_view.quit_requested.connect(func(): get_tree().quit())
 	add_child(hud_view)
 	player_visual = ExileVisual.new()
+	player_visual.reduced_flashes = preferences.reduced_flashes
+	player_visual.reduced_motion = preferences.reduced_motion
 	player_visual.z_index = 1
 	add_child(player_visual)
 	overlay = Node2D.new()
@@ -98,6 +104,8 @@ func _set_paused(value: bool) -> void:
 
 
 func _burst(point: Vector2, color: Color, count: int) -> void:
+	if preferences.reduced_motion:
+		return
 	for index in range(count):
 		if particles.size() >= 160:
 			break
@@ -167,6 +175,19 @@ func _take_player_damage() -> void:
 	player.hurt_cooldown = player.CONTACT_COOLDOWN
 
 
+func _change_preferences(reduced_flashes: bool, reduced_motion: bool) -> void:
+	preferences.reduced_flashes = reduced_flashes
+	preferences.reduced_motion = reduced_motion
+	preferences.save()
+	player_visual.reduced_flashes = reduced_flashes
+	player_visual.reduced_motion = reduced_motion
+	player_visual.queue_redraw()
+	if reduced_motion:
+		particles.clear()
+	_update_hud()
+	queue_redraw()
+
+
 func _apply_upgrades() -> void:
 	var base = load("res://resources/default_weapon.tres")
 	var weapon = base.duplicate()
@@ -215,6 +236,7 @@ func _reset_run() -> void:
 func _update_hud() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
+	hud_view.present_preferences(preferences.reduced_flashes, preferences.reduced_motion, preferences.last_error != OK)
 	hud_view.present_upgrades(upgrades.offered, run.phase == RunState.Phase.UPGRADE, upgrades.stacks)
 	hud_view.present_records(records.data, records.last_error != OK)
 	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD), (run.phase == RunState.Phase.PAUSED))
@@ -240,14 +262,14 @@ func _draw() -> void:
 		if enemy.get("windup", 0.0) > 0.0:
 			draw_line(point, point + Vector2(enemy["shot_direction"]) * profile.attack_range, Color(0.95, 0.35, 0.8, 0.55), 1.0)
 		if profile.kind == "ranged":
-			draw_colored_polygon(PackedVector2Array([point + Vector2(0, -10), point + Vector2(9, 0), point + Vector2(0, 10), point + Vector2(-9, 0)]), Color("fff0b0") if enemy["flash"] > 0.0 else Color("c079e8"))
+			draw_colored_polygon(PackedVector2Array([point + Vector2(0, -10), point + Vector2(9, 0), point + Vector2(0, 10), point + Vector2(-9, 0)]), Color("fff0b0") if enemy["flash"] > 0.0 and not preferences.reduced_flashes else Color("c079e8"))
 			draw_circle(point, 3.0, Color("151c2c"))
 			continue
-		var color := Color("fff0b0") if enemy["flash"] > 0.0 else Color("e76170")
+		var color := Color("fff0b0") if enemy["flash"] > 0.0 and not preferences.reduced_flashes else Color("e76170")
 		draw_rect(Rect2(point - Vector2(8, 8), Vector2(16, 16)), color)
-	if player.dash_time > 0.0:
+	if player.dash_time > 0.0 and not preferences.reduced_motion:
 		draw_line(player.player_position - player.dash_direction * 26.0, player.player_position, Color("388fba"), 10.0)
-	if player.muzzle_time > 0.0:
+	if player.muzzle_time > 0.0 and not preferences.reduced_flashes:
 		draw_circle((player.player_position + player.aim * 17.0).round(), 4.0, Color("fff0b0"))
 	for particle in particles:
 		var tint: Color = particle["color"]

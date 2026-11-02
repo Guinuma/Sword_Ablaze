@@ -70,7 +70,8 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Centralizar eventos de dano recebido, eliminação e fim/início de ronda.
 - [ ] Ligar os eventos aos futuros sistemas de áudio e recompensas.
 - [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.
-- [ ] Guardar e carregar preferências e remapeamentos do jogador.
+- [x] Guardar e carregar preferências visuais com validação e backup.
+- [ ] Guardar e carregar remapeamentos do jogador.
 - [ ] Definir camadas de colisão, grupos, ordem de desenho e convenções de pivôs.
 - [x] Limitar entidades e medir simulação densa antes de introduzir pooling; ver `docs/performance/`.
 
@@ -229,7 +230,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Garantir navegação por teclado e foco visível nos menus.
 - [ ] Ajustar escala de texto/UI e testar resoluções, fullscreen e janelas pequenas.
 - [ ] Distinguir perigos por forma e movimento, além da cor.
-- [ ] Oferecer redução de flashes e movimento visual intenso.
+- [x] Guardar opções de redução de flashes e movimento decorativo no menu de pausa.
 - [ ] Criar tutorial curto para mover, apontar, disparar, dash e escolher melhorias.
 - [ ] **Decidir:** idiomas suportados e preparar textos para localização.
 
