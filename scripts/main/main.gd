@@ -18,8 +18,6 @@ const ARENA := Rect2(24, 64, 592, 272)
 var player_position := Vector2(320, 200)
 var aim := Vector2.RIGHT
 var fire_cooldown: float = 0.0
-const ENEMY_HEALTH: int = 2
-const ENEMY_SPEED: float = 46.0
 const CONTACT_COOLDOWN: float = 0.85
 const DASH_SPEED: float = 380.0
 const DASH_DURATION: float = 0.14
@@ -29,7 +27,8 @@ var dash_cooldown: float = 0.0
 var dash_direction := Vector2.RIGHT
 const ProjectileSystem = preload("res://scripts/combat/projectile_system.gd")
 var projectiles = ProjectileSystem.new()
-var enemies: Array[Dictionary] = []
+const EnemySystem = preload("res://scripts/enemies/enemy_system.gd")
+var enemies = EnemySystem.new()
 var hurt_cooldown: float = 0.0
 var fire_requires_release: bool = false
 var particles: Array[Dictionary] = []
@@ -137,7 +136,7 @@ func _try_dash(movement: Vector2) -> void:
 
 
 func _update_waves(delta: float) -> void:
-	waves.advance(delta, enemies.size())
+	waves.advance(delta, enemies.items.size())
 
 
 func _on_wave_cleared() -> void:
@@ -147,41 +146,15 @@ func _on_wave_cleared() -> void:
 
 
 func _spawn_enemy() -> void:
-	var point: Vector2
-	# Spawn on the opposite half of the perimeter, away from the player.
-	if random.randf() < 0.5:
-		var x := ARENA.position.x + 10.0 if player_position.x > ARENA.get_center().x else ARENA.end.x - 10.0
-		point = Vector2(x, random.randf_range(ARENA.position.y + 10.0, ARENA.end.y - 10.0))
-	else:
-		var y := ARENA.position.y + 10.0 if player_position.y > ARENA.get_center().y else ARENA.end.y - 10.0
-		point = Vector2(random.randf_range(ARENA.position.x + 10.0, ARENA.end.x - 10.0), y)
-	enemies.append({"position": point, "health": ENEMY_HEALTH, "flash": 0.0})
+	enemies.spawn(player_position, ARENA, random)
 
 
 func _update_enemies(delta: float) -> void:
-	for enemy in enemies:
-		var point: Vector2 = enemy["position"]
-		enemy["position"] = point.move_toward(player_position, minf(ENEMY_SPEED + (waves.number - 1) * 3.0, 90.0) * delta)
-		var knockback: Vector2 = enemy.get("knockback", Vector2.ZERO)
-		enemy["position"] += knockback * delta
-		enemy["knockback"] = knockback.move_toward(Vector2.ZERO, 600.0 * delta)
-		enemy["flash"] = maxf(0.0, enemy["flash"] - delta)
-	# Resolve each pair once; a stable fallback separates coincident centers.
-	for first in range(enemies.size()):
-		for second in range(first + 1, enemies.size()):
-			var offset: Vector2 = enemies[second]["position"] - enemies[first]["position"]
-			var distance := offset.length()
-			if distance < 18.0:
-				var normal := offset / distance if distance > 0.001 else Vector2.RIGHT.rotated(float(first) * 2.4)
-				var push := normal * (18.0 - distance) * 0.5
-				enemies[first]["position"] -= push
-				enemies[second]["position"] += push
-	for enemy in enemies:
-		enemy["position"] = Vector2(enemy["position"]).clamp(ARENA.position + Vector2(8, 8), ARENA.end - Vector2(8, 8))
+	enemies.advance(delta, player_position, waves.number, ARENA)
 
 
 func _update_bullets(delta: float) -> void:
-	projectiles.advance(delta, enemies, ARENA)
+	projectiles.advance(delta, enemies.items, ARENA)
 
 
 func _on_projectile_impact(point: Vector2) -> void:
@@ -196,12 +169,10 @@ func _on_projectile_defeat(point: Vector2) -> void:
 func _check_contact() -> void:
 	if hurt_cooldown > 0.0 or dash_time > 0.0 or (run.phase == RunState.Phase.DEAD):
 		return
-	for enemy in enemies:
-		if player_position.distance_to(enemy["position"]) < 15.0:
-			run.take_damage()
-			_burst(player_position, Color("65dfc1"), 10)
-			hurt_cooldown = CONTACT_COOLDOWN
-			break
+	if enemies.touches(player_position):
+		run.take_damage()
+		_burst(player_position, Color("65dfc1"), 10)
+		hurt_cooldown = CONTACT_COOLDOWN
 
 
 func _reset_run() -> void:
@@ -228,7 +199,7 @@ func _reset_run() -> void:
 func _update_hud() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
-	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.size(), waves.break_time, dash_cooldown, (run.phase == RunState.Phase.DEAD), (run.phase == RunState.Phase.PAUSED))
+	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, dash_cooldown, (run.phase == RunState.Phase.DEAD), (run.phase == RunState.Phase.PAUSED))
 
 
 func _draw() -> void:
@@ -238,7 +209,7 @@ func _draw() -> void:
 	for y in range(64, 337, 16):
 		draw_line(Vector2(24, y), Vector2(616, y), Color("1d2638"))
 	draw_rect(ARENA, Color("61758b"), false, 1.0)
-	for enemy in enemies:
+	for enemy in enemies.items:
 		var point: Vector2 = Vector2(enemy["position"]).round()
 		var color := Color("fff0b0") if enemy["flash"] > 0.0 else Color("e76170")
 		draw_rect(Rect2(point - Vector2(8, 8), Vector2(16, 16)), color)
