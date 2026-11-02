@@ -12,6 +12,9 @@ func check(condition: bool, description: String) -> void:
 
 func _run() -> void:
 	var arena = load("res://scenes/main/main.tscn").instantiate()
+	arena.records = arena.ArenaRecords.new("user://combat_smoke_records.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(arena.records.path + suffix)
 	root.add_child(arena)
 	arena.set_physics_process(false)
 	arena.enemies.items.append({"position": Vector2(150, 200), "health": 2, "flash": 0.0})
@@ -359,6 +362,37 @@ func _run() -> void:
 	arena.player.player_position = Vector2(200, 100)
 	arena.hostile_projectiles.advance(2.0, arena.player.player_position, arena.ARENA)
 	check(arena.run.health == 5 and arena.hostile_projectiles.items.is_empty(), "Expired hostile shot must not hit beyond its remaining lifetime")
+	var storage = arena.ArenaRecords.new("user://record_storage_test.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(storage.path + suffix)
+	storage.load_records()
+	check(storage.data["runs"] == 0, "Missing record file must load defaults")
+	check(storage.record(3, 12, 80.0) == OK, "First record save must succeed")
+	check(storage.record(2, 7, 60.0) == OK, "Record replacement must succeed")
+	var reloaded = arena.ArenaRecords.new(storage.path)
+	reloaded.load_records()
+	check(reloaded.data["runs"] == 2 and reloaded.data["best_wave"] == 3 and reloaded.data["best_kills"] == 12, "Records must survive reload and preserve maxima")
+	var broken := FileAccess.open(storage.path, FileAccess.WRITE)
+	broken.store_string("broken save")
+	broken.close()
+	reloaded.load_records()
+	check(reloaded.data["runs"] == 1 and reloaded.data["best_wave"] == 3, "Corrupt primary must recover previous backup")
+	check(reloaded.record(4, 20, 100.0) == OK, "Recovered records must save successfully")
+	arena._reset_run()
+	var prior_runs: int = arena.records.data["runs"]
+	arena.run.health = 1
+	arena._take_player_damage()
+	arena._on_run_phase_changed(arena.RunState.Phase.DEAD)
+	check(arena.records.data["runs"] == prior_runs + 1, "Repeated death notifications must record a run only once")
+	var future := FileAccess.open(storage.path, FileAccess.WRITE)
+	future.store_string('{"version": 99, "runs": 900}')
+	future.close()
+	reloaded.load_records()
+	check(reloaded.record(1, 1, 1.0) == ERR_UNAVAILABLE, "Newer record schema must not be overwritten")
+	check(FileAccess.get_file_as_string(storage.path).contains('"version": 99'), "Unsupported record file must remain intact")
+	for store in [storage, arena.records]:
+		for suffix in ["", ".bak", ".tmp"]:
+			DirAccess.remove_absolute(store.path + suffix)
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

@@ -8,6 +8,8 @@ var menu: HBoxContainer
 var resume_button: Button
 var restart_button: Button
 var quit_button: Button
+var record_label: Label
+var record_save_failed: bool = false
 var stats: Label
 var wave_status: Label
 var status: Label
@@ -36,6 +38,10 @@ func _ready() -> void:
 	restart_button = _button("Restart", func(): restart_requested.emit())
 	quit_button = _button("Quit", func(): quit_requested.emit())
 	menu.hide()
+	record_label = _label(Vector2(100, 308), 11)
+	record_label.size = Vector2(440, 20)
+	record_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	record_label.hide()
 
 
 func _label(point: Vector2, font_size: int) -> Label:
@@ -53,6 +59,7 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 	wave_status.text = "WAVE %d CLEAR  |  Next in %d" % [wave, ceili(break_time)] if break_time > 0.0 else "WAVE %d  |  Remaining %d  |  DASH %s" % [wave, remaining, "READY" if dash_cooldown <= 0.0 else "%.1fs" % dash_cooldown]
 	var was_open := menu.visible
 	var was_dead := not resume_button.visible
+	record_label.visible = game_over
 	status.visible = game_over or paused
 	status.text = "YOU FELL\nWave %d  /  %d kills\nTime %d:%02d\nR to restart" % [wave, kills, int(elapsed) / 60, int(elapsed) % 60]
 	if paused:
@@ -88,3 +95,10 @@ func _button(text: String, action: Callable) -> Button:
 	button.pressed.connect(action)
 	menu.add_child(button)
 	return button
+
+
+func present_records(records: Dictionary, save_failed: bool) -> void:
+	record_save_failed = save_failed
+	record_label.text = "BEST  Wave %d  |  %d kills  |  %d:%02d" % [records["best_wave"], records["best_kills"], int(records["best_seconds"]) / 60, int(records["best_seconds"]) % 60]
+	if save_failed:
+		record_label.text += "  |  Save failed"

@@ -3,6 +3,9 @@ extends Node2D
 
 const RunState = preload("res://scripts/run/run_state.gd")
 var run = RunState.new()
+const ArenaRecords = preload("res://scripts/run/arena_records.gd")
+var records = ArenaRecords.new()
+var run_recorded: bool = false
 
 const WaveDirector = preload("res://scripts/run/wave_director.gd")
 var waves = WaveDirector.new()
@@ -27,6 +30,8 @@ var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	records.load_records()
+	run.phase_changed.connect(_on_run_phase_changed)
 	enemies.shot.connect(hostile_projectiles.fire)
 	hostile_projectiles.hit_player.connect(_take_player_damage)
 	player.shot.connect(projectiles.fire)
@@ -155,7 +160,14 @@ func _take_player_damage() -> void:
 	player.hurt_cooldown = player.CONTACT_COOLDOWN
 
 
+func _on_run_phase_changed(phase: RunState.Phase) -> void:
+	if phase == RunState.Phase.DEAD and not run_recorded:
+		run_recorded = true
+		records.record(waves.number, run.kills, run.elapsed)
+
+
 func _reset_run() -> void:
+	run_recorded = false
 	player.reset()
 	projectiles.clear()
 	hostile_projectiles.clear()
@@ -172,6 +184,7 @@ func _reset_run() -> void:
 func _update_hud() -> void:
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
+	hud_view.present_records(records.data, records.last_error != OK)
 	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD), (run.phase == RunState.Phase.PAUSED))
 
 

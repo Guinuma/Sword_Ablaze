@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Protótipo de combate jogável, ainda sem menus, áudio, XP, gravação ou hub. O jogador já usa um primeiro visual do Exilado; arena e inimigos mantêm placeholders. A arte gerada serve como referência e base provisória, não como atlas de animação final.
+Protótipo de combate jogável, com pausa, resumo e recordes locais; ainda sem menu principal, áudio, XP ou hub. O jogador já usa um primeiro visual do Exilado; arena e inimigos mantêm placeholders. A arte gerada serve como referência e base provisória, não como atlas de animação final.
 
 - Movimento, mira, disparo, colisão contínua dos tiros, dano, morte e reinício.
 - Ondas crescentes, pausa entre rondas, recuperação de vida e dash.
@@ -123,7 +123,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Mostrar resumo de derrota com ronda, tempo, eliminações e opção de repetir.
 - [ ] Acrescentar recompensas ao resumo quando existir progressão.
 - [ ] Criar fluxo completo: iniciar arena, jogar, terminar, repetir ou regressar ao hub.
-- [ ] Guardar recordes locais e apresentar resultados de forma clara.
+- [x] Guardar recordes locais de onda, eliminações e sobrevivência, com backup e resumo.
 - [ ] Fazer playtests da primeira ronda, meio da partida e rondas avançadas.
 
 ### 5. Arte do Exilado
@@ -202,8 +202,10 @@ Os valores são provisórios e precisam de playtesting.
 
 ### 10. Save e dados persistentes
 
-- [ ] Definir esquema versionado para XP, desbloqueios, skills, recordes e preferências.
-- [ ] Gravar em `user://`, com escrita segura e cópia de recuperação.
+- [x] Criar esquema versionado para recordes locais da arena em `user://arena_records.json`.
+- [ ] Definir esquema de perfil para XP, desbloqueios, skills e preferências.
+- [x] Gravar recordes em `user://` através de ficheiro temporário e cópia de recuperação.
+- [ ] Aplicar escrita segura ao futuro perfil global.
 - [ ] Criar e carregar perfil inicial quando não existir save.
 - [ ] Validar dados e tratar saves incompletos ou corrompidos.
 - [ ] Implementar migrações entre versões do esquema.
