@@ -2,113 +2,233 @@ extends CanvasLayer
 ## Presentation only: combat owns all timers and run state.
 signal upgrade_selected(id: StringName)
 signal preferences_changed(reduced_flashes: bool, reduced_motion: bool)
+signal pause_requested
 signal resume_requested
 signal restart_requested
 signal quit_requested
 
-var upgrade_panel: VBoxContainer
-var choice_buttons: Array[Button] = []
-var flashes_toggle: CheckButton
-var motion_toggle: CheckButton
-var preference_error: Label
-var menu: HBoxContainer
+const PIXEL_FONT = preload("res://assets/fonts/Silkscreen-Regular.ttf")
+const INK := Color("0a111c")
+const IVORY := Color("ede3c9")
+const GOLD := Color("c5a46c")
+const MUTED := Color("9aabb8")
+const TEAL := Color("63b7b3")
+var pixel_font: FontFile
+var stats: Label
+var wave_status: Label
+var wave_heading: Label
+var time_label: Label
+var kill_label: Label
+var health_pips: Control
+var health_value: int = 5
+var health_max: int = 5
+var dash_panel: Panel
+var dash_key: Label
+var dash_label: Label
+var dash_meter: ProgressBar
+var dash_fill: StyleBoxFlat
+var control_hint: Label
+var pause_hint: Label
+var blessing_count: Label
+var pause_button: Button
+var menu_backdrop: Panel
+var status: Label
+var summary: Label
+var menu_hint: Label
+var menu: VBoxContainer
 var resume_button: Button
 var restart_button: Button
 var quit_button: Button
 var record_label: Label
 var record_save_failed: bool = false
-var stats: Label
-var wave_status: Label
-var status: Label
+var flashes_toggle: CheckButton
+var motion_toggle: CheckButton
+var preference_error: Label
+var upgrade_backdrop: Panel
+var upgrade_panel: VBoxContainer
+var choice_buttons: Array[Button] = []
+var shown_choices: Array[Resource] = []
+var stack_total: int = 0
 
 
 func _ready() -> void:
 	layer = 3
-	var header := ColorRect.new()
-	header.size = Vector2(640, 62)
-	header.color = Color("080d16")
-	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(header)
-	var title := _label(Vector2(24, 12), 16)
-	title.text = "SWORD ABLAZE  /  ARENA"
-	var instructions := _label(Vector2(24, 38), 12)
-	instructions.text = "WASD: move | Click/Space: fire | Shift: dash | Esc: pause | R: restart"
-	stats = _label(Vector2(348, 14), 12)
-	wave_status = _label(Vector2(120, 72), 14)
-	wave_status.size = Vector2(400, 30)
+	pixel_font = PIXEL_FONT.duplicate()
+	pixel_font.antialiasing = 0
+	_build_status_bar()
+	_build_menus()
+	_build_upgrades()
+
+
+func _build_status_bar() -> void:
+	_panel(Rect2(0, 0, 640, 62), INK, Color("6b573a"))
+	var name_label := _label(Vector2(20, 8), Vector2(150, 14), 8, true, GOLD)
+	name_label.text = "THE EXILE"
+	health_pips = Control.new()
+	health_pips.position = Vector2(24, 34)
+	health_pips.size = Vector2(72, 14)
+	health_pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	health_pips.draw.connect(_draw_health)
+	add_child(health_pips)
+	stats = _label(Vector2(105, 28), Vector2(72, 18), 8, true)
+	var location := _label(Vector2(210, 8), Vector2(220, 14), 8, true, GOLD)
+	location.text = "CELESTIAL COURTYARD"
+	location.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	wave_heading = _label(Vector2(230, 24), Vector2(180, 26), 16, true)
+	wave_heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	time_label = _label(Vector2(472, 7), Vector2(112, 25), 16, true)
+	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	kill_label = _label(Vector2(472, 34), Vector2(112, 14), 8, true, GOLD)
+	kill_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	pause_button = _button("II", self, func(): pause_requested.emit())
+	pause_button.position = Vector2(602, 15)
+	pause_button.custom_minimum_size = Vector2(24, 28)
+	pause_button.size = Vector2(24, 28)
+	pause_button.tooltip_text = "Pause (Escape)"
+	wave_status = _label(Vector2(232, 66), Vector2(176, 21), 8, true)
 	wave_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	status = _label(Vector2(120, 128), 18)
-	status.size = Vector2(400, 110)
+	wave_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	wave_status.add_theme_stylebox_override("normal", _style(Color(0.04, 0.07, 0.11, 0.93), Color("6b573a")))
+	dash_panel = _panel(Rect2(14, 330, 144, 23), Color(0.04, 0.07, 0.11, 0.95), Color("6b573a"))
+	dash_key = _label(Vector2(20, 336), Vector2(36, 12), 8, true, GOLD)
+	dash_key.text = "SHIFT"
+	dash_label = _label(Vector2(63, 332), Vector2(89, 13), 8, true)
+	dash_meter = ProgressBar.new()
+	dash_meter.position = Vector2(63, 346)
+	dash_meter.size = Vector2(85, 3)
+	dash_meter.max_value = 1.0
+	dash_meter.show_percentage = false
+	dash_meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dash_meter.add_theme_stylebox_override("background", _style(Color("26313d"), Color("26313d"), 0))
+	dash_fill = _style(TEAL, TEAL, 0)
+	dash_meter.add_theme_stylebox_override("fill", dash_fill)
+	add_child(dash_meter)
+	control_hint = _label(Vector2(176, 336), Vector2(310, 14), 8, true, IVORY)
+	control_hint.text = "WASD MOVE   MOUSE AIM   CLICK FIRE"
+	control_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	blessing_count = _label(Vector2(210, 336), Vector2(220, 14), 8, true, GOLD)
+	blessing_count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_hint = _label(Vector2(514, 336), Vector2(112, 14), 8, true, IVORY)
+	pause_hint.text = "ESC PAUSE"
+	pause_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_hint.add_theme_stylebox_override("normal", _style(Color(0.04, 0.07, 0.11, 0.95), Color("6b573a")))
+
+
+func _build_menus() -> void:
+	menu_backdrop = _panel(Rect2(158, 96, 324, 238), Color("0c1521"), GOLD)
+	status = _label(Vector2(180, 111), Vector2(280, 30), 16, true)
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	menu = HBoxContainer.new()
-	menu.position = Vector2(130, 256)
-	menu.size = Vector2(380, 32)
-	menu.alignment = BoxContainer.ALIGNMENT_CENTER
-	menu.add_theme_constant_override("separation", 12)
+	summary = _label(Vector2(180, 146), Vector2(280, 54), 13, false, MUTED)
+	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	menu = VBoxContainer.new()
+	menu.position = Vector2(182, 176)
+	menu.size = Vector2(276, 68)
+	menu.add_theme_constant_override("separation", 8)
 	add_child(menu)
-	resume_button = _button("Resume", func(): resume_requested.emit())
-	restart_button = _button("Restart", func(): restart_requested.emit())
-	quit_button = _button("Quit", func(): quit_requested.emit())
-	menu.hide()
-	record_label = _label(Vector2(100, 308), 11)
-	record_label.size = Vector2(440, 20)
-	record_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	record_label.hide()
-	upgrade_panel = VBoxContainer.new()
-	upgrade_panel.position = Vector2(100, 108)
-	upgrade_panel.size = Vector2(440, 200)
-	upgrade_panel.add_theme_constant_override("separation", 10)
-	add_child(upgrade_panel)
-	var heading := Label.new()
-	heading.text = "CHOOSE A TEMPORARY UPGRADE"
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heading.add_theme_font_size_override("font_size", 16)
-	upgrade_panel.add_child(heading)
-	for index in range(3):
-		var button := Button.new()
-		button.custom_minimum_size = Vector2(440, 44)
-		button.add_theme_font_size_override("font_size", 12)
-		button.pressed.connect(_select_upgrade.bind(index))
-		upgrade_panel.add_child(button)
-		choice_buttons.append(button)
-	upgrade_panel.hide()
-	flashes_toggle = _toggle("Reduce flashes", Vector2(198, 190))
-	motion_toggle = _toggle("Reduce visual motion", Vector2(198, 220))
-	preference_error = _label(Vector2(198, 300), 9)
+	resume_button = _button("RESUME", menu, func(): resume_requested.emit(), true)
+	var secondary := HBoxContainer.new()
+	secondary.add_theme_constant_override("separation", 8)
+	menu.add_child(secondary)
+	restart_button = _button("RESTART", secondary, func(): restart_requested.emit())
+	quit_button = _button("QUIT", secondary, func(): quit_requested.emit())
+	flashes_toggle = _toggle("Reduce flashes", Vector2(182, 247))
+	motion_toggle = _toggle("Reduce visual motion", Vector2(182, 274))
+	menu_hint = _label(Vector2(182, 310), Vector2(276, 12), 8, true, MUTED)
+	menu_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	preference_error = _label(Vector2(182, 310), Vector2(276, 12), 10, false, Color("ed8c82"))
 	preference_error.text = "Preferences could not be saved"
+	preference_error.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	record_label = _label(Vector2(180, 267), Vector2(280, 42), 8, true, GOLD)
+	record_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	menu.hide()
+	menu_backdrop.hide()
+	status.hide()
+	summary.hide()
+	flashes_toggle.hide()
+	motion_toggle.hide()
+	menu_hint.hide()
 	preference_error.hide()
+	record_label.hide()
 
 
-func _label(point: Vector2, font_size: int) -> Label:
-	var label := Label.new()
-	label.position = point
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.95))
-	label.add_theme_constant_override("shadow_offset_x", 1)
-	label.add_theme_constant_override("shadow_offset_y", 1)
-	add_child(label)
-	return label
+func _build_upgrades() -> void:
+	upgrade_backdrop = _panel(Rect2(80, 102, 480, 218), Color("0c1521"), GOLD)
+	var heading := _label(Vector2(100, 114), Vector2(440, 26), 16, true)
+	heading.text = "CHOOSE A BLESSING"
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	upgrade_backdrop.set_meta("heading", heading)
+	var note := _label(Vector2(100, 141), Vector2(440, 18), 11, false, MUTED)
+	note.text = "Choose one. Its power lasts for this run."
+	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	upgrade_backdrop.set_meta("note", note)
+	upgrade_panel = VBoxContainer.new()
+	upgrade_panel.position = Vector2(104, 166)
+	upgrade_panel.size = Vector2(432, 144)
+	upgrade_panel.add_theme_constant_override("separation", 8)
+	add_child(upgrade_panel)
+	for index in range(3):
+		var button := _button("", upgrade_panel, _select_upgrade.bind(index))
+		button.custom_minimum_size = Vector2(432, 42)
+		button.add_theme_font_override("font", ThemeDB.fallback_font)
+		button.add_theme_font_size_override("font_size", 11)
+		choice_buttons.append(button)
+	_set_upgrade_visible(false)
 
 
-func present(health: int, max_health: int, kills: int, elapsed: float, wave: int, remaining: int, break_time: float, dash_cooldown: float, game_over: bool, paused: bool) -> void:
-	stats.text = "HP %d/%d  |  KILLS %d  |  %ds" % [health, max_health, kills, int(elapsed)]
+func _draw_health() -> void:
+	for index in range(mini(health_max, 12)):
+		var center := Vector2(index * 14, 0)
+		var shape := PackedVector2Array([center + Vector2(0, -5), center + Vector2(5, 0), center + Vector2(0, 5), center + Vector2(-5, 0)])
+		var filled := index < health_value
+		var tint := Color("ed8c82") if health_value <= 1 else GOLD
+		health_pips.draw_colored_polygon(shape, tint if filled else Color("26313d"))
+		health_pips.draw_polyline(PackedVector2Array([shape[0], shape[1], shape[2], shape[3], shape[0]]), GOLD if filled else Color("55616a"), 1.0)
+		if filled:
+			health_pips.draw_rect(Rect2(center + Vector2(-1, -2), Vector2(2, 2)), IVORY)
+
+
+func present(health: int, max_health: int, kills: int, elapsed: float, wave: int, remaining: int, break_time: float, dash_cooldown: float, game_over: bool, paused: bool, dash_max: float = 1.2) -> void:
+	health_value = health
+	health_max = max_health
+	health_pips.queue_redraw()
+	stats.text = "HP %d/%d" % [health, max_health]
+	stats.modulate = Color("ed8c82") if health <= 1 else IVORY
+	wave_heading.text = "WAVE %02d" % wave
+	time_label.text = "%02d:%02d" % [int(elapsed) / 60, int(elapsed) % 60]
+	kill_label.text = "%d KILLS" % kills
 	wave_status.visible = not game_over
-	wave_status.text = "WAVE %d CLEAR  |  Next in %d" % [wave, ceili(break_time)] if break_time > 0.0 else "WAVE %d  |  Remaining %d  |  DASH %s" % [wave, remaining, "READY" if dash_cooldown <= 0.0 else "%.1fs" % dash_cooldown]
+	wave_status.text = "NEXT WAVE IN %d" % ceili(break_time) if break_time > 0.0 else "%d REMAINING" % remaining
 	if upgrade_panel.visible:
-		wave_status.text = "WAVE %d CLEAR  |  Choose an upgrade" % wave
+		wave_status.text = "WAVE CLEARED"
+	dash_label.text = "DASH READY" if dash_cooldown <= 0.0 else "DASH %.1fS" % dash_cooldown
+	dash_meter.value = clampf(1.0 - dash_cooldown / maxf(0.01, dash_max), 0.0, 1.0)
+	dash_fill.bg_color = TEAL if dash_cooldown <= 0.0 else GOLD
+	var modal := game_over or paused or upgrade_panel.visible
+	dash_panel.visible = not modal
+	dash_label.visible = not modal
+	dash_meter.visible = not modal
+	dash_key.visible = not modal
+	control_hint.visible = elapsed < 20.0 and not modal
+	blessing_count.text = "%02d BLESSINGS" % stack_total
+	blessing_count.visible = elapsed >= 20.0 and stack_total > 0 and not modal
+	pause_hint.visible = not modal
+	pause_button.disabled = paused or game_over
 	var was_open := menu.visible
 	var was_dead := not resume_button.visible
+	menu_backdrop.visible = game_over or paused
+	status.visible = game_over or paused
+	summary.visible = game_over or paused
+	status.text = "PAUSED" if paused else "YOU FELL"
+	summary.text = "Wave %d  /  %d kills\nSurvived %d:%02d" % [wave, kills, int(elapsed) / 60, int(elapsed) % 60] if game_over else "Wave %d   /   %d:%02d" % [wave, int(elapsed) / 60, int(elapsed) % 60]
+	menu.position.y = 176 if paused else 218
+	menu.visible = game_over or paused
+	resume_button.visible = paused and not game_over
 	record_label.visible = game_over
 	flashes_toggle.visible = paused and not game_over
 	motion_toggle.visible = paused and not game_over
 	preference_error.visible = paused and preference_error.get_meta("failed", false)
-	status.visible = game_over or paused
-	status.text = "YOU FELL\nWave %d  /  %d kills\nTime %d:%02d\nR to restart" % [wave, kills, int(elapsed) / 60, int(elapsed) % 60]
-	if paused:
-		status.text = "PAUSED\nEsc to resume  /  R to restart"
-	menu.visible = game_over or paused
-	resume_button.visible = paused and not game_over
+	menu_hint.visible = paused and not preference_error.visible
+	menu_hint.text = "ESC RESUME    R RESTART"
 	if menu.visible and (not was_open or was_dead != game_over):
 		if resume_button.visible:
 			resume_button.grab_focus()
@@ -120,48 +240,35 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 			focused.release_focus()
 
 
-func _button(text: String, action: Callable) -> Button:
-	var button := Button.new()
-	button.text = text
-	button.custom_minimum_size = Vector2(112, 32)
-	button.add_theme_font_size_override("font_size", 14)
-	var normal := StyleBoxFlat.new()
-	normal.bg_color = Color("1d2638")
-	normal.border_color = Color("61758b")
-	normal.set_border_width_all(1)
-	button.add_theme_stylebox_override("normal", normal)
-	var focus := StyleBoxFlat.new()
-	focus.bg_color = Color(0.0, 0.0, 0.0, 0.0)
-	focus.border_color = Color("ffb454")
-	focus.set_border_width_all(2)
-	button.add_theme_stylebox_override("focus", focus)
-	button.pressed.connect(action)
-	menu.add_child(button)
-	return button
-
-
 func present_records(records: Dictionary, save_failed: bool) -> void:
 	record_save_failed = save_failed
-	record_label.text = "BEST  Wave %d  |  %d kills  |  %d:%02d" % [records["best_wave"], records["best_kills"], int(records["best_seconds"]) / 60, int(records["best_seconds"]) % 60]
+	record_label.text = "BEST WAVE %d    %d KILLS\nSURVIVAL %d:%02d" % [records["best_wave"], records["best_kills"], int(records["best_seconds"]) / 60, int(records["best_seconds"]) % 60]
 	if save_failed:
-		record_label.text += "  |  Save failed"
-
-
-var shown_choices: Array[Resource] = []
+		record_label.text += "\nCould not save records"
 
 
 func present_upgrades(choices: Array[Resource], choosing: bool, stacks: Dictionary) -> void:
 	var was_visible := upgrade_panel.visible
-	upgrade_panel.visible = choosing
+	_set_upgrade_visible(choosing)
 	shown_choices = choices.duplicate()
+	stack_total = 0
+	for count in stacks.values():
+		stack_total += int(count)
 	for index in range(choice_buttons.size()):
 		var button: Button = choice_buttons[index]
 		button.visible = index < choices.size()
 		if button.visible:
 			var definition = choices[index]
-			button.text = "%s  [%d/%d]\n%s" % [definition.title, stacks.get(definition.id, 0) + 1, definition.max_stacks, definition.description]
+			button.text = "%s   /   RANK %d OF %d\n%s" % [definition.title.to_upper(), stacks.get(definition.id, 0) + 1, definition.max_stacks, definition.description]
 	if choosing and not was_visible and not choices.is_empty():
 		choice_buttons[0].grab_focus()
+
+
+func _set_upgrade_visible(value: bool) -> void:
+	upgrade_panel.visible = value
+	upgrade_backdrop.visible = value
+	upgrade_backdrop.get_meta("heading").visible = value
+	upgrade_backdrop.get_meta("note").visible = value
 
 
 func _select_upgrade(index: int) -> void:
@@ -169,19 +276,75 @@ func _select_upgrade(index: int) -> void:
 		upgrade_selected.emit(shown_choices[index].id)
 
 
-func _toggle(text: String, point: Vector2) -> CheckButton:
-	var toggle := CheckButton.new()
-	toggle.text = text
-	toggle.position = point
-	toggle.size = Vector2(244, 26)
-	toggle.add_theme_font_size_override("font_size", 12)
-	toggle.toggled.connect(func(_pressed): preferences_changed.emit(flashes_toggle.button_pressed, motion_toggle.button_pressed))
-	add_child(toggle)
-	toggle.hide()
-	return toggle
-
-
 func present_preferences(reduced_flashes: bool, reduced_motion: bool, save_failed: bool) -> void:
 	flashes_toggle.set_pressed_no_signal(reduced_flashes)
 	motion_toggle.set_pressed_no_signal(reduced_motion)
 	preference_error.set_meta("failed", save_failed)
+
+
+func _style(fill: Color, border: Color, width: int = 1) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = fill
+	style.border_color = border
+	style.set_border_width_all(width)
+	return style
+
+
+func _panel(rect: Rect2, fill: Color, border: Color) -> Panel:
+	var panel := Panel.new()
+	panel.position = rect.position
+	panel.size = rect.size
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_theme_stylebox_override("panel", _style(fill, border))
+	add_child(panel)
+	return panel
+
+
+func _label(point: Vector2, dimensions: Vector2, font_size: int, pixel: bool = false, tint: Color = IVORY) -> Label:
+	var label := Label.new()
+	label.position = point
+	label.size = dimensions
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", tint)
+	if pixel:
+		label.add_theme_font_override("font", pixel_font)
+	label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.9))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	add_child(label)
+	return label
+
+
+func _button(text: String, parent: Node, action: Callable, primary: bool = false) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(134, 28)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.add_theme_font_override("font", pixel_font)
+	button.add_theme_font_size_override("font_size", 8)
+	button.add_theme_color_override("font_color", INK if primary else IVORY)
+	button.add_theme_color_override("font_hover_color", INK if primary else IVORY)
+	button.add_theme_color_override("font_focus_color", INK if primary else IVORY)
+	button.add_theme_color_override("font_pressed_color", INK if primary else IVORY)
+	button.add_theme_stylebox_override("normal", _style(GOLD if primary else Color("172332"), GOLD if primary else Color("66717a")))
+	button.add_theme_stylebox_override("hover", _style(IVORY if primary else Color("293847"), IVORY))
+	button.add_theme_stylebox_override("pressed", _style(Color("a78855") if primary else Color("354351"), GOLD))
+	button.add_theme_stylebox_override("focus", _style(Color(0, 0, 0, 0), IVORY, 2))
+	button.pressed.connect(action)
+	parent.add_child(button)
+	return button
+
+
+func _toggle(text: String, point: Vector2) -> CheckButton:
+	var toggle := CheckButton.new()
+	toggle.text = text
+	toggle.position = point
+	toggle.size = Vector2(276, 24)
+	toggle.add_theme_font_size_override("font_size", 12)
+	toggle.add_theme_color_override("font_color", IVORY)
+	toggle.add_theme_color_override("font_hover_color", GOLD)
+	toggle.add_theme_stylebox_override("focus", _style(Color(0, 0, 0, 0), GOLD))
+	toggle.toggled.connect(func(_pressed): preferences_changed.emit(flashes_toggle.button_pressed, motion_toggle.button_pressed))
+	add_child(toggle)
+	return toggle

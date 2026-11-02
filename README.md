@@ -230,11 +230,12 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Criar botões de pausa para retomar, reiniciar e sair, com foco por teclado.
 - [ ] Acrescentar configurações ao menu de pausa quando existir esse ecrã.
 - [ ] Integrar menus de melhorias, skill tree e recompensas.
-- [ ] Criar hierarquia visual e tipografia coerentes com a direção artística.
+- [x] Aplicar HUD e menus em marinho, ouro e marfim, com fonte pixel e hierarquia de informação.
 - [ ] Oferecer remapeamento de teclas e guardar preferências.
 - [ ] **Decidir:** suporte de comando; se incluído, implementar mira, foco e navegação completos.
 - [ ] Garantir navegação por teclado e foco visível nos menus.
-- [ ] Ajustar escala de texto/UI e testar resoluções, fullscreen e janelas pequenas.
+- [x] Rever HUD e menus a 640 × 360 e 1280 × 720, incluindo vida crítica e contadores maiores.
+- [ ] Oferecer opções de escala de UI e testar fullscreen e outras proporções.
 - [ ] Distinguir perigos por forma e movimento, além da cor.
 - [x] Guardar opções de redução de flashes e movimento decorativo no menu de pausa.
 - [ ] Criar tutorial curto para mover, apontar, disparar, dash e escolher melhorias.

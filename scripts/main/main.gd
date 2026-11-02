@@ -52,6 +52,7 @@ func _ready() -> void:
 	waves.wave_cleared.connect(_on_wave_cleared)
 	random.randomize()
 	hud_view = ArenaHud.new()
+	hud_view.pause_requested.connect(func(): _set_paused(true))
 	hud_view.preferences_changed.connect(_change_preferences)
 	hud_view.upgrade_selected.connect(_choose_upgrade)
 	hud_view.resume_requested.connect(func(): _set_paused(false))
@@ -264,7 +265,7 @@ func _update_hud() -> void:
 	hud_view.present_preferences(preferences.reduced_flashes, preferences.reduced_motion, preferences.last_error != OK)
 	hud_view.present_upgrades(upgrades.offered, run.phase == RunState.Phase.UPGRADE, upgrades.stacks)
 	hud_view.present_records(records.data, records.last_error != OK)
-	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD and player_visual.defeat_done), (run.phase == RunState.Phase.PAUSED))
+	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD and player_visual.defeat_done), (run.phase == RunState.Phase.PAUSED), player.dash_recharge)
 
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
 		hud_view.wave_status.hide()
