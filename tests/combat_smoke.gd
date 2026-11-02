@@ -473,6 +473,34 @@ func _run() -> void:
 		for second in range(first + 1, arena.enemies.items.size()):
 			nearest_pair = minf(nearest_pair, point.distance_to(arena.enemies.items[second]["position"]))
 	check(nearest_pair >= 17.5, "Dense corner crowd must converge to separated positions")
+	arena._reset_run()
+	Input.action_press("move_right")
+	arena._physics_process(0.2)
+	var walking_frame: int = arena.player_visual.walk_frame
+	check(walking_frame != 0 and arena.player_visual.WALK.get_frame_count(&"walk") == 4, "Movement must advance real player walk frames")
+	arena._set_paused(true)
+	arena._physics_process(1.0)
+	check(arena.player_visual.walk_frame == walking_frame, "Pause must freeze the player walk pose")
+	arena._set_paused(false)
+	Input.action_release("move_right")
+	arena._physics_process(0.01)
+	check(arena.player_visual.walk_frame == 0 and arena.player_visual.travel == Vector2.ZERO, "Stopping must return the player to idle")
+	arena._reset_run()
+	arena._spawn_enemy(&"ranged")
+	var walking_enemy: Dictionary = arena.enemies.items[0]
+	walking_enemy["spawn_time"] = 0.0
+	walking_enemy["position"] = Vector2(200, 180)
+	arena.run.elapsed = 0.1
+	arena._update_hud()
+	walking_enemy["position"] += Vector2(5, 0)
+	arena.run.elapsed = 0.3
+	arena._update_hud()
+	check(arena.enemy_views[0].walk_frame != 0 and arena.enemy_views[0].moving, "Moving sentinel must advance its leg animation")
+	var enemy_frame: int = arena.enemy_views[0].walk_frame
+	arena._set_paused(true)
+	check(arena.enemy_views[0].walk_frame == enemy_frame, "Pausing must preserve sentinel animation pose")
+	arena._reset_run()
+	check(arena.enemy_views.is_empty(), "Reset must remove enemy visual nodes from the presentation list")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

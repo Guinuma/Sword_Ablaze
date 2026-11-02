@@ -20,8 +20,12 @@ const PlayerState = preload("res://scripts/player/player_state.gd")
 var player = PlayerState.new()
 var player_visual: Node2D
 var overlay: Node2D
+var world: Node2D
+const EnemyVisual = preload("res://scripts/enemies/enemy_visual.gd")
+var enemy_views: Array[Node2D] = []
+const COURTYARD = preload("res://assets/art/arena/celestial-courtyard-01.png")
 
-const ARENA := Rect2(24, 64, 592, 272)
+const ARENA := Rect2(34, 70, 572, 258)
 const ProjectileSystem = preload("res://scripts/combat/projectile_system.gd")
 var projectiles = ProjectileSystem.new()
 const HostileProjectiles = preload("res://scripts/combat/hostile_projectiles.gd")
@@ -54,11 +58,14 @@ func _ready() -> void:
 	hud_view.restart_requested.connect(_reset_run)
 	hud_view.quit_requested.connect(func(): get_tree().quit())
 	add_child(hud_view)
+	world = Node2D.new()
+	world.y_sort_enabled = true
+	world.z_index = 1
+	add_child(world)
 	player_visual = ExileVisual.new()
 	player_visual.reduced_flashes = preferences.reduced_flashes
 	player_visual.reduced_motion = preferences.reduced_motion
-	player_visual.z_index = 1
-	add_child(player_visual)
+	world.add_child(player_visual)
 	overlay = Node2D.new()
 	overlay.z_index = 2
 	overlay.draw.connect(_draw_overlay)
@@ -198,6 +205,8 @@ func _apply_upgrades() -> void:
 	projectiles.weapon = weapon
 	player.move_speed = upgrades.value("move_speed", player.SPEED)
 	player.dash_recharge = upgrades.value("dash_cooldown", player.DASH_COOLDOWN)
+	if is_instance_valid(player_visual):
+		player_visual.walk_rate = 8.0 * player.move_speed / player.SPEED
 
 
 func _choose_upgrade(id: StringName) -> void:
@@ -233,7 +242,21 @@ func _reset_run() -> void:
 	queue_redraw()
 
 
+func _present_enemies() -> void:
+	while enemy_views.size() > enemies.items.size():
+		var view = enemy_views.pop_back()
+		view.hide()
+		view.queue_free()
+	while enemy_views.size() < enemies.items.size():
+		var view = EnemyVisual.new()
+		world.add_child(view)
+		enemy_views.append(view)
+	for index in range(enemy_views.size()):
+		enemy_views[index].present(enemies.items[index], run.elapsed, preferences.reduced_motion, preferences.reduced_flashes)
+
+
 func _update_hud() -> void:
+	_present_enemies()
 	if is_instance_valid(overlay):
 		overlay.queue_redraw()
 	hud_view.present_preferences(preferences.reduced_flashes, preferences.reduced_motion, preferences.last_error != OK)
@@ -243,30 +266,9 @@ func _update_hud() -> void:
 
 
 func _draw() -> void:
-	draw_rect(ARENA, Color("151c2c"))
-	for x in range(24, 617, 16):
-		draw_line(Vector2(x, 64), Vector2(x, 336), Color("1d2638"))
-	for y in range(64, 337, 16):
-		draw_line(Vector2(24, y), Vector2(616, y), Color("1d2638"))
-	draw_rect(ARENA, Color("61758b"), false, 1.0)
-	for enemy in enemies.items:
-		var point: Vector2 = Vector2(enemy["position"]).round()
-		if enemy.get("spawn_time", 0.0) > 0.0:
-			var progress: float = 1.0 - enemy["spawn_time"] / enemies.settings.spawn_warning
-			draw_arc(point, 13.0 - progress * 4.0, 0.0, TAU, 16, Color("ffb454"), 1.0)
-			draw_line(point - Vector2(4, 0), point + Vector2(4, 0), Color("ffb454"))
-			draw_line(point - Vector2(0, 4), point + Vector2(0, 4), Color("ffb454"))
-			continue
-		draw_rect(Rect2(point + Vector2(-8, -14), Vector2(8 * enemy["health"], 2)), Color("ffb454"))
-		var profile = enemy.get("profile", enemies.settings)
-		if enemy.get("windup", 0.0) > 0.0:
-			draw_line(point, point + Vector2(enemy["shot_direction"]) * profile.attack_range, Color(0.95, 0.35, 0.8, 0.55), 1.0)
-		if profile.kind == "ranged":
-			draw_colored_polygon(PackedVector2Array([point + Vector2(0, -10), point + Vector2(9, 0), point + Vector2(0, 10), point + Vector2(-9, 0)]), Color("fff0b0") if enemy["flash"] > 0.0 and not preferences.reduced_flashes else Color("c079e8"))
-			draw_circle(point, 3.0, Color("151c2c"))
-			continue
-		var color := Color("fff0b0") if enemy["flash"] > 0.0 and not preferences.reduced_flashes else Color("e76170")
-		draw_rect(Rect2(point - Vector2(8, 8), Vector2(16, 16)), color)
+	draw_texture_rect(COURTYARD, Rect2(0, 38, 640, 332), false)
+	draw_rect(Rect2(0, 0, 640, 62), Color("080d16"))
+	draw_line(Vector2(24, 61), Vector2(616, 61), Color("756247"), 1.0)
 	if player.dash_time > 0.0 and not preferences.reduced_motion:
 		draw_line(player.player_position - player.dash_direction * 26.0, player.player_position, Color("388fba"), 10.0)
 	if player.muzzle_time > 0.0 and not preferences.reduced_flashes:

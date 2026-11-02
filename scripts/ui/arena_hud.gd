@@ -24,6 +24,11 @@ var status: Label
 
 func _ready() -> void:
 	layer = 3
+	var header := ColorRect.new()
+	header.size = Vector2(640, 62)
+	header.color = Color("080d16")
+	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(header)
 	var title := _label(Vector2(24, 12), 16)
 	title.text = "SWORD ABLAZE  /  ARENA"
 	var instructions := _label(Vector2(24, 38), 12)
@@ -79,6 +84,9 @@ func _label(point: Vector2, font_size: int) -> Label:
 	label.position = point
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.95))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
 	add_child(label)
 	return label
 

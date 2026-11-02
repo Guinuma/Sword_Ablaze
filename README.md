@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Protótipo de combate jogável, com pausa, resumo e recordes locais; ainda sem menu principal, áudio, XP ou hub. O jogador já usa um primeiro visual do Exilado; arena e inimigos mantêm placeholders. A arte gerada serve como referência e base provisória, não como atlas de animação final.
+Protótipo de combate jogável, com pausa, resumo e recordes locais; ainda sem menu principal, áudio, XP ou hub. O jogador já usa um primeiro visual do Exilado; a arena usa um pátio celestial ilustrado e os inimigos têm sprites próprios. A arte gerada serve como referência e base provisória, não como atlas de animação final.
 
 - Movimento, mira, disparo, colisão contínua dos tiros, dano, morte e reinício.
 - Ondas crescentes, pausa entre rondas, recuperação de vida, dash e melhorias temporárias a cada três ondas.
@@ -138,7 +138,8 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Fixar grelha, paleta e tamanho final do sprite à escala real do jogo.
 - [ ] Simplificar o corpo atual num sprite de baixa resolução com pixels consistentes.
 - [ ] Produzir vistas frente, costas e laterais com silhuetas coerentes.
-- [ ] Criar animações idle e movimento nas direções escolhidas.
+- [x] Integrar ciclo de caminhada de quatro frames com pernas alternadas e idle separado.
+- [ ] Completar idle e movimento com vistas direcionais coerentes.
 - [ ] Criar animações de dash, dano e morte.
 - [ ] Finalizar capa e arma com estilo consistente com o corpo.
 - [ ] Ajustar mãos, pivôs, pés, sombra e ponto de saída dos tiros por direção.
@@ -152,9 +153,12 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Criar tiles de chão com variação moderada e boa leitura dos projéteis.
 - [ ] Criar paredes, limites do abismo, cantos e transições sem falhas de encaixe.
 - [ ] Criar pilares e ruínas com colisões alinhadas à arte.
-- [ ] Construir uma arena finalizada com espaço de combate legível.
-- [ ] Substituir o quadrado inimigo pelo primeiro sprite animado.
-- [ ] Desenvolver wisp corrompido, sentinela fraturado e aberração como conceitos a validar.
+- [x] Integrar uma primeira arena ilustrada com mármore partido, ouro antigo e abismo, mantendo o interior aberto.
+- [x] Substituir formas geométricas por sprites do wisp corrompido e sentinela fraturado.
+- [x] Animar passos com quatro frames de pernas no Exilado e sentinela; wisp com flutuação.
+- [ ] Produzir conjuntos direcionais de frente/costas e validar transições.
+- [x] Integrar visuais do wisp corrompido e sentinela fraturado.
+- [ ] Desenvolver o conceito da aberração.
 - [ ] Criar arte de elites e boss após validar os respetivos comportamentos.
 - [x] Distinguir projéteis do jogador (quadrados dourados) e inimigos (losangos magenta).
 - [ ] Criar ícones coerentes para armas, melhorias, recursos e habilidades.

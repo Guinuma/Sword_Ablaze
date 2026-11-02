@@ -1,0 +1,16 @@
+Use case: identity-preserve.
+Asset type: actual four-frame WALK-CYCLE SPRITE SHEET, transparent PNG, for the playable Exile in Sword Ablaze.
+Reference image is the character identity reference. Preserve the ivory hood and pale mask, turquoise scarf, dark fitted clothing, restrained gold and ivory armor, slim agile silhouette. NO weapon and NO rear cape: those are rendered separately in game.
+Output one square canvas divided into an EXACT 2 by 2 grid of four equal square cells. No grid lines. Each cell contains exactly ONE full-body sprite of this SAME character, same scale, facing RIGHT in a three-quarter top-down game view. Each character's head and torso MUST stay in the same relative position in its cell, and feet use the same ground baseline. Character occupies approximately 78% of each cell height with ample transparent separation between cells.
+Read order: top-left = LEFT LEG stepping forward and RIGHT LEG extended backward; top-right = passing pose with LEFT LEG planted and RIGHT KNEE visibly bent and lifting; bottom-left = RIGHT LEG stepping forward and LEFT LEG extended backward; bottom-right = passing pose with RIGHT LEG planted and LEFT KNEE visibly bent and lifting. Make the leg and foot positions SIGNIFICANTLY DIFFERENT in all four frames. Natural alternating walk gait, small opposite arm swing. The hood, mask, chest, body proportions, colors and light direction remain consistent across frames. This is not four copies of a standing pose. Both legs and both boots must be visible and clearly separated from each other.
+Art style: deliberate low-resolution pixel art with crisp square pixel clusters and dark outline, simple leg shapes readable when each sprite is shown at 32 pixels tall. No painterly detail, no blur, no gradients, no smoothed antialiasing. Genuine transparent background in all cells and gaps.
+No text, labels, numbers, grid borders, scenery, ground shadows, extra accessories, extra characters, weapon or oversized trailing cloth. EXACTLY four full-body frames.
+
+Targeted correction:
+Use case: precise-object-edit.
+Edit this four-frame Exile walk-cycle sheet. Preserve the exact 2x2 equal-cell layout, transparent background, sprite scale, hood, mask, torso design, colors, and RIGHT-facing orientation.
+The TOP TWO frames are correct and should remain unchanged.
+Fix ONLY THE LEGS OF THE BOTTOM TWO FRAMES so that the gait alternates instead of repeating the top row:
+BOTTOM-LEFT: the leg with the large golden knee armor is now BEHIND the body, reaching toward screen LEFT. The plain dark leg WITHOUT the large golden knee armor reaches FORWARD toward screen RIGHT and its boot is the frontmost boot. This must reverse the top-left contact pose.
+BOTTOM-RIGHT: the large golden armored-knee leg is the PLANTED straight support leg; the plain dark leg WITHOUT the big golden knee armor is visibly bent at the knee and lifted forward toward screen RIGHT. This must reverse which leg is raised compared with top-right.
+Keep upper bodies and cell alignment invariant. Both legs and boots visible, natural alternating walk, strong silhouette differences. Do not simply shift the whole character up or down. Crisp low-resolution pixel art, no blur, no smoothing, no text, no shadows, genuine transparent background. Exactly four full-body frames.

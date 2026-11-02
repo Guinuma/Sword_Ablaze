@@ -1,0 +1,47 @@
+[
+  {
+    "asset": "assets/art/arena/celestial-courtyard-01.png",
+    "sha256": "868db260c068eb2ba8eedca302c40bd0b1ee320abdd38486f7add2c6e540798f",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/celestial-courtyard-01-prompt.txt",
+    "reference": "Project art direction or original character image; no external asset pack",
+    "rights_note": "Generated project artwork; the code MIT license does not automatically apply to these images."
+  },
+  {
+    "asset": "assets/art/enemies/corrupted-wisp-01.png",
+    "sha256": "ca1973b4c377adf06b6d42e232b0ef3bf932eda6980f4b3b823e6fb9b11a5079",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/corrupted-wisp-01-prompt.txt",
+    "reference": "Project art direction or original character image; no external asset pack",
+    "rights_note": "Generated project artwork; the code MIT license does not automatically apply to these images."
+  },
+  {
+    "asset": "assets/art/enemies/fractured-sentinel-01.png",
+    "sha256": "4fc51e879c39713da30d251cf0644d5355d14580e39a009d906c90c13d3ef06f",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/fractured-sentinel-01-prompt.txt",
+    "reference": "Project art direction or original character image; no external asset pack",
+    "rights_note": "Generated project artwork; the code MIT license does not automatically apply to these images."
+  },
+  {
+    "asset": "assets/art/enemies/fractured-sentinel-walk-01.png",
+    "sha256": "27b646f34e5c0dc1214689f7b9ec66e7d5d511348c5557e7507f4ecfd158a8bd",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/fractured-sentinel-walk-01-prompt.txt",
+    "reference": "Project art direction or original character image; no external asset pack",
+    "rights_note": "Generated project artwork; the code MIT license does not automatically apply to these images."
+  },
+  {
+    "asset": "assets/art/player/exile-walk-01.png",
+    "sha256": "4ded4379c940e7331137a97a9bc6eeaacd3214fe09fdcdde137f3547d65a4d2c",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/exile-walk-01-prompt.txt",
+    "reference": "Project art direction or original character image; no external asset pack",
+    "rights_note": "Generated project artwork; the code MIT license does not automatically apply to these images."
+  }
+]

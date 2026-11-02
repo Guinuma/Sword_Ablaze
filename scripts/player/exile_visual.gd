@@ -1,6 +1,10 @@
 extends Node2D
 ## Layered prototype: generated body, responsive cape and independently aimed weapon.
 const BODY = preload("res://assets/art/player/exile-body-01.png")
+const WALK = preload("res://assets/art/player/exile-walk-01-frames.tres")
+var walk_clock: float = 0.0
+var walk_frame: int = 0
+var walk_rate: float = 8.0
 var facing := Vector2.RIGHT
 var travel := Vector2.ZERO
 var clock: float = 0.0
@@ -19,6 +23,12 @@ func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash
 	hurt = damaged
 	firing = shot
 	clock += delta
+	if movement.length_squared() > 0.01 and not dash:
+		walk_clock += delta
+		walk_frame = int(walk_clock * walk_rate) % 4
+	else:
+		walk_clock = 0.0
+		walk_frame = 0
 	var trailing := -movement.normalized() if movement.length_squared() > 0.01 else Vector2(-signf(aim.x) if absf(aim.x) > 0.1 else -1.0, 0.2)
 	var length := 20.0 if dash and not reduced_motion else 12.0
 	var target := trailing * length + Vector2(0, 4 + (0.0 if reduced_motion else sin(clock * 9.0) * 1.5))
@@ -27,6 +37,8 @@ func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash
 
 func reset_pose() -> void:
 	clock = 0.0
+	walk_clock = 0.0
+	walk_frame = 0
 	cape_tip = Vector2(-12, 5)
 	travel = Vector2.ZERO
 	queue_redraw()
@@ -42,7 +54,10 @@ func _draw() -> void:
 	var body_rect := Rect2(Vector2(-18, -23 + bob), Vector2(36, 36))
 	# Mirror around the shared origin; negative Rect2 sizes shift the image.
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < 0.0 else 1.0, 1.0))
-	draw_texture_rect(BODY, body_rect, false, tint)
+	if travel.length_squared() > 0.01 and not dashing:
+		draw_texture_rect(WALK.get_frame_texture(&"walk", walk_frame), Rect2(-12, -24 + bob, 24, 35), false, tint)
+	else:
+		draw_texture_rect(BODY, body_rect, false, tint)
 	draw_set_transform(Vector2.ZERO)
 	# Rotate only the weapon, preserving the body's upright silhouette.
 	var grip := Vector2(0, -2 + bob)
