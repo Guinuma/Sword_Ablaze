@@ -34,6 +34,7 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 ### Regras do protótipo
 
 - Jogador: 5 HP; contacto causa 1 de dano, com 0,85 s de proteção entre impactos.
+- Inimigo à distância: surge da onda 3 em diante; mantém cerca de 150 px, avisa durante 0,65 s e dispara na direção fixada. Projéteis causam 1 de dano e respeitam dash/proteção de contacto.
 - Inimigo básico: 2 HP; persegue o jogador e sofre recuo ao receber tiros.
 - Ondas: 5 inimigos inicialmente, mais 2 por ronda até 40 por onda; máximo de 18 em simultâneo.
 - Spawns: marcador de aviso de 0,7 s, sem dano ou movimento durante a preparação; ativação adiada a menos de 56 px do jogador. Contam para o limite e orçamento da onda.
@@ -100,11 +101,12 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Avisar spawns com um marcador de 0,7 s; adiar ativação enquanto o jogador estiver demasiado perto.
 - [ ] Melhorar separação junto às paredes e em grupos densos.
 - [ ] Adicionar navegação quando existirem obstáculos reais.
-- [ ] Criar primeiro inimigo de ataque à distância, com projéteis e aviso legível.
+- [x] Criar inimigo à distância com distância preferida, aviso de 0,65 s, mira fixa e projétil distinto.
 - [ ] Criar inimigo de investida com preparação, ataque e recuperação claros.
 - [ ] Criar inimigo resistente que altere o posicionamento do jogador.
 - [ ] Definir estatísticas, recompensas e função de cada tipo de inimigo.
-- [ ] Combinar tipos em encontros progressivos, evitando picos injustos.
+- [x] Introduzir um inimigo à distância por três spawns a partir da onda 3.
+- [ ] Equilibrar a composição de encontros em playtests.
 - [ ] Criar primeiro elite com comportamento reconhecível.
 - [ ] Criar primeiro boss com ataques anunciados, fases e recompensa.
 - [ ] Testar dano simultâneo, eliminações em cadeia e limpeza de inimigos no fim da run.
@@ -152,7 +154,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Substituir o quadrado inimigo pelo primeiro sprite animado.
 - [ ] Desenvolver wisp corrompido, sentinela fraturado e aberração como conceitos a validar.
 - [ ] Criar arte de elites e boss após validar os respetivos comportamentos.
-- [ ] Criar projéteis distintos para jogador e inimigos, com silhuetas reconhecíveis.
+- [x] Distinguir projéteis do jogador (quadrados dourados) e inimigos (losangos magenta).
 - [ ] Criar ícones coerentes para armas, melhorias, recursos e habilidades.
 - [ ] Rever escala e contraste de todos os assets no jogo, não apenas nas pranchas.
 - [ ] Registar autoria, ferramenta de geração, prompts e licenças dos assets utilizados.

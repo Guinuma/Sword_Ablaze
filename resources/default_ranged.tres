@@ -1,0 +1,16 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+kind = "ranged"
+health = 2
+speed = 36.0
+speed_per_wave = 1.0
+max_speed = 60.0
+preferred_distance = 150.0
+attack_range = 230.0
+attack_cooldown = 1.8
+attack_warning = 0.65
+projectile_speed = 130.0

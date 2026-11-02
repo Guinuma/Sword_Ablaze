@@ -265,6 +265,62 @@ func _run() -> void:
 	check(arena.enemies.items[0]["spawn_time"] == 0.0, "Spawn must activate after player leaves warning")
 	arena._reset_run()
 	check(arena.enemies.items.is_empty(), "Reset must clear pending spawns")
+	# Ranged attacks must announce, lock aim, and respect the shared damage rules.
+	arena._reset_run()
+	arena._spawn_enemy(&"ranged")
+	var ranged: Dictionary = arena.enemies.items[0]
+	ranged["position"] = Vector2(160, 200)
+	ranged["spawn_time"] = 0.0
+	ranged["attack_cooldown"] = 0.0
+	arena._update_enemies(0.01)
+	check(ranged["windup"] > 0.0 and arena.hostile_projectiles.items.is_empty(), "Ranged attack must warn before firing")
+	var locked_direction: Vector2 = ranged["shot_direction"]
+	arena.player.player_position = Vector2(320, 260)
+	arena._update_enemies(0.2)
+	check(ranged["shot_direction"] == locked_direction and arena.hostile_projectiles.items.is_empty(), "Warning must lock aim so player can dodge")
+	arena._set_paused(true)
+	var attack_time: float = ranged["windup"]
+	arena._physics_process(1.0)
+	check(ranged["windup"] == attack_time, "Pause must freeze ranged windup")
+	arena._set_paused(false)
+	arena._update_enemies(0.65)
+	check(arena.hostile_projectiles.items.size() == 1 and arena.hostile_projectiles.items[0]["direction"] == locked_direction, "Completed warning must fire exactly one locked shot")
+	arena._update_enemies(0.1)
+	check(arena.hostile_projectiles.items.size() == 1, "Cooldown must prevent immediate repeated attacks")
+	arena.hostile_projectiles.clear()
+	arena.player.player_position = Vector2(320, 200)
+	arena.hostile_projectiles.fire(Vector2(200, 200), Vector2.RIGHT, 360.0)
+	arena.hostile_projectiles.advance(0.5, arena.player.player_position, arena.ARENA)
+	check(arena.run.health == 4 and arena.hostile_projectiles.items.is_empty(), "Swept hostile shot must damage player and be consumed")
+	arena.hostile_projectiles.fire(Vector2(300, 200), Vector2.RIGHT, 360.0)
+	arena.hostile_projectiles.advance(0.1, arena.player.player_position, arena.ARENA)
+	check(arena.run.health == 4, "Hostile shots must share contact invulnerability cooldown")
+	arena.player.hurt_cooldown = 0.0
+	arena._try_dash(Vector2.RIGHT)
+	arena.hostile_projectiles.fire(Vector2(300, 200), Vector2.RIGHT, 360.0)
+	arena.hostile_projectiles.advance(0.1, arena.player.player_position, arena.ARENA)
+	check(arena.run.health == 4, "Dash must protect against hostile projectiles")
+	for index in range(100):
+		arena.hostile_projectiles.fire(Vector2(30, 100), Vector2.RIGHT, 130.0)
+	check(arena.hostile_projectiles.items.size() == 64, "Hostile projectile count must be bounded")
+	arena._on_wave_cleared()
+	check(arena.hostile_projectiles.items.is_empty(), "Wave clear must remove hostile shots")
+	arena.hostile_projectiles.fire(Vector2(30, 100), Vector2.RIGHT, 130.0)
+	arena._reset_run()
+	check(arena.hostile_projectiles.items.is_empty(), "Reset must remove hostile shots")
+	var composition = arena.WaveDirector.new()
+	var spawned: Array[StringName] = []
+	composition.spawn_requested.connect(func(kind): spawned.append(kind))
+	for index in range(5):
+		composition.advance(2.0, 0)
+	check(not spawned.has(&"ranged"), "Opening wave must contain only chasers")
+	composition.number = 3
+	composition.remaining = 9
+	composition.spawn_count = 0
+	spawned.clear()
+	for index in range(9):
+		composition.advance(2.0, 0)
+	check(spawned.count(&"ranged") == 3 and spawned.count(&"chaser") == 6, "Wave three must introduce one ranged enemy per three spawns")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

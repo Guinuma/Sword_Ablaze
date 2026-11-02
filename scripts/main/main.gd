@@ -17,6 +17,8 @@ var overlay: Node2D
 const ARENA := Rect2(24, 64, 592, 272)
 const ProjectileSystem = preload("res://scripts/combat/projectile_system.gd")
 var projectiles = ProjectileSystem.new()
+const HostileProjectiles = preload("res://scripts/combat/hostile_projectiles.gd")
+var hostile_projectiles = HostileProjectiles.new()
 const EnemySystem = preload("res://scripts/enemies/enemy_system.gd")
 var enemies = EnemySystem.new()
 var particles: Array[Dictionary] = []
@@ -25,6 +27,8 @@ var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	enemies.shot.connect(hostile_projectiles.fire)
+	hostile_projectiles.hit_player.connect(_take_player_damage)
 	player.shot.connect(projectiles.fire)
 	projectiles.impacted.connect(_on_projectile_impact)
 	projectiles.defeated.connect(_on_projectile_defeat)
@@ -67,6 +71,7 @@ func _physics_process(delta: float) -> void:
 	_update_enemies(delta)
 	_update_bullets(delta)
 	_check_contact()
+	hostile_projectiles.advance(delta, player.player_position, ARENA)
 	player_visual.present(player.player_position, player.aim, player.dash_direction if player.dash_time > 0.0 else movement, delta, player.dash_time > 0.0, player.hurt_cooldown > 0.0, player.muzzle_time > 0.0)
 	_update_hud()
 	queue_redraw()
@@ -108,12 +113,13 @@ func _update_waves(delta: float) -> void:
 
 func _on_wave_cleared() -> void:
 	projectiles.clear()
+	hostile_projectiles.clear()
 	run.start_intermission()
 
 
 
-func _spawn_enemy() -> void:
-	enemies.spawn(player.player_position, ARENA, random)
+func _spawn_enemy(kind: StringName = &"chaser") -> void:
+	enemies.spawn(player.player_position, ARENA, random, kind)
 
 
 func _update_enemies(delta: float) -> void:
@@ -134,17 +140,22 @@ func _on_projectile_defeat(point: Vector2) -> void:
 
 
 func _check_contact() -> void:
-	if player.hurt_cooldown > 0.0 or player.dash_time > 0.0 or (run.phase == RunState.Phase.DEAD):
-		return
 	if enemies.touches(player.player_position):
-		run.take_damage()
-		_burst(player.player_position, Color("65dfc1"), 10)
-		player.hurt_cooldown = player.CONTACT_COOLDOWN
+		_take_player_damage()
+
+
+func _take_player_damage() -> void:
+	if player.hurt_cooldown > 0.0 or player.dash_time > 0.0 or run.phase != RunState.Phase.COMBAT:
+		return
+	run.take_damage()
+	_burst(player.player_position, Color("65dfc1"), 10)
+	player.hurt_cooldown = player.CONTACT_COOLDOWN
 
 
 func _reset_run() -> void:
 	player.reset()
 	projectiles.clear()
+	hostile_projectiles.clear()
 	enemies.clear()
 	run.reset()
 	particles.clear()
@@ -176,9 +187,16 @@ func _draw() -> void:
 			draw_line(point - Vector2(4, 0), point + Vector2(4, 0), Color("ffb454"))
 			draw_line(point - Vector2(0, 4), point + Vector2(0, 4), Color("ffb454"))
 			continue
+		draw_rect(Rect2(point + Vector2(-8, -14), Vector2(8 * enemy["health"], 2)), Color("ffb454"))
+		var profile = enemy.get("profile", enemies.settings)
+		if enemy.get("windup", 0.0) > 0.0:
+			draw_line(point, point + Vector2(enemy["shot_direction"]) * profile.attack_range, Color(0.95, 0.35, 0.8, 0.55), 1.0)
+		if profile.kind == "ranged":
+			draw_colored_polygon(PackedVector2Array([point + Vector2(0, -10), point + Vector2(9, 0), point + Vector2(0, 10), point + Vector2(-9, 0)]), Color("fff0b0") if enemy["flash"] > 0.0 else Color("c079e8"))
+			draw_circle(point, 3.0, Color("151c2c"))
+			continue
 		var color := Color("fff0b0") if enemy["flash"] > 0.0 else Color("e76170")
 		draw_rect(Rect2(point - Vector2(8, 8), Vector2(16, 16)), color)
-		draw_rect(Rect2(point + Vector2(-8, -12), Vector2(8 * enemy["health"], 2)), Color("ffb454"))
 	if player.dash_time > 0.0:
 		draw_line(player.player_position - player.dash_direction * 26.0, player.player_position, Color("388fba"), 10.0)
 	if player.muzzle_time > 0.0:
@@ -189,6 +207,10 @@ func _draw() -> void:
 		draw_rect(Rect2(Vector2(particle["position"]).round(), Vector2(2, 2)), tint)
 	for bullet in projectiles.items:
 		draw_rect(Rect2(Vector2(bullet["position"]).round() - Vector2(2, 2), Vector2(4, 4)), Color("ffb454"))
+
+	for bullet in hostile_projectiles.items:
+		var point: Vector2 = Vector2(bullet["position"]).round()
+		draw_colored_polygon(PackedVector2Array([point + Vector2(0, -4), point + Vector2(4, 0), point + Vector2(0, 4), point + Vector2(-4, 0)]), Color("ee8de8"))
 
 
 func _draw_overlay() -> void:

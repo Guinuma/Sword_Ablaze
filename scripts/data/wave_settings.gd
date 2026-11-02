@@ -11,3 +11,5 @@ extends Resource
 @export_range(0.001, 1000.0) var break_duration: float = 3.0
 @export_range(0.001, 1000.0) var initial_delay: float = 0.8
 @export_range(0.001, 1000.0) var next_wave_delay: float = 0.3
+@export_range(1, 1000) var ranged_start_wave: int = 3
+@export_range(1, 1000) var ranged_every: int = 3
