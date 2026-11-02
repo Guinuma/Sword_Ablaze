@@ -1,0 +1,13 @@
+{
+  "engine": "4.5.1-stable (official)",
+  "max_ms": 6.227,
+  "mean_ms": 1.582495,
+  "measured_frames": 3600,
+  "note": "Simulation only; excludes rendering, refill setup and real input. Not a hardware requirement or FPS claim.",
+  "p95_ms": 2.368,
+  "peak_static_memory_bytes": 31731182,
+  "platform": "Windows",
+  "processor": "AMD Ryzen 7 5825U with Radeon Graphics",
+  "scenario": "Headless simulation, 18 enemies (6 ranged), 128 player shots, 64 hostile shots, 160 particles; caps refilled before each measured frame",
+  "warmup_frames": 600
+}

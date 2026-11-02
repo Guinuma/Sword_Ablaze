@@ -18,7 +18,7 @@ func advance(delta: float, player_position: Vector2, bounds: Rect2) -> void:
 	for index in range(items.size() - 1, -1, -1):
 		var bullet: Dictionary = items[index]
 		var start: Vector2 = bullet["position"]
-		var end: Vector2 = start + Vector2(bullet["direction"]) * bullet["speed"] * delta
+		var end: Vector2 = start + Vector2(bullet["direction"]) * bullet["speed"] * minf(delta, bullet["life"])
 		bullet["life"] -= delta
 		if start.distance_to(player_position) <= 11.0 or Geometry2D.segment_intersects_circle(start, end, player_position, 11.0) >= 0.0:
 			items.remove_at(index)

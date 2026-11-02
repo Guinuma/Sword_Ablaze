@@ -59,12 +59,14 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 				items[first]["position"] -= push
 				items[second]["position"] += push
 	for enemy in items:
-		enemy["position"] = Vector2(enemy["position"]).clamp(bounds.position + Vector2.ONE * settings.body_margin, bounds.end - Vector2.ONE * settings.body_margin)
+		var profile: EnemySettings = enemy.get("profile", settings)
+		enemy["position"] = Vector2(enemy["position"]).clamp(bounds.position + Vector2.ONE * profile.body_margin, bounds.end - Vector2.ONE * profile.body_margin)
 
 
 func touches(point: Vector2) -> bool:
 	for enemy in items:
-		if enemy.get("spawn_time", 0.0) <= 0.0 and point.distance_to(enemy["position"]) < settings.contact_radius:
+		var profile: EnemySettings = enemy.get("profile", settings)
+		if enemy.get("spawn_time", 0.0) <= 0.0 and point.distance_to(enemy["position"]) < profile.contact_radius:
 			return true
 	return false
 

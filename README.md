@@ -72,7 +72,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.
 - [ ] Guardar e carregar preferências e remapeamentos do jogador.
 - [ ] Definir camadas de colisão, grupos, ordem de desenho e convenções de pivôs.
-- [ ] Definir limites de entidades e medir desempenho antes de introduzir pooling.
+- [x] Limitar entidades e medir simulação densa antes de introduzir pooling; ver `docs/performance/`.
 
 ### 2. Jogador e combate base
 
@@ -240,7 +240,8 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Criar testes de melhorias, recompensas únicas, skill trees, saves e migrações.
 - [ ] Testar a run completa: hub → combate → resultado → recompensa → hub.
 - [ ] Verificar alinhamento visual e hitboxes nas quatro direções e junto aos limites.
-- [ ] Medir frame time, memória e entidades nas piores situações de combate.
+- [x] Registar baseline de tempo de simulação e memória com entidades no limite.
+- [ ] Medir renderização e frame time em combate denso real.
 - [ ] Definir hardware mínimo e objetivo de desempenho com base em medições.
 - [ ] Testar sessões longas, muitas rondas, reinícios e alternância de foco.
 - [ ] Recolher feedback externo sobre clareza, dificuldade e variedade das escolhas.
