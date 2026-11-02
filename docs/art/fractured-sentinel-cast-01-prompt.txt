@@ -1,0 +1,11 @@
+Use case: identity-preserve.
+Asset type: four-frame CASTING animation sprite sheet for the Fractured Sentinel ranged enemy in Sword Ablaze, genuine transparent PNG.
+Reference image 1 is the sentinel identity; reference image 2 gives the exact established sprite proportions. Preserve the broken ivory marble shoulders, small hollow violet eye, violet-crimson chest core, antique gold bands, broken gold halo and circular spell-focus in the hand at screen LEFT. Slim stone legs, asymmetrical shoulders, same character in every frame.
+EXACT 2x2 equal square cells, no visible grid. One full-body character per cell, front-facing slight overhead top-down game view. Keep the head, torso, legs and planted feet in the SAME locations, at identical scale across all four cells. Both feet planted on a shared baseline. Character occupies about 80% of cell height.
+Frames in reading order:
+1. Prepare: spell-focus hand held low near waist, fingers opening; small dim violet seed inside ring.
+2. Gather: same hand rises to chest level, elbow bends, fingers curl around a clearly larger violet orb. Chest core brightens subtly.
+3. Charge: spell-focus arm extends partway forward, hand/ring glows bright violet-magenta, strong but tightly contained spell orb in the ring.
+4. Release: spell-focus arm fully thrust forward, fingers spread, small sharp violet flash in the ring, other stone claw counterbalances. Do not include a detached projectile; the game renders the shot.
+Pose changes should be clearly readable in the ARM, HAND and SPELL FOCUS, not merely whole-body bobbing or random armor changes. No walking or lifting feet during casting. No large glow haze; preserve transparent gaps and clean silhouettes.
+Deliberate low-resolution pixel art, chunky square pixel clusters, strong dark outline, limited ivory/gold/charcoal/violet palette. Readable at 36 logical pixels tall. No blur, gradients, painting, text, labels, numbers, grid lines, scenery, shadows or extra characters. Exactly four full-body casting frames on true transparency.

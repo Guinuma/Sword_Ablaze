@@ -70,5 +70,14 @@
     "prompt": "docs/art/exile-defeat-01-prompt.txt",
     "reference": "Original Exile body and side walk sheet",
     "rights_note": "Generated project artwork; code MIT license does not automatically apply."
+  },
+  {
+    "asset": "assets/art/enemies/fractured-sentinel-cast-01.png",
+    "sha256": "a009a6b2aae0b43e1593126a097e03f8a33e100370068a32784de8a42b6f44ee",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "prompt": "docs/art/fractured-sentinel-cast-01-prompt.txt",
+    "reference": "Original sentinel and its walk sheet",
+    "rights_note": "Generated project artwork; code MIT license does not automatically apply."
   }
 ]

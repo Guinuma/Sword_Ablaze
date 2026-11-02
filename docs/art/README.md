@@ -57,3 +57,5 @@ Front/back sources: `assets/art/player/exile-front-walk-01.png` and `exile-back-
 `assets/art/player/exile-defeat-01.png` contains four non-looping hurt/kneel/fall/lying poses. `exile-defeat-01-frames.tres` supplies the regions; per-frame draw offsets preserve the ground baseline. Only presentation advances during this 0.64 s sequence; combat time, enemies and shots remain frozen. Results appear after the fall. Restart cancels the sequence. It currently uses one mirrored side-view fall for all aim directions.
 
 Review with `tools/capture_defeat.gd -- <absolute-output-directory>`. The tool uses isolated review records and cleans them afterward. `docs/art/exile-defeat-gameplay-01.png` captures the fallen pose before the menu covers it.
+
+The sentinel uses `assets/art/enemies/fractured-sentinel-cast-01.png` for four casting poses. Their progress is tied directly to the existing attack windup, so pose, aiming cue and projectile release use the same combat clock. Movement frames resume after the cast.

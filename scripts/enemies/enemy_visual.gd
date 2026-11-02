@@ -3,6 +3,7 @@ extends Node2D
 const WISP = preload("res://assets/art/enemies/corrupted-wisp-01-atlas.tres")
 const SENTINEL = preload("res://assets/art/enemies/fractured-sentinel-01-atlas.tres")
 const WALK = preload("res://assets/art/enemies/fractured-sentinel-walk-01-frames.tres")
+const CAST = preload("res://assets/art/enemies/fractured-sentinel-cast-01-frames.tres")
 var walk_clock: float = 0.0
 var walk_frame: int = 0
 var last_point := Vector2.ZERO
@@ -69,8 +70,12 @@ func _draw() -> void:
 			bob = 0.0
 	var tint := Color(1.8, 1.5, 1.2) if state["flash"] > 0.0 and not reduced_flashes else Color.WHITE
 	if ranged:
-		var body = WALK.get_frame_texture(&"walk", walk_frame) if moving and windup <= 0.0 else SENTINEL
-		draw_texture_rect(body, Rect2(-17, -29 + bob, 34, 39), false, tint)
+		if windup > 0.0:
+			var frame: int = clampi(int((1.0 - windup / profile.attack_warning) * 4.0), 0, 3)
+			draw_texture_rect(CAST.get_frame_texture(&"cast", frame), Rect2(-18, -29, 36, 39), false, tint)
+		else:
+			var body = WALK.get_frame_texture(&"walk", walk_frame) if moving else SENTINEL
+			draw_texture_rect(body, Rect2(-17, -29 + bob, 34, 39), false, tint)
 	else:
 		draw_texture_rect(WISP, Rect2(-10, -25 + bob, 20, 35), false, tint)
 	var health: int = state["health"]
