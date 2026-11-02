@@ -13,7 +13,6 @@ var player_visual: Node2D
 var overlay: Node2D
 
 const SPEED: float = 120.0
-const BULLET_SPEED: float = 360.0
 const FIRE_INTERVAL: float = 0.16
 const ARENA := Rect2(24, 64, 592, 272)
 var player_position := Vector2(320, 200)
@@ -28,7 +27,8 @@ const DASH_COOLDOWN: float = 1.2
 var dash_time: float = 0.0
 var dash_cooldown: float = 0.0
 var dash_direction := Vector2.RIGHT
-var bullets: Array[Dictionary] = []
+const ProjectileSystem = preload("res://scripts/combat/projectile_system.gd")
+var projectiles = ProjectileSystem.new()
 var enemies: Array[Dictionary] = []
 var hurt_cooldown: float = 0.0
 var fire_requires_release: bool = false
@@ -39,6 +39,8 @@ var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	projectiles.impacted.connect(_on_projectile_impact)
+	projectiles.defeated.connect(_on_projectile_defeat)
 	waves.wave_started.connect(run.start_combat)
 	waves.spawn_requested.connect(_spawn_enemy)
 	waves.wave_cleared.connect(_on_wave_cleared)
@@ -88,7 +90,7 @@ func _physics_process(delta: float) -> void:
 		aim = mouse_direction.normalized()
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	if Input.is_action_pressed("fire") and not fire_requires_release and fire_cooldown <= 0.0:
-		bullets.append({"position": player_position + aim * 12.0, "direction": aim})
+		projectiles.fire(player_position + aim * 12.0, aim)
 		fire_cooldown = FIRE_INTERVAL
 		muzzle_time = 0.06
 	_update_waves(delta)
@@ -139,7 +141,7 @@ func _update_waves(delta: float) -> void:
 
 
 func _on_wave_cleared() -> void:
-	bullets.clear()
+	projectiles.clear()
 	run.start_intermission()
 
 
@@ -179,33 +181,16 @@ func _update_enemies(delta: float) -> void:
 
 
 func _update_bullets(delta: float) -> void:
-	for index in range(bullets.size() - 1, -1, -1):
-		var start: Vector2 = bullets[index]["position"]
-		var end: Vector2 = start + Vector2(bullets[index]["direction"]) * BULLET_SPEED * delta
-		# Segment collision prevents fast bullets from skipping through enemies.
-		var target: int = -1
-		var nearest: float = INF
-		for enemy_index in range(enemies.size()):
-			var point: Vector2 = enemies[enemy_index]["position"]
-			var hit := Geometry2D.segment_intersects_circle(start, end, point, 10.0)
-			if hit >= 0.0 and hit < nearest:
-				target = enemy_index
-				nearest = hit
-		if target >= 0:
-			var impact: Vector2 = enemies[target]["position"]
-			enemies[target]["knockback"] = Vector2(bullets[index]["direction"]) * 135.0
-			_burst(impact, Color("ffb454"), 5)
-			enemies[target]["health"] -= 1
-			enemies[target]["flash"] = 0.12
-			if enemies[target]["health"] <= 0:
-				_burst(impact, Color("e76170"), 10)
-				enemies.remove_at(target)
-				run.record_kill()
-			bullets.remove_at(index)
-		elif not ARENA.has_point(end):
-			bullets.remove_at(index)
-		else:
-			bullets[index]["position"] = end
+	projectiles.advance(delta, enemies, ARENA)
+
+
+func _on_projectile_impact(point: Vector2) -> void:
+	_burst(point, Color("ffb454"), 5)
+
+
+func _on_projectile_defeat(point: Vector2) -> void:
+	_burst(point, Color("e76170"), 10)
+	run.record_kill()
 
 
 func _check_contact() -> void:
@@ -222,7 +207,7 @@ func _check_contact() -> void:
 func _reset_run() -> void:
 	player_position = Vector2(320, 200)
 	aim = Vector2.RIGHT
-	bullets.clear()
+	projectiles.clear()
 	enemies.clear()
 	run.reset()
 	hurt_cooldown = 0.0
@@ -266,7 +251,7 @@ func _draw() -> void:
 		var tint: Color = particle["color"]
 		tint.a = clampf(particle["life"] / 0.3, 0.0, 1.0)
 		draw_rect(Rect2(Vector2(particle["position"]).round(), Vector2(2, 2)), tint)
-	for bullet in bullets:
+	for bullet in projectiles.items:
 		draw_rect(Rect2(Vector2(bullet["position"]).round() - Vector2(2, 2), Vector2(4, 4)), Color("ffb454"))
 
 
