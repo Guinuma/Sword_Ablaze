@@ -454,6 +454,25 @@ func _run() -> void:
 	check(loaded_preferences.reduced_flashes and not loaded_preferences.reduced_motion, "Invalid preference types must recover backup values")
 	for suffix in ["", ".bak", ".tmp"]:
 		DirAccess.remove_absolute(arena.preferences.path + suffix)
+	arena.preferences.reduced_motion = false
+	arena._reset_run()
+	var corner: Vector2 = arena.ARENA.position + Vector2(8, 8)
+	for index in range(2):
+		arena.enemies.items.append({"position": corner, "health": 2, "flash": 0.0})
+	arena._update_enemies(0.0)
+	check(arena.enemies.items[0]["position"].distance_to(arena.enemies.items[1]["position"]) >= 17.99, "Wall must not cancel separation of coincident enemies")
+	arena.enemies.clear()
+	for index in range(18):
+		arena.enemies.items.append({"position": corner, "health": 2, "flash": 0.0})
+	for frame in range(60):
+		arena._update_enemies(0.0)
+	var nearest_pair: float = INF
+	for first in range(arena.enemies.items.size()):
+		var point: Vector2 = arena.enemies.items[first]["position"]
+		check(point.is_finite() and arena.ARENA.has_point(point), "Dense separation must keep finite positions inside arena")
+		for second in range(first + 1, arena.enemies.items.size()):
+			nearest_pair = minf(nearest_pair, point.distance_to(arena.enemies.items[second]["position"]))
+	check(nearest_pair >= 17.5, "Dense corner crowd must converge to separated positions")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

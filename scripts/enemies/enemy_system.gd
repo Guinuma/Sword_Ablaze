@@ -44,23 +44,49 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 		enemy["position"] += knockback * delta
 		enemy["knockback"] = knockback.move_toward(Vector2.ZERO, 600.0 * delta)
 		enemy["flash"] = maxf(0.0, enemy["flash"] - delta)
-	# Resolve each pair once; a stable fallback separates coincident centers.
+	for enemy in items:
+		enemy["position"] = _clamp_enemy(enemy, enemy["position"], bounds)
+	# A few bounded passes reduce crowd overlap without an unbounded solver.
+	for pass_index in range(6):
+		if _resolve_separation(bounds) < 0.05:
+			break
+
+
+func _clamp_enemy(enemy: Dictionary, point: Vector2, bounds: Rect2) -> Vector2:
+	var profile: EnemySettings = enemy.get("profile", settings)
+	var margin := Vector2.ONE * profile.body_margin
+	return point.clamp(bounds.position + margin, bounds.end - margin)
+
+
+func _resolve_separation(bounds: Rect2) -> float:
+	var maximum_overlap: float = 0.0
 	for first in range(items.size()):
 		if items[first].get("spawn_time", 0.0) > 0.0:
 			continue
 		for second in range(first + 1, items.size()):
 			if items[second].get("spawn_time", 0.0) > 0.0:
 				continue
+			var first_profile: EnemySettings = items[first].get("profile", settings)
+			var second_profile: EnemySettings = items[second].get("profile", settings)
+			var separation: float = (first_profile.separation_distance + second_profile.separation_distance) * 0.5
 			var offset: Vector2 = items[second]["position"] - items[first]["position"]
 			var distance := offset.length()
-			if distance < settings.separation_distance:
-				var normal := offset / distance if distance > 0.001 else Vector2.RIGHT.rotated(float(first) * 2.4)
-				var push := normal * (settings.separation_distance - distance) * 0.5
-				items[first]["position"] -= push
-				items[second]["position"] += push
-	for enemy in items:
-		var profile: EnemySettings = enemy.get("profile", settings)
-		enemy["position"] = Vector2(enemy["position"]).clamp(bounds.position + Vector2.ONE * profile.body_margin, bounds.end - Vector2.ONE * profile.body_margin)
+			if distance >= separation:
+				continue
+			maximum_overlap = maxf(maximum_overlap, separation - distance)
+			var normal := offset / distance if distance > 0.001 else Vector2.RIGHT.rotated(float(first) * 2.4)
+			var push := normal * (separation - distance) * 0.5
+			var a := _clamp_enemy(items[first], items[first]["position"] - push, bounds)
+			var b := _clamp_enemy(items[second], items[second]["position"] + push, bounds)
+			# Give the movable enemy the displacement blocked by a wall.
+			var remaining := maxf(0.0, separation - (b - a).dot(normal))
+			b = _clamp_enemy(items[second], b + normal * remaining, bounds)
+			remaining = maxf(0.0, separation - (b - a).dot(normal))
+			a = _clamp_enemy(items[first], a - normal * remaining, bounds)
+			items[first]["position"] = a
+			items[second]["position"] = b
+	return maximum_overlap
+
 
 
 func touches(point: Vector2) -> bool:

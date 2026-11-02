@@ -15,6 +15,7 @@ def main():
         ("Import", ["--editor", "--quit"], None),
         ("Combat", ["--script", "tests/combat_smoke.gd"], "Combat checks complete: 0 failures"),
         ("Startup", ["--quit-after", "120"], None),
+        ("Long session", ["--script", "tests/run_soak.gd"], "Run soak complete: 0 failures"),
     ]
     for name, flags, marker in checks:
         try:

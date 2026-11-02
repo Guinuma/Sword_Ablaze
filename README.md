@@ -100,7 +100,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Recuo ao receber tiros e contagem de eliminações.
 - [x] Spawns afastados do jogador e limite de inimigos simultâneos.
 - [x] Avisar spawns com um marcador de 0,7 s; adiar ativação enquanto o jogador estiver demasiado perto.
-- [ ] Melhorar separação junto às paredes e em grupos densos.
+- [x] Resolver separação junto às paredes com redistribuição do movimento bloqueado e passes limitados.
 - [ ] Adicionar navegação quando existirem obstáculos reais.
 - [x] Criar inimigo à distância com distância preferida, aviso de 0,65 s, mira fixa e projétil distinto.
 - [ ] Criar inimigo de investida com preparação, ataque e recuperação claros.
@@ -248,7 +248,8 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Registar baseline de tempo de simulação e memória com entidades no limite.
 - [ ] Medir renderização e frame time em combate denso real.
 - [ ] Definir hardware mínimo e objetivo de desempenho com base em medições.
-- [ ] Testar sessões longas, muitas rondas, reinícios e alternância de foco.
+- [x] Simular 20 minutos, ondas avançadas, escolhas, pausas e reinício com teste determinista.
+- [ ] Fazer sessões longas de playtesting real e alternância de foco.
 - [ ] Recolher feedback externo sobre clareza, dificuldade e variedade das escolhas.
 - [ ] Registar problemas conhecidos e corrigir bloqueios antes de expandir conteúdo.
 
