@@ -42,4 +42,3 @@ func advance(delta: float, enemies: Array[Dictionary], bounds: Rect2) -> void:
 			items.remove_at(index)
 		else:
 			items[index]["position"] = end
-
