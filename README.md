@@ -130,7 +130,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Criar inimigo à distância com distância preferida, aviso de 0,65 s, mira fixa e projétil distinto.
 - [x] Criar inimigo de investida com preparação, ataque e recuperação claros.
 - [x] Criar inimigo resistente que altere o posicionamento do jogador.
-- [ ] Definir estatísticas, recompensas e função de cada tipo de inimigo.
+- [x] Definir estatísticas, recompensas e função dos quatro tipos atuais; ver [inimigos](docs/enemies.md).
 - [x] Introduzir um inimigo à distância por três spawns a partir da onda 3.
 - [ ] Equilibrar a composição de encontros em playtests.
 - [ ] Criar primeiro elite com comportamento reconhecível.
