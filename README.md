@@ -226,7 +226,7 @@ Os valores são provisórios e precisam de playtesting.
 
 ### 9. XP transversal, hub e skill trees
 
-- [ ] Definir XP global, níveis, fontes de recompensa e limites por modo.
+- [x] Definir XP global, níveis, fontes de recompensa e limites por modo; ver [progressão](docs/progression.md). Implementação pendente.
 - [ ] Distinguir XP global de experiência ou moeda temporária de uma run.
 - [ ] Garantir que Arena e Roguelite usam as mesmas regras de atribuição global.
 - [ ] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves.
