@@ -29,6 +29,7 @@ def main():
         ("Global profile", ["--script", "tests/profile_smoke.gd"], "Profile checks complete: 0 failures"),
         ("Reward flow", ["--script", "tests/reward_flow_smoke.gd"], "Reward flow checks complete: 0 failures"),
         ("Hub flow", ["--script", "tests/hub_smoke.gd"], "Hub checks complete: 0 failures"),
+        ("Event integration", ["--script", "tests/event_integration_smoke.gd"], "Event integration checks complete: 0 failures"),
         ("Startup", ["--quit-after", "120"], None),
         ("Long session", ["--script", "tests/run_soak.gd"], "Run soak complete: 0 failures"),
     ]

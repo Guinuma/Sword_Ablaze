@@ -94,7 +94,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Mover atributos da arma, inimigo e ondas para Resources reutilizáveis em `resources/default_*.tres`.
 - [x] Definir melhorias temporárias como Resources reutilizáveis em `resources/upgrades/`.
 - [x] Centralizar eventos de dano recebido, eliminação e fim/início de ronda.
-- [ ] Ligar os eventos aos futuros sistemas de áudio e recompensas.
+- [x] Ligar eventos de disparo, dano, impacto, eliminação e fim de ronda ao áudio e às recompensas, com regressão de integração.
 - [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.
 - [x] Guardar e carregar preferências visuais com validação e backup.
 - [x] Guardar e carregar remapeamentos do jogador.
