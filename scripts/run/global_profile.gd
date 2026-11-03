@@ -129,3 +129,7 @@ static func _clean(parsed: Dictionary) -> Dictionary:
 		if not parsed.get(field) is Array or not parsed[field].is_empty():
 			return {}
 	return {"version": VERSION, "xp": int(parsed.xp), "next_run_id": int(parsed.next_run_id), "last_settled_run_id": int(parsed.last_settled_run_id), "active_run": {"id": int(active.id), "mode": String(active.mode)}, "skills": [], "unlocks": []}
+
+
+static func for_tree(tree: SceneTree):
+	return load("res://scripts/run/global_profile.gd").new(String(tree.get_meta("profile_path", "user://profile.json")))

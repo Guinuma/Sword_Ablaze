@@ -2,6 +2,7 @@ extends Control
 ## Front door only: the arena is instantiated when PLAY is activated.
 const ControlNames = preload("res://scripts/ui/combat_tutorial.gd")
 const FocusNavigation = preload("res://scripts/ui/focus_navigation.gd")
+const GlobalProfile = preload("res://scripts/run/global_profile.gd")
 const Preferences = preload("res://scripts/settings/preferences.gd")
 const ArenaRecords = preload("res://scripts/run/arena_records.gd")
 const COURTYARD = preload("res://assets/art/arena/celestial-courtyard-01.png")
@@ -351,5 +352,12 @@ func _show_modes() -> void:
 	var finite_records = ArenaRecords.new("user://finite_records.json")
 	finite_records.load_records()
 	_label(detail_body, "COURTYARD VICTORIES: %d" % finite_records.data["wins"], Vector2.ZERO, 8, GOLD)
+	var profile = GlobalProfile.for_tree(get_tree())
+	profile.load_profile()
+	_label(detail_body, "GLOBAL XP %d / 1900   LEVEL %d" % [profile.data.xp, GlobalProfile.level(profile.data.xp)], Vector2.ZERO, 8, GOLD)
+	if profile.last_error != OK:
+		_label(detail_body, "Progression unavailable: profile cannot be saved.", Vector2.ZERO, 12, MUTED, false)
+	elif profile.load_status in [&"recovered", &"reset"]:
+		_label(detail_body, "Profile recovered from backup or reset after corruption.", Vector2.ZERO, 11, MUTED, false)
 	_refresh_focus()
 	finite.grab_focus()

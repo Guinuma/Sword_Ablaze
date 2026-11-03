@@ -1,6 +1,9 @@
 extends SceneTree
 ## Capture the actual renderer with a deterministic visual review encounter.
 func _initialize() -> void:
+	set_meta("profile_path", "user://capture_arena_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_capture")
 
 
@@ -33,4 +36,6 @@ func _capture() -> void:
 	var output: String = arguments[0] if not arguments.is_empty() else "res://docs/art/celestial-courtyard-gameplay-01.png"
 	var result := root.get_texture().get_image().save_png(output)
 	arena.free()
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit(0 if result == OK else 1)

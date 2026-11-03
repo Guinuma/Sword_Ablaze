@@ -1,5 +1,8 @@
 extends SceneTree
 func _initialize() -> void:
+	set_meta("profile_path", "user://capture_guardian_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_capture")
 func _capture() -> void:
 	var arena = load("res://scenes/main/main.tscn").instantiate()
@@ -24,4 +27,6 @@ func _capture() -> void:
 			quit(1)
 			return
 	arena.free()
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit()

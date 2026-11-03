@@ -1,6 +1,9 @@
 extends SceneTree
 ## Render a short animation review using the same visual components as gameplay.
 func _initialize() -> void:
+	set_meta("profile_path", "user://capture_walk_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_capture")
 
 
@@ -37,4 +40,6 @@ func _capture() -> void:
 			quit(1)
 			return
 	arena.free()
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit()

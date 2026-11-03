@@ -1,5 +1,8 @@
 extends SceneTree
 func _initialize() -> void:
+	set_meta("profile_path", "user://capture_elite_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_capture")
 func _capture() -> void:
 	var arena = load("res://scenes/main/main.tscn").instantiate()
@@ -21,4 +24,6 @@ func _capture() -> void:
 	var result := root.get_texture().get_image().save_png(path)
 	arena.free()
 	await create_timer(0.35).timeout
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit(0 if result == OK else 1)

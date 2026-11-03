@@ -1,5 +1,8 @@
 extends SceneTree
 func _initialize() -> void:
+	set_meta("profile_path", "user://capture_finite_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_capture")
 func _capture() -> void:
 	set_meta("finite_run", true)
@@ -7,6 +10,9 @@ func _capture() -> void:
 	arena.records = arena.ArenaRecords.new("user://finite_capture_records.json")
 	root.add_child(arena)
 	arena.set_physics_process(false)
+	arena.run.cleared_waves = 9
+	arena.run.kills = 114
+	arena.run.elapsed = 600.0
 	arena.waves.number = 10
 	arena.waves.remaining = 0
 	arena._spawn_enemy(&"boss")
@@ -37,4 +43,6 @@ func _capture() -> void:
 		DirAccess.remove_absolute(arena.records.path + suffix)
 	arena.free()
 	await create_timer(0.35).timeout
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit()

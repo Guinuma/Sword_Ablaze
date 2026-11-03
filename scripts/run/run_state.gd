@@ -12,6 +12,7 @@ var max_health: int = MAX_HEALTH
 var phase: Phase = Phase.COMBAT
 var resume_phase: Phase = Phase.COMBAT
 var health: int = MAX_HEALTH
+var cleared_waves: int = 0
 var kills: int = 0
 var elapsed: float = 0.0
 
@@ -76,6 +77,7 @@ func reset() -> void:
 	max_health = MAX_HEALTH
 	health = MAX_HEALTH
 	kills = 0
+	cleared_waves = 0
 	elapsed = 0.0
 	resume_phase = Phase.COMBAT
 	_set_phase(Phase.COMBAT)
@@ -111,3 +113,8 @@ func win() -> bool:
 		return false
 	_set_phase(Phase.WON)
 	return true
+
+
+func record_wave_clear(number: int) -> void:
+	if phase == Phase.COMBAT and number == cleared_waves + 1:
+		cleared_waves = number

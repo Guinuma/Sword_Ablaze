@@ -13,6 +13,12 @@ const SoundEffects = preload("res://scripts/audio/sound_effects.gd")
 var sounds = SoundEffects.new()
 const CombatTutorial = preload("res://scripts/ui/combat_tutorial.gd")
 var tutorial = CombatTutorial.new()
+const GlobalProfile = preload("res://scripts/run/global_profile.gd")
+var profile
+var active_run_id: int = 0
+var reward_pending: bool = false
+var reward_received: bool = false
+var reward_awarded: int = 0
 var finite_mode: bool = false
 var run_recorded: bool = false
 const UpgradeSystem = preload("res://scripts/run/upgrade_system.gd")
@@ -51,6 +57,8 @@ func _ready() -> void:
 	waves.final_wave = 10 if finite_mode else 0
 	if finite_mode and records.path == "user://arena_records.json":
 		records.path = "user://finite_records.json"
+	profile = GlobalProfile.for_tree(get_tree())
+	_begin_progression()
 	preferences.load_preferences()
 	add_child(sounds)
 	player.shot.connect(func(_origin, _direction): sounds.play(&"shot"); tutorial.shot())
@@ -72,6 +80,7 @@ func _ready() -> void:
 	waves.run_cleared.connect(_on_run_won)
 	random.randomize()
 	hud_view = ArenaHud.new()
+	hud_view.reward_retry_requested.connect(_retry_reward)
 	hud_view.pause_requested.connect(func(): _set_paused(true))
 	hud_view.preferences_changed.connect(_change_preferences)
 	hud_view.upgrade_selected.connect(_choose_upgrade)
@@ -176,6 +185,7 @@ func _update_waves(delta: float) -> void:
 
 
 func _on_wave_cleared() -> void:
+	run.record_wave_clear(waves.number)
 	sounds.play(&"wave")
 	feedback.add(&"wave", player.player_position)
 	projectiles.clear()
@@ -270,10 +280,13 @@ func _choose_upgrade(id: StringName) -> void:
 
 func _on_run_won() -> void:
 	if finite_mode and waves.number == 10 and waves.remaining == 0 and enemies.items.is_empty():
+		run.record_wave_clear(waves.number)
 		run.win()
 
 
 func _on_run_phase_changed(phase: RunState.Phase) -> void:
+	if phase in [RunState.Phase.WON, RunState.Phase.DEAD] and not reward_received:
+		_settle_reward()
 	if phase == RunState.Phase.WON and not run_recorded:
 		run_recorded = true
 		projectiles.clear()
@@ -288,6 +301,10 @@ func _on_run_phase_changed(phase: RunState.Phase) -> void:
 
 
 func _reset_run() -> void:
+	if reward_pending and not _settle_reward():
+		_update_hud()
+		return
+	_begin_progression()
 	tutorial.reset()
 	sounds.stop_combat()
 	run_recorded = false
@@ -341,8 +358,9 @@ func _update_hud() -> void:
 		hud_view.wave_heading.text = "BOSS" if waves.number == 10 else "WAVE %02d / 09" % waves.number
 		hud_view.record_label.text = "FINITE RUNS: %d  /  WINS: %d" % [records.data["runs"], records.data["wins"]]
 		hud_view.record_label.text += "\nCould not save records" if records.last_error != OK else ""
-	hud_view.control_hint.text = tutorial.hint()
-	hud_view.control_hint.visible = run.is_active() and tutorial.step < 5
+	hud_view.present_reward(run.phase in [RunState.Phase.WON, RunState.Phase.DEAD], reward_pending, reward_received, reward_awarded, GlobalProfile.level(profile.data.xp), active_run_id == 0)
+	hud_view.control_hint.text = tutorial.hint() if active_run_id > 0 else "GLOBAL XP UNAVAILABLE THIS RUN"
+	hud_view.control_hint.visible = run.is_active() and (tutorial.step < 5 or active_run_id == 0)
 	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")
 	hud_view.menu_hint.text = "ESC RESUME    %s RESTART" % CombatTutorial.key_name(&"reset_sandbox")
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
@@ -380,7 +398,10 @@ func _draw_overlay() -> void:
 
 
 func _return_to_menu() -> void:
-	# Leaving a live run abandons it; only defeats contribute to records.
+	if reward_pending and not _settle_reward():
+		_update_hud()
+		return
+	# Leaving a live run abandons it; only terminal results settle progression.
 	get_tree().change_scene_to_file("res://scenes/main/menu.tscn")
 
 
@@ -394,3 +415,27 @@ func _draw_healing_drop(item: Dictionary) -> void:
 		draw_polyline(PackedVector2Array([point + Vector2(-1 * side, 5), point + Vector2(7 * side, -6)]), Color("c5a46c"), 1.0)
 		for offset in [0, 3]:
 			draw_line(point + Vector2((2 + offset) * side, 1 - offset), point + Vector2((5 + offset) * side, 2 - offset), Color("7c9da7"), 1.0)
+
+
+func _begin_progression() -> void:
+	profile.load_profile()
+	active_run_id = profile.begin_run(&"courtyard" if finite_mode else &"endless")
+	reward_pending = false
+	reward_received = false
+	reward_awarded = 0
+
+func _settle_reward() -> bool:
+	if reward_received:
+		return true
+	if active_run_id == 0 or run.phase not in [RunState.Phase.DEAD, RunState.Phase.WON]:
+		return false
+	var result: Dictionary = profile.settle(active_run_id, &"courtyard" if finite_mode else &"endless", &"victory" if run.phase == RunState.Phase.WON else &"defeat", run.kills, run.cleared_waves)
+	reward_pending = not result.ok
+	if result.ok:
+		reward_received = true
+		reward_awarded = result.awarded
+	return result.ok
+
+func _retry_reward() -> void:
+	_settle_reward()
+	_update_hud()

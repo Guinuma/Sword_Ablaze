@@ -1,6 +1,9 @@
 extends SceneTree
 ## Review cardinal-facing sprites with walking and idle poses in the real scene.
 func _initialize() -> void:
+	set_meta("profile_path", "user://capture_directions_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_capture")
 
 
@@ -30,4 +33,6 @@ func _capture() -> void:
 	var path: String = args[0] if not args.is_empty() else "res://docs/art/exile-directions-02.png"
 	var result := root.get_texture().get_image().save_png(path)
 	arena.free()
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit(0 if result == OK else 1)

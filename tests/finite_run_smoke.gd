@@ -1,6 +1,9 @@
 extends SceneTree
 var failures := 0
 func _initialize() -> void:
+	set_meta("profile_path", "user://finite_run_smoke_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_run")
 func check(value: bool, message: String) -> void:
 	if not value:
@@ -65,6 +68,7 @@ func _run() -> void:
 				arena.projectiles.advance(0.0, arena.enemies.items, arena.ARENA)
 			if arena.run.phase == arena.RunState.Phase.WON:
 				break
+		check(arena.run.cleared_waves == 10 and arena.reward_received and arena.reward_awarded == 300, "Complete finite victory must award capped global XP once")
 		check(saw_boss and choices == 3, "Finite run must contain three choices and the boss")
 		check(arena.run.phase == arena.RunState.Phase.WON and arena.waves.number == 10, "Finite run must stop at wave-ten victory")
 		check(arena.records.data.wins == 1 and arena.records.data.runs == 1, "Victory reward must record exactly once")
@@ -98,4 +102,6 @@ func _run() -> void:
 	remove_meta("finite_run")
 	root.remove_meta("finite_run")
 	print("Finite run checks complete: %d failures" % failures)
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit(1 if failures else 0)

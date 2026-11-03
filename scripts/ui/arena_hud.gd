@@ -1,5 +1,6 @@
 extends CanvasLayer
 ## Presentation only: combat owns all timers and run state.
+signal reward_retry_requested
 signal upgrade_selected(id: StringName)
 signal preferences_changed(reduced_flashes: bool, reduced_motion: bool)
 signal pause_requested
@@ -43,6 +44,8 @@ var menu: VBoxContainer
 var resume_button: Button
 var restart_button: Button
 var quit_button: Button
+var reward_label: Label
+var reward_retry_button: Button
 var record_label: Label
 var record_save_failed: bool = false
 var flashes_toggle: CheckButton
@@ -146,6 +149,14 @@ func _build_menus() -> void:
 	preference_error = _label(Vector2(182, 310), Vector2(276, 12), 10, false, Color("ed8c82"))
 	preference_error.text = "Preferences could not be saved"
 	preference_error.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reward_label = _label(Vector2(182, 249), Vector2(276, 14), 8, true, GOLD)
+	reward_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reward_retry_button = _button("RETRY XP SAVE", self, func(): reward_retry_requested.emit())
+	reward_retry_button.position = Vector2(182, 310)
+	reward_retry_button.custom_minimum_size = Vector2(276, 20)
+	reward_retry_button.size = Vector2(276, 20)
+	reward_label.hide()
+	reward_retry_button.hide()
 	record_label = _label(Vector2(180, 267), Vector2(280, 42), 8, true, GOLD)
 	record_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	menu.hide()
@@ -387,3 +398,18 @@ func _sync_badges(stacks: Dictionary, definitions: Array[Resource]) -> void:
 func blocks_fire() -> bool:
 	var hovered := get_viewport().gui_get_hovered_control()
 	return hovered != null and (hovered == pause_button or blessing_tray.is_ancestor_of(hovered))
+
+
+func present_reward(terminal: bool, pending: bool, _received: bool, awarded: int, level: int, unavailable: bool) -> void:
+	var shown := terminal and menu.visible
+	reward_label.visible = shown
+	var retry_had_focus := reward_retry_button.has_focus()
+	reward_retry_button.visible = shown and pending
+	if retry_had_focus and not reward_retry_button.visible and shown:
+		restart_button.grab_focus()
+	reward_label.text = "XP NOT SAVED - RETRY BELOW" if pending else ("GLOBAL XP UNAVAILABLE" if unavailable else "GLOBAL XP +%d   LEVEL %d" % [awarded, level])
+	if shown:
+		var controls: Array[Control] = [restart_button, quit_button]
+		if reward_retry_button.visible:
+			controls.append(reward_retry_button)
+		FocusNavigation.ring(controls)

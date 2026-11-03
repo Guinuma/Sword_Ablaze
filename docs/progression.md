@@ -1,6 +1,6 @@
 # Global progression contract
 
-Prototype decision, 2026-11-03. This document defines the next implementation; it does not claim that XP, the profile or the hub are already active in the game. Existing local records and loadout/preferences remain independent.
+Prototype decision, 2026-11-03. Global XP and the profile are now integrated with terminal results in both modes. The hub and skill purchases remain pending. Local records and loadout/preferences remain independent.
 
 ## Global XP and levels
 
@@ -61,6 +61,15 @@ Concurrent application instances editing one profile are outside this first impl
 
 ## Storage implementation status
 
-`scripts/run/global_profile.gd` now implements profile creation/loading, strict version-1 validation, bounded IDs/XP, safe transactional writes, backup recovery and identity-based reward settlement. It is not connected to combat or UI yet. `skills` and `unlocks` are reserved empty arrays until their definition sets exist; unknown IDs are rejected rather than applied. Profiles recovered from corruption expose `recovered`/`reset` status; future versions expose a write-blocking status. Sequence exhaustion refuses allocation.
+`scripts/run/global_profile.gd` now implements profile creation/loading, strict version-1 validation, bounded IDs/XP, safe transactional writes, backup recovery and identity-based reward settlement. It is connected to combat terminal results and the mode/results UI. `skills` and `unlocks` are reserved empty arrays until their definition sets exist; unknown IDs are rejected rather than applied. Profiles recovered from corruption expose `recovered`/`reset` status; future versions expose a write-blocking status. Sequence exhaustion refuses allocation.
 
 `tests/profile_smoke.gd` verifies reward and level boundaries, initial saves, failed writes with unchanged in-memory state, retry, duplicate callbacks/reloads, abandoned IDs, mismatched mode/outcome, capped awards, corruption/incomplete data recovery, backup preservation, future-version protection, cross-field validation, ignored partial temporary data and sequence exhaustion. Test files use isolated `user://profile_smoke.json` paths. Physical power-loss testing and game integration remain pending.
+
+
+## Game integration
+
+Each arena entry/restart allocates a saved ID before combat. RunState tracks completed waves explicitly and only in order; starting a wave or repeating a clear callback does not grant a wave reward. Victory/defeat calls the same settlement method in both modes. Results show actual saved GLOBAL XP and resulting level. The mode selector shows cumulative global XP; temporary blessing stacks still reset on retry.
+
+A failed terminal write keeps the result pending and exposes RETRY XP SAVE. Restart/Return first retry settlement and stay on the result if it still fails, preserving its identity and counters. A successful retry returns keyboard focus to Restart. An allocation failure keeps combat playable with a visible GLOBAL XP UNAVAILABLE notice; no retrospective identity is invented. Future-version profiles remain unchanged. Closing the app with an unsaved result still abandons it under the no-resume policy.
+
+`tests/reward_flow_smoke.gd` verifies both-mode base rewards, completed-wave deduplication, failure/retry UI, persistent totals, repeated result updates, restart separation and future-version fallback. Complete finite-run tests also verify the 300-XP capped victory reward with both loadouts. All scene tests/capture/benchmark tools use isolated profile paths selected through SceneTree metadata, and normal exits remove their temporary profile files; real player XP is not used by these checks.

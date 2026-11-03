@@ -1,6 +1,9 @@
 extends SceneTree
 var failures := 0
 func _initialize() -> void:
+	set_meta("profile_path", "user://navigation_smoke_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_run")
 func check(value: bool, message: String) -> void:
 	if not value:
@@ -64,4 +67,6 @@ func _run() -> void:
 	arena.free()
 	await create_timer(0.35).timeout
 	print("Navigation checks complete: %d failures" % failures)
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit(1 if failures else 0)

@@ -1,6 +1,9 @@
 extends SceneTree
 ## Measures simulation cost with configured entity limits, without rendering.
 func _initialize() -> void:
+	set_meta("profile_path", "user://combat_benchmark_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_run")
 
 
@@ -60,4 +63,6 @@ func _run() -> void:
 			quit(1)
 			return
 	arena.free()
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit()

@@ -1,6 +1,9 @@
 extends SceneTree
 
 func _initialize() -> void:
+	set_meta("profile_path", "user://capture_audio_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_capture")
 
 func _capture() -> void:
@@ -14,4 +17,6 @@ func _capture() -> void:
 	var path: String = args[0] if not args.is_empty() else "user://audio-options.png"
 	var result := root.get_texture().get_image().save_png(path)
 	menu.free()
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit(0 if result == OK else 1)

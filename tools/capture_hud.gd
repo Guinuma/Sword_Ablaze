@@ -1,6 +1,9 @@
 extends SceneTree
 ## Review HUD states without altering real records or preferences.
 func _initialize() -> void:
+	set_meta("profile_path", "user://capture_hud_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_capture")
 
 
@@ -58,4 +61,6 @@ func _capture() -> void:
 	for suffix in ["", ".bak", ".tmp"]:
 		DirAccess.remove_absolute(arena.records.path + suffix)
 	arena.free()
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit()

@@ -3,6 +3,9 @@ extends SceneTree
 var failures: int = 0
 
 func _initialize() -> void:
+	set_meta("profile_path", "user://combat_smoke_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_run")
 
 func check(condition: bool, description: String) -> void:
@@ -638,4 +641,6 @@ func _run() -> void:
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	await create_timer(0.35).timeout
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit(0 if failures == 0 else 1)

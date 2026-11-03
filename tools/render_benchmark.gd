@@ -5,6 +5,9 @@ const FRAMES := 600
 var random := RandomNumberGenerator.new()
 
 func _initialize() -> void:
+	set_meta("profile_path", "user://render_benchmark_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_run")
 
 func stats(values: Array[float]) -> Dictionary:
@@ -100,4 +103,6 @@ func _run() -> void:
 		return
 	print(JSON.stringify(report, "  "))
 	arena.free()
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit()

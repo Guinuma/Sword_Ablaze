@@ -2,6 +2,9 @@ extends SceneTree
 var failures: int = 0
 
 func _initialize() -> void:
+	set_meta("profile_path", "user://menu_smoke_global_profile.json")
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	call_deferred("_run")
 
 func check(condition: bool, message: String) -> void:
@@ -116,4 +119,6 @@ func _run() -> void:
 	current_scene.free()
 	await create_timer(0.35).timeout
 	print("Menu checks complete: %d failures" % failures)
+	for suffix in ["", ".bak", ".tmp"]:
+		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
 	quit(failures)

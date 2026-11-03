@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. Ainda não existem XP global ou hub.
+Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. XP global é atribuído uma vez por vitória/derrota, com nível e resumo guardados; o hub continua pendente.
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -226,9 +226,9 @@ Os valores são provisórios e precisam de playtesting.
 
 ### 9. XP transversal, hub e skill trees
 
-- [x] Definir XP global, níveis, fontes de recompensa e limites por modo; ver [progressão](docs/progression.md). Implementação pendente.
+- [x] Definir XP global, níveis, fontes de recompensa e limites por modo; ver [progressão](docs/progression.md).
 - [ ] Distinguir XP global de experiência ou moeda temporária de uma run.
-- [ ] Garantir que Arena e Roguelite usam as mesmas regras de atribuição global.
+- [x] Garantir regras globais partilhadas entre Courtyard Run e Endless Arena, com bónus explícito de vitória.
 - [ ] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves.
 - [ ] Criar hub com acesso aos modos, progressão e configurações.
 - [ ] Desenhar skill trees com custos, requisitos e efeitos compreensíveis.
@@ -243,7 +243,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Criar esquema versionado para recordes locais da arena em `user://arena_records.json`.
 - [x] Definir esquema de perfil para XP, desbloqueios e skills, mantendo preferências num ficheiro separado; ver [esquema](docs/progression.md).
 - [x] Gravar recordes em `user://` através de ficheiro temporário e cópia de recuperação.
-- [x] Aplicar escrita segura ao perfil global, com transações de identidade da run e XP; integração no jogo pendente.
+- [x] Aplicar escrita segura ao perfil global, com transações de identidade da run e XP.
 - [x] Criar e carregar perfil inicial quando não existir save, com caminhos isolados nos testes.
 - [x] Validar dados do perfil e recuperar saves incompletos/corrompidos através do backup, com proteção de versões futuras.
 - [ ] Implementar migrações entre versões do esquema.

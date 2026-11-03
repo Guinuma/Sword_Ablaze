@@ -19,8 +19,8 @@ Reviewed 2026-11-03 against the automated suite and graphical capture tools. Thi
 | Audio | Listen on real speakers/headphones; refine synthesized effects; compose music and transitions | Current effects are original synthesized prototype tones; no music is included. |
 | Art | Final native-resolution sprites, hands/weapon/cape alignment, dedicated ram/guardian art | Ram and guardian are geometric placeholders; integrated character art still needs pixel cleanup. |
 | Accessibility | UI scale/fullscreen/aspect-ratio checks, controller decision, full localization plan | Current visual reviews focus on the 640 × 360 layout at 1280 × 720. Very long custom key names can crowd compact HUD labels. |
-| Game loop | Implement global rewards and hub; playtest the new finite run and boss | Endless Arena repeats encounters; Courtyard Run now has a boss and local victories, but no global XP or hub. |
-| Persistence | Global profile, migrations, skill purchases and reward deduplication | Existing save tests cover preferences and local records only. |
+| Game loop | Implement hub and skill purchases; playtest finite run/boss and global reward pacing | Endless Arena repeats encounters; Courtyard Run now has a boss and local victories, global XP is now saved on results, while the hub remains pending. |
+| Persistence | Migrations, skill purchases and interrupted-write recovery testing | Profile tests now cover safe writes, corruption, reward identity and failed-save retries; migration/purchase and power-loss coverage remain pending. |
 | Performance | More hardware and real-session measurements | The rendered benchmark is one Windows integrated-GPU machine under seeded load. |
 | Distribution | Platform/channel decisions, export presets, clean-machine validation and consolidated credits | No demo release is authorized or implied by a passing prototype suite. |
 
