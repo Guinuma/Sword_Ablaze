@@ -5,6 +5,8 @@ var reduced_flashes: bool = false
 var reduced_motion: bool = false
 const AUDIO_BUSES = ["Master", "Music", "SFX", "UI"]
 var volumes: Dictionary = {"Master": 1.0, "Music": 1.0, "SFX": 1.0, "UI": 1.0}
+const REMAPPABLE = [&"move_left", &"move_right", &"move_up", &"move_down", &"fire", &"dash", &"reset_sandbox"]
+var bindings: Dictionary = {}
 var last_error: Error = OK
 var unsupported_version: bool = false
 
@@ -25,6 +27,14 @@ func load_preferences() -> void:
 		var value = audio.get(bus, 1.0)
 		volumes[bus] = clampf(float(value), 0.0, 1.0) if (value is float or value is int) and is_finite(float(value)) else 1.0
 	apply_audio()
+	bindings.clear()
+	var stored = data.get("bindings", {})
+	if stored is Dictionary:
+		for action in REMAPPABLE:
+			var code = stored.get(String(action), 0)
+			if (code is int or code is float) and is_finite(float(code)) and float(code) == floor(float(code)) and _valid_key(int(code)):
+				bindings[action] = int(code)
+	apply_bindings()
 
 
 func save() -> Error:
@@ -35,7 +45,7 @@ func save() -> Error:
 	if file == null:
 		last_error = FileAccess.get_open_error()
 		return last_error
-	file.store_string(JSON.stringify({"version": 1, "reduced_flashes": reduced_flashes, "reduced_motion": reduced_motion, "volumes": volumes}))
+	file.store_string(JSON.stringify({"version": 1, "reduced_flashes": reduced_flashes, "reduced_motion": reduced_motion, "volumes": volumes, "bindings": bindings}))
 	file.flush()
 	last_error = file.get_error()
 	file.close()
@@ -82,3 +92,37 @@ func apply_audio() -> void:
 			var value: float = volumes[bus]
 			AudioServer.set_bus_mute(index, value <= 0.0)
 			AudioServer.set_bus_volume_db(index, linear_to_db(maxf(value, 0.0001)))
+
+
+func _valid_key(code: int) -> bool:
+	return code > 0 and code < (1 << 23) and code != KEY_ESCAPE and not OS.get_keycode_string(code).is_empty()
+
+func set_binding(action: StringName, code: int) -> bool:
+	if action not in REMAPPABLE or not _valid_key(code):
+		return false
+	# Reject conflicts with all other active keyboard bindings.
+	for other in REMAPPABLE:
+		if other == action:
+			continue
+		for event in InputMap.action_get_events(other):
+			if event is InputEventKey and (event.physical_keycode == code or event.keycode == code):
+				return false
+	bindings[action] = code
+	apply_bindings()
+	return true
+
+func apply_bindings() -> void:
+	for action in REMAPPABLE:
+		InputMap.action_erase_events(action)
+		var defaults: Dictionary = ProjectSettings.get_setting("input/" + String(action), {})
+		for event in defaults.get("events", []):
+			if not (event is InputEventKey) or not bindings.has(action):
+				InputMap.action_add_event(action, event)
+		if bindings.has(action):
+			var key := InputEventKey.new()
+			key.physical_keycode = bindings[action]
+			InputMap.action_add_event(action, key)
+
+func reset_bindings() -> void:
+	bindings.clear()
+	apply_bindings()

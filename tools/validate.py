@@ -16,6 +16,7 @@ def main():
         ("Combat", ["--script", "tests/combat_smoke.gd"], "Combat checks complete: 0 failures"),
         ("Menu flow", ["--script", "tests/menu_smoke.gd"], "Menu checks complete: 0 failures"),
         ("Audio", ["--script", "tests/audio_smoke.gd"], "Audio checks complete: 0 failures"),
+        ("Bindings", ["--script", "tests/bindings_smoke.gd"], "Bindings checks complete: 0 failures"),
         ("Startup", ["--quit-after", "120"], None),
         ("Long session", ["--script", "tests/run_soak.gd"], "Run soak complete: 0 failures"),
     ]

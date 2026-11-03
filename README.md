@@ -90,7 +90,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Ligar os eventos aos futuros sistemas de áudio e recompensas.
 - [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.
 - [x] Guardar e carregar preferências visuais com validação e backup.
-- [ ] Guardar e carregar remapeamentos do jogador.
+- [x] Guardar e carregar remapeamentos do jogador.
 - [x] Definir colisões atuais, reserva de camadas físicas, política de grupos, ordem de desenho e pivôs; ver [convenções técnicas](docs/technical-conventions.md).
 - [x] Limitar entidades e medir simulação densa antes de introduzir pooling; ver `docs/performance/`.
 
