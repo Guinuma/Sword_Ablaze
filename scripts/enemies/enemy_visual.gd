@@ -54,6 +54,9 @@ func _draw() -> void:
 		draw_line(Vector2(-4, 0), Vector2(4, 0), Color("ffe0a3"))
 		draw_line(Vector2(0, -4), Vector2(0, 4), Color("ffe0a3"))
 		return
+	if profile != null and profile.kind == "charger":
+		_draw_charger(profile)
+		return
 	# Ground shadow stays fixed while the wisp floats above it.
 	draw_set_transform(Vector2(0, 7), 0.0, Vector2(1.0, 0.35))
 	draw_circle(Vector2.ZERO, 9.0 if ranged else 7.0, Color(0.02, 0.03, 0.06, 0.55))
@@ -83,3 +86,32 @@ func _draw() -> void:
 	if health < max_health:
 		draw_rect(Rect2(-9, -33, 18, 2), Color("101421"))
 		draw_rect(Rect2(-9, -33, 18.0 * maxf(0.0, float(health) / max_health), 2), Color("ffb454"))
+
+
+func _draw_charger(profile: Resource) -> void:
+	var phase: String = state.get("charge_phase", "approach")
+	var direction: Vector2 = state.get("charge_direction", Vector2.DOWN)
+	if phase == "warning":
+		var length: float = profile.charge_speed * profile.charge_duration
+		var end := direction * length
+		var side := direction.orthogonal() * profile.contact_radius
+		draw_line(side, end + side, Color("ffb454"), 1.0)
+		draw_line(-side, end - side, Color("ffb454"), 1.0)
+		draw_line(end + side, end, Color("ffe0a3"), 2.0)
+		draw_line(end - side, end, Color("ffe0a3"), 2.0)
+	var color := Color("ffb454") if phase == "warning" else Color("a96d55")
+	if phase == "recovery":
+		color = Color("666b86")
+	if state["flash"] > 0.0 and not reduced_flashes:
+		color = Color("ffe0a3")
+	draw_circle(Vector2(0, 7), 10, Color(0.02, 0.03, 0.06, 0.6))
+	# Angular armored ram silhouette is a code-native prototype visual.
+	draw_colored_polygon(PackedVector2Array([Vector2(-12, 2), Vector2(-9, -17), Vector2(-4, -12), Vector2(0, -25), Vector2(4, -12), Vector2(9, -17), Vector2(12, 2), Vector2(0, 8)]), color)
+	draw_line(Vector2(-6, -6), Vector2(6, -6), Color("f7ddb0"), 2.0)
+	if phase == "charge":
+		draw_line(-direction * 10, -direction * 23, Color("ffb454"), 3.0)
+	if phase == "recovery":
+		draw_arc(Vector2(0, -26), 5, 0, PI, 8, Color("ede3c9"), 1.0)
+	if state["health"] < profile.health:
+		draw_rect(Rect2(-10, -33, 20, 2), Color("101421"))
+		draw_rect(Rect2(-10, -33, 20.0 * state["health"] / profile.health, 2), Color("ffb454"))

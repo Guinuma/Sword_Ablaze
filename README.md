@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Ainda não existem XP global, hub, boss ou condição de vitória.
+Arena jogável com um pátio celestial ilustrado, três tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Ainda não existem XP global, hub, boss ou condição de vitória.
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -48,6 +48,7 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 
 - Jogador: 100 PV iniciais; contacto causa 15 PV de dano, com 0,85 s de proteção entre impactos.
 - Inimigo à distância: surge da onda 3 em diante; mantém cerca de 150 px, avisa durante 0,65 s e dispara na direção fixada. Projéteis dos snipers causam 50 PV de dano e respeitam dash/proteção de contacto.
+- Inimigo de investida: 4 HP; a partir da onda 5, um por cinco spawns. Fixa a direção durante 0,85 s, investe a 300 px/s até 0,45 s e recupera imóvel durante 0,8 s. Visual geométrico provisório; contacto usa segmento para evitar atravessar o jogador entre frames.
 - Inimigo básico: 2 HP; persegue o jogador e sofre recuo ao receber tiros.
 - Ondas: 5 inimigos inicialmente, mais 2 por ronda até 40 por onda; máximo de 18 em simultâneo.
 - Spawns: marcador de aviso de 0,7 s, sem dano ou movimento durante a preparação; ativação adiada a menos de 56 px do jogador. Contam para o limite e orçamento da onda.
@@ -126,7 +127,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Resolver separação junto às paredes com redistribuição do movimento bloqueado e passes limitados.
 - [ ] Adicionar navegação quando existirem obstáculos reais.
 - [x] Criar inimigo à distância com distância preferida, aviso de 0,65 s, mira fixa e projétil distinto.
-- [ ] Criar inimigo de investida com preparação, ataque e recuperação claros.
+- [x] Criar inimigo de investida com preparação, ataque e recuperação claros.
 - [ ] Criar inimigo resistente que altere o posicionamento do jogador.
 - [ ] Definir estatísticas, recompensas e função de cada tipo de inimigo.
 - [x] Introduzir um inimigo à distância por três spawns a partir da onda 3.

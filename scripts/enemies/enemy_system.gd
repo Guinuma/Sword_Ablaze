@@ -5,6 +5,7 @@ signal shot(origin: Vector2, direction: Vector2, speed: float, damage: int)
 const EnemySettings = preload("res://scripts/data/enemy_settings.gd")
 var settings: EnemySettings = load("res://resources/default_enemy.tres")
 var ranged_settings: EnemySettings = load("res://resources/default_ranged.tres")
+var charger_settings: EnemySettings = load("res://resources/default_charger.tres")
 var items: Array[Dictionary] = []
 
 
@@ -21,7 +22,7 @@ func spawn(target: Vector2, bounds: Rect2, random: RandomNumberGenerator, kind: 
 	else:
 		var y := bounds.position.y + 10.0 if target.y > bounds.get_center().y else bounds.end.y - 10.0
 		point = Vector2(random.randf_range(bounds.position.x + 10.0, bounds.end.x - 10.0), y)
-	var profile: EnemySettings = ranged_settings if kind == &"ranged" else settings
+	var profile: EnemySettings = ranged_settings if kind == &"ranged" else (charger_settings if kind == &"charger" else settings)
 	items.append({"position": point, "health": profile.health, "flash": 0.0, "spawn_time": profile.spawn_warning, "profile": profile, "attack_cooldown": profile.attack_cooldown, "windup": 0.0})
 
 
@@ -29,6 +30,8 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 	for enemy in items:
 		var profile: EnemySettings = enemy.get("profile", settings)
 		var point: Vector2 = enemy["position"]
+		enemy["charge_from"] = point
+		enemy["charge_moved"] = false
 		if enemy.get("spawn_time", 0.0) > 0.0:
 			enemy["spawn_time"] = maxf(0.0, enemy["spawn_time"] - delta)
 			# Never activate on top of a player who moved into the warning.
@@ -36,7 +39,9 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 				enemy["spawn_time"] = maxf(0.001, enemy["spawn_time"])
 			continue
 		var speed: float = minf(profile.speed + (wave - 1) * profile.speed_per_wave, profile.max_speed)
-		if profile.kind == "ranged":
+		if profile.kind == "charger":
+			_advance_charger(enemy, target, delta, speed, profile, bounds)
+		elif profile.kind == "ranged":
 			_advance_ranged(enemy, target, delta, speed, profile)
 		else:
 			enemy["position"] = point.move_toward(target, speed * delta)
@@ -92,7 +97,12 @@ func _resolve_separation(bounds: Rect2) -> float:
 func touches(point: Vector2) -> bool:
 	for enemy in items:
 		var profile: EnemySettings = enemy.get("profile", settings)
-		if enemy.get("spawn_time", 0.0) <= 0.0 and point.distance_to(enemy["position"]) < profile.contact_radius:
+		if enemy.get("spawn_time", 0.0) > 0.0:
+			continue
+		var closest: Vector2 = enemy["position"]
+		if enemy.get("charge_moved", false):
+			closest = Geometry2D.get_closest_point_to_segment(point, enemy["charge_from"], enemy["position"])
+		if point.distance_to(closest) < profile.contact_radius:
 			return true
 	return false
 
@@ -115,3 +125,42 @@ func _advance_ranged(enemy: Dictionary, target: Vector2, delta: float, speed: fl
 	if enemy["attack_cooldown"] == 0.0 and distance <= profile.attack_range:
 		enemy["shot_direction"] = point.direction_to(target)
 		enemy["windup"] = profile.attack_warning
+
+
+func _advance_charger(enemy: Dictionary, target: Vector2, delta: float, speed: float, profile: EnemySettings, bounds: Rect2) -> void:
+	var phase: String = enemy.get("charge_phase", "approach")
+	if phase == "approach":
+		enemy["position"] = enemy["position"].move_toward(target, speed * delta)
+		enemy["attack_cooldown"] = maxf(0.0, enemy["attack_cooldown"] - delta)
+		if enemy["attack_cooldown"] == 0.0 and enemy["position"].distance_to(target) <= profile.attack_range:
+			enemy["charge_direction"] = enemy["position"].direction_to(target)
+			enemy["charge_phase"] = "warning"
+			enemy["charge_timer"] = profile.attack_warning
+		return
+	var remaining := delta
+	# Carry time across the three attack stages, including the final charge step.
+	for transition in range(3):
+		phase = enemy["charge_phase"]
+		var step := minf(remaining, enemy["charge_timer"])
+		if phase == "charge":
+			var destination: Vector2 = enemy["position"] + enemy["charge_direction"] * profile.charge_speed * step
+			enemy["position"] = _clamp_enemy(enemy, destination, bounds)
+			enemy["charge_moved"] = step > 0.0
+			if enemy["position"].distance_squared_to(destination) > 0.001:
+				enemy["charge_timer"] = step
+		enemy["charge_timer"] = maxf(0.0, enemy["charge_timer"] - step)
+		remaining -= step
+		if enemy["charge_timer"] > 0.0:
+			break
+		if phase == "warning":
+			enemy["charge_phase"] = "charge"
+			enemy["charge_timer"] = profile.charge_duration
+		elif phase == "charge":
+			enemy["charge_phase"] = "recovery"
+			enemy["charge_timer"] = profile.charge_recovery
+		else:
+			enemy["charge_phase"] = "approach"
+			enemy["attack_cooldown"] = profile.attack_cooldown
+			break
+		if remaining <= 0.0:
+			break

@@ -41,4 +41,6 @@ func advance(delta: float, living_enemies: int) -> void:
 		spawn_cooldown = maxf(settings.min_spawn_interval, settings.spawn_interval - (number - 1) * settings.interval_reduction)
 		spawn_count += 1
 		var kind: StringName = &"ranged" if number >= settings.ranged_start_wave and spawn_count % settings.ranged_every == 0 else &"chaser"
+		if number >= settings.charger_start_wave and spawn_count % settings.charger_every == 0:
+			kind = &"charger"
 		spawn_requested.emit(kind)

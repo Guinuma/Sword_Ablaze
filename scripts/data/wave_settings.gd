@@ -14,3 +14,6 @@ extends Resource
 @export_range(1, 1000) var ranged_start_wave: int = 3
 @export_range(1, 1000) var ranged_every: int = 3
 @export_range(1, 1000) var upgrade_every: int = 3
+
+@export_range(1, 1000) var charger_start_wave: int = 5
+@export_range(1, 1000) var charger_every: int = 5

@@ -18,6 +18,7 @@ def main():
         ("Audio", ["--script", "tests/audio_smoke.gd"], "Audio checks complete: 0 failures"),
         ("Bindings", ["--script", "tests/bindings_smoke.gd"], "Bindings checks complete: 0 failures"),
         ("Tutorial", ["--script", "tests/tutorial_smoke.gd"], "Tutorial checks complete: 0 failures"),
+        ("Charger", ["--script", "tests/charger_smoke.gd"], "Charger checks complete: 0 failures"),
         ("Startup", ["--quit-after", "120"], None),
         ("Long session", ["--script", "tests/run_soak.gd"], "Run soak complete: 0 failures"),
     ]
