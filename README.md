@@ -150,7 +150,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Substituir escalada uniforme por configurações de encontros e composição de ondas; ver [encontros](docs/encounters.md).
 - [x] **Decidido:** nove ondas + boss na décima, alvo de 10–15 minutos e variante Endless separada; ver [estrutura da run](docs/run-design.md). Courtyard Run e Endless Arena selecionáveis no menu.
 - [x] Mostrar resumo de derrota com ronda, tempo, eliminações e opção de repetir.
-- [ ] Acrescentar recompensas ao resumo quando existir progressão.
+- [x] Acrescentar XP global guardado e nível ao resumo, com estado de falha e repetição da gravação.
 - [ ] Criar fluxo completo: iniciar arena, jogar, terminar, repetir ou regressar ao hub.
 - [x] Guardar recordes locais de onda, eliminações e sobrevivência, com backup e resumo.
 - [ ] Fazer playtests da primeira ronda, meio da partida e rondas avançadas.
