@@ -64,6 +64,8 @@ Perder foco pausa o jogo; Escape retoma. Após pausa, reinício, escolha de melh
 
 Os recordes de onda, eliminações e sobrevivência são máximos independentes e ficam em `user://arena_records.json`. As preferências visuais e os volumes ficam em `user://preferences.json`. As melhorias da partida não são progresso persistente. Detalhes: [recordes e recuperação](docs/arena-records.md).
 
+Options → Keyboard Bindings permite remapear movimento, disparo, dash e reinício, com deteção de conflitos e reposição dos valores iniciais. Escape e o disparo pelo rato mantêm-se disponíveis. Ver [controlos](docs/controls.md).
+
 Os valores são provisórios e precisam de playtesting.
 
 ## Checklist de desenvolvimento
@@ -256,7 +258,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Integrar escolha de melhorias e indicadores das melhorias adquiridas no HUD.
 - [ ] Integrar futuros menus de skill tree e recompensas.
 - [x] Aplicar HUD e menus em marinho, ouro e marfim, com fonte pixel e hierarquia de informação.
-- [ ] Oferecer remapeamento de teclas e guardar preferências.
+- [x] Oferecer remapeamento de teclas e guardar preferências.
 - [ ] **Decidir:** suporte de comando; se incluído, implementar mira, foco e navegação completos.
 - [ ] Garantir navegação por teclado e foco visível nos menus.
 - [x] Rever HUD e menus a 640 × 360 e 1280 × 720, incluindo vida crítica e contadores maiores.

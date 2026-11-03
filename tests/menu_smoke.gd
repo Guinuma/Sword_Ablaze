@@ -31,6 +31,22 @@ func _run() -> void:
 	var frozen: float = menu.clock
 	menu._process(1.0)
 	check(menu.clock == frozen, "Reduced motion must stop menu animation")
+	menu._show_bindings()
+	check(menu.detail_body.get_child(1) is GridContainer, "Keyboard settings must expose action buttons")
+	menu._capture_binding(&"dash")
+	var key := InputEventKey.new()
+	key.keycode = KEY_Q
+	key.physical_keycode = KEY_Q
+	key.pressed = true
+	menu._input(key)
+	check(menu.binding_action == &"" and menu.preferences.bindings.get(&"dash") == KEY_Q, "Capture must apply and finish")
+	menu._capture_binding(&"fire")
+	key.keycode = KEY_ESCAPE
+	key.physical_keycode = KEY_ESCAPE
+	menu._input(key)
+	check(menu.binding_action == &"" and not menu.preferences.bindings.has(&"fire"), "Escape must cancel capture")
+	menu.preferences.reset_bindings()
+	menu.preferences.save()
 	menu._show_audio()
 	for bus in menu.Preferences.AUDIO_BUSES:
 		var index := AudioServer.get_bus_index(bus)

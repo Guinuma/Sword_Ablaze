@@ -19,6 +19,9 @@ var back_button: Button
 var return_focus: Button
 var save_error: Label
 var clock: float = 0.0
+var binding_action: StringName = &""
+var binding_button: Button
+var binding_status: Label
 var starting: bool = false
 var pixel_font: Font
 
@@ -74,6 +77,24 @@ func _process(delta: float) -> void:
 		clock += delta
 		queue_redraw()
 
+func _input(event: InputEvent) -> void:
+	if binding_action == &"" or not event is InputEventKey or not event.pressed or event.echo:
+		return
+	get_viewport().set_input_as_handled()
+	if event.keycode == KEY_ESCAPE:
+		binding_action = &""
+		_show_bindings()
+		return
+	var code: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
+	if not preferences.set_binding(binding_action, code):
+		binding_status.text = "Key unavailable. Try another; Escape cancels."
+		return
+	binding_action = &""
+	preferences.save()
+	_show_bindings()
+	if preferences.last_error != OK:
+		binding_status.text = "Applied, but could not save preferences."
+
 func _unhandled_input(event: InputEvent) -> void:
 	if detail.visible and event.is_action_pressed("ui_cancel"):
 		_back()
@@ -121,6 +142,7 @@ func _show_options() -> void:
 		else:
 			toggle.toggled.connect(func(value): preferences.reduced_motion = value; _save_preferences(); queue_redraw())
 	_button(detail_body, "AUDIO VOLUMES", _show_audio)
+	_button(detail_body, "KEYBOARD BINDINGS", _show_bindings)
 	_label(detail_body, "Applies to the menu and arena. Saved automatically.", Vector2.ZERO, 12, MUTED, false)
 	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
 	detail_body.get_child(1).grab_focus()
@@ -130,6 +152,7 @@ func _save_preferences() -> void:
 	save_error.text = "Could not save preferences." if preferences.last_error != OK else ""
 
 func _back() -> void:
+	binding_action = &""
 	detail.hide()
 	home.show()
 	if is_instance_valid(return_focus):
@@ -234,3 +257,39 @@ func _show_audio() -> void:
 			first_slider = slider
 	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
 	first_slider.grab_focus()
+
+
+func _show_bindings() -> void:
+	_open_detail("KEYBOARD")
+	detail_body.add_theme_constant_override("separation", 2)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 3)
+	detail_body.add_child(grid)
+	var names := ["LEFT", "RIGHT", "UP", "DOWN", "FIRE", "DASH", "RESTART"]
+	var first: Button
+	for index in range(Preferences.REMAPPABLE.size()):
+		var action: StringName = Preferences.REMAPPABLE[index]
+		var keys := PackedStringArray()
+		for event in InputMap.action_get_events(action):
+			if event is InputEventKey:
+				keys.append(OS.get_keycode_string(event.physical_keycode if event.physical_keycode else event.keycode))
+		var button := _button(grid, names[index] + ": " + "/".join(keys), func(): _capture_binding(action))
+		button.custom_minimum_size = Vector2(190, 26)
+		if first == null:
+			first = button
+	var reset := _button(grid, "RESTORE DEFAULTS", func():
+		preferences.reset_bindings()
+		preferences.save()
+		_show_bindings()
+		if preferences.last_error != OK:
+			binding_status.text = "Applied, but could not save preferences.")
+	reset.custom_minimum_size = Vector2(190, 26)
+	binding_status = _label(detail_body, "Choose an action, then press a key. Escape cancels.", Vector2.ZERO, 12, MUTED, false)
+	_label(detail_body, "Mouse fire and Escape pause stay available.", Vector2.ZERO, 12, MUTED, false)
+	first.grab_focus()
+
+func _capture_binding(action: StringName) -> void:
+	binding_action = action
+	binding_status.text = "Press a key for %s. Escape cancels." % String(action).trim_prefix("move_").to_upper()
