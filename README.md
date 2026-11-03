@@ -244,7 +244,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Definir esquema de perfil para XP, desbloqueios e skills, mantendo preferências num ficheiro separado; ver [esquema](docs/progression.md).
 - [x] Gravar recordes em `user://` através de ficheiro temporário e cópia de recuperação.
 - [x] Aplicar escrita segura ao perfil global, com transações de identidade da run e XP; integração no jogo pendente.
-- [ ] Criar e carregar perfil inicial quando não existir save.
+- [x] Criar e carregar perfil inicial quando não existir save, com caminhos isolados nos testes.
 - [ ] Validar dados e tratar saves incompletos ou corrompidos.
 - [ ] Implementar migrações entre versões do esquema.
 - [ ] Guardar nos momentos de recompensa, compra e alteração de preferências.
