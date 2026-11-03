@@ -227,7 +227,7 @@ Os valores são provisórios e precisam de playtesting.
 ### 9. XP transversal, hub e skill trees
 
 - [x] Definir XP global, níveis, fontes de recompensa e limites por modo; ver [progressão](docs/progression.md).
-- [ ] Distinguir XP global de experiência ou moeda temporária de uma run.
+- [x] Distinguir GLOBAL XP persistente de melhorias temporárias da run, no perfil, regras e apresentação.
 - [x] Garantir regras globais partilhadas entre Courtyard Run e Endless Arena, com bónus explícito de vitória.
 - [x] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves, com identidade persistente e transação única.
 - [ ] Criar hub com acesso aos modos, progressão e configurações.
