@@ -220,7 +220,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Definir raridade, pré-requisitos e exclusões de melhorias, se necessários.
 - [x] Recalcular melhorias sem duplicação e removê-las ao reiniciar.
 - [ ] **Decidir:** recuperação, moeda temporária, lojas, rerolls e outros sistemas de economia.
-- [ ] Definir recompensas de vitória e derrota antes de ligar progressão persistente.
+- [x] Definir recompensas de vitória e derrota antes de ligar progressão persistente; ver [contrato de XP](docs/progression.md).
 - [x] Testar acumulação, seleção repetida/inválida, reset e esgotamento de opções.
 - [ ] Equilibrar combinações fortes em playtests.
 
