@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Ainda não existem menu principal, áudio, XP global, hub, boss ou condição de vitória.
+Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Ainda não existem áudio, XP global, hub, boss ou condição de vitória.
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -20,13 +20,15 @@ A arte gerada já está integrada em texturas e atlas de animação. É uma base
 
 ![Arena e HUD no motor](docs/art/celestial-courtyard-gameplay-01.png)
 
+![Menu principal no motor](docs/art/main-menu-01.png)
+
 HUD e menus: [notas de apresentação](docs/hud.md). Arte, prompts e limitações: [direção de arte](docs/art/README.md).
 
 ## Abrir e executar
 
 1. Instalar **Godot 4.5.1 Standard** (sem .NET), versão de referência.
 2. Clonar o repositório e importar `project.godot`.
-3. Carregar **F5** para executar o projeto.
+3. Carregar **F5** para abrir o menu principal e escolher **PLAY ARENA**.
 
 Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável no PATH.
 
@@ -38,7 +40,8 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 | Shift | Dash na direção do movimento, ou da mira quando parado |
 | Escape / botão II no HUD | Pausar; Escape ou Resume para retomar |
 | R | Reiniciar, incluindo durante pausa ou após morrer |
-| Tab / Enter | Navegar e ativar os botões dos menus |
+| Tab / setas / Enter | Navegar e ativar os botões dos menus |
+| Escape nos controlos/opções | Voltar ao menu principal |
 | Rato sobre os ícones inferiores | Consultar rank e efeito acumulado das melhorias |
 
 ### Regras do protótipo
@@ -243,9 +246,10 @@ Os valores são provisórios e precisam de playtesting.
 
 - [x] HUD funcional e mensagens de morte/pausa.
 - [x] Integrar ecrã de derrota com resultados, recordes e reinício.
-- [ ] Criar menu principal e seleção de modo.
+- [x] Criar menu principal com entrada na arena, controlos, opções e recordes locais.
+- [ ] Criar seleção de modo quando existir outro modo jogável.
 - [x] Criar botões de pausa para retomar, reiniciar e sair, com foco por teclado.
-- [ ] Acrescentar configurações ao menu de pausa quando existir esse ecrã.
+- [x] Partilhar preferências visuais entre menu principal e pausa.
 - [x] Integrar escolha de melhorias e indicadores das melhorias adquiridas no HUD.
 - [ ] Integrar futuros menus de skill tree e recompensas.
 - [x] Aplicar HUD e menus em marinho, ouro e marfim, com fonte pixel e hierarquia de informação.
@@ -345,3 +349,5 @@ Os testes verificam a lógica do protótipo. Não substituem playtesting nem rev
 ## Contribuir e licença
 
 Consultar [CONTRIBUTING.md](CONTRIBUTING.md). Código distribuído sob a [licença MIT](LICENSE). A fonte Silkscreen inclui a sua [licença própria](assets/fonts/Silkscreen-OFL.txt). Registar origem e licença dos assets adicionados; não presumir que referências visuais têm automaticamente a mesma licença do código.
+
+O botão **MAIN MENU** na pausa e nos resultados regressa ao menu principal. Sair de uma partida em curso abandona-a; apenas derrotas atualizam os recordes. As opções visuais são guardadas automaticamente e também afetam a animação decorativa do menu.

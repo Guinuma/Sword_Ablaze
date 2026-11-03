@@ -5,6 +5,7 @@ signal preferences_changed(reduced_flashes: bool, reduced_motion: bool)
 signal pause_requested
 signal resume_requested
 signal restart_requested
+signal main_menu_requested
 signal quit_requested
 
 const BlessingBadge = preload("res://scripts/ui/blessing_badge.gd")
@@ -136,7 +137,7 @@ func _build_menus() -> void:
 	secondary.add_theme_constant_override("separation", 8)
 	menu.add_child(secondary)
 	restart_button = _button("RESTART", secondary, func(): restart_requested.emit())
-	quit_button = _button("QUIT", secondary, func(): quit_requested.emit())
+	quit_button = _button("MAIN MENU", secondary, func(): main_menu_requested.emit())
 	flashes_toggle = _toggle("Reduce flashes", Vector2(182, 247))
 	motion_toggle = _toggle("Reduce visual motion", Vector2(182, 274))
 	menu_hint = _label(Vector2(182, 310), Vector2(276, 12), 8, true, MUTED)

@@ -57,6 +57,7 @@ func _ready() -> void:
 	hud_view.upgrade_selected.connect(_choose_upgrade)
 	hud_view.resume_requested.connect(func(): _set_paused(false))
 	hud_view.restart_requested.connect(_reset_run)
+	hud_view.main_menu_requested.connect(_return_to_menu)
 	hud_view.quit_requested.connect(func(): get_tree().quit())
 	add_child(hud_view)
 	world = Node2D.new()
@@ -72,6 +73,7 @@ func _ready() -> void:
 	overlay.z_index = 2
 	overlay.draw.connect(_draw_overlay)
 	add_child(overlay)
+	player.fire_requires_release = true
 	player_visual.present(player.player_position, player.aim, Vector2.ZERO, 0.0, false, false, false)
 	_update_hud()
 
@@ -242,6 +244,7 @@ func _reset_run() -> void:
 	particles.clear()
 	waves.reset()
 	player_visual.reset_pose()
+	player.fire_requires_release = true
 	player_visual.present(player.player_position, player.aim, Vector2.ZERO, 0.0, false, false, false)
 	_update_hud()
 	queue_redraw()
@@ -298,3 +301,8 @@ func _draw_overlay() -> void:
 		return
 	if not run.is_active():
 		overlay.draw_rect(ARENA, Color(0.02, 0.02, 0.04, 0.86))
+
+
+func _return_to_menu() -> void:
+	# Leaving a live run abandons it; only defeats contribute to records.
+	get_tree().change_scene_to_file("res://scenes/main/menu.tscn")
