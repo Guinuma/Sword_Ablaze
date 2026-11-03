@@ -637,4 +637,5 @@ func _run() -> void:
 	check(arena.run.health == 0 and arena.run.phase == arena.RunState.Phase.DEAD, "Two unprotected sniper hits must kill a base-health player")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
+	await create_timer(0.35).timeout
 	quit(0 if failures == 0 else 1)

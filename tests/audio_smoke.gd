@@ -26,5 +26,6 @@ func _run() -> void:
 		check(not effects.voices[index].playing, "Pause must stop combat tails")
 	check(effects.voices[0].playing, "Combat stop must preserve UI")
 	effects.free()
+	await create_timer(0.35).timeout
 	print("Audio checks complete: %d failures" % failures)
 	quit(1 if failures else 0)

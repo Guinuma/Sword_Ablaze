@@ -57,5 +57,7 @@ func _run() -> void:
 	arena.player_visual.defeat_done = true
 	arena._update_hud()
 	await cycle(arena.hud_view.restart_button, 2)
+	arena.free()
+	await create_timer(0.35).timeout
 	print("Navigation checks complete: %d failures" % failures)
 	quit(1 if failures else 0)

@@ -70,3 +70,12 @@ func _synthesize(tone: Array) -> AudioStreamWAV:
 	stream.mix_rate = RATE
 	stream.data = data
 	return stream
+
+
+func _exit_tree() -> void:
+	# Release playback references before scene destruction or application shutdown.
+	for voice in voices:
+		voice.stop()
+		voice.stream = null
+	streams.clear()
+	voices.clear()

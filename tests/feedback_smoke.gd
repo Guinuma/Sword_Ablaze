@@ -42,5 +42,6 @@ func _run() -> void:
 	arena._reset_run()
 	check(arena.feedback.items.is_empty(), "Restart must clear feedback")
 	arena.free()
+	await create_timer(0.35).timeout
 	print("Feedback checks complete: %d failures" % failures)
 	quit(1 if failures else 0)

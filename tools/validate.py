@@ -37,7 +37,7 @@ def main():
             print(f"{name} failed: {error}", file=sys.stderr)
             return 1
         print(result.stdout, end="")
-        if result.returncode or re.search(r"(?:SCRIPT ERROR:|(?:^|\n)ERROR:)", result.stdout) or (marker and marker not in result.stdout):
+        if result.returncode or re.search(r"(?:SCRIPT ERROR:|(?:^|\n)ERROR:|ObjectDB instances leaked)", result.stdout) or (marker and marker not in result.stdout):
             print(f"{name} failed", file=sys.stderr)
             return 1
         print(f"{name}: passed")

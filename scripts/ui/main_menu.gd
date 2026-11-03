@@ -1,5 +1,6 @@
 extends Control
 ## Front door only: the arena is instantiated when PLAY is activated.
+const ControlNames = preload("res://scripts/ui/combat_tutorial.gd")
 const FocusNavigation = preload("res://scripts/ui/focus_navigation.gd")
 const Preferences = preload("res://scripts/settings/preferences.gd")
 const ArenaRecords = preload("res://scripts/run/arena_records.gd")
@@ -124,7 +125,8 @@ func _open_detail(title: String) -> void:
 func _show_controls() -> void:
 	_open_detail("HOW TO PLAY")
 	detail_body.add_theme_constant_override("separation", 6)
-	for text in ["WASD / arrows     Move", "Mouse                 Aim", "Left click / Space   Fire", "Shift                    Dash", "Escape                 Pause / resume", "R                         Restart the run", "Clear waves. Choose blessings every third wave."]:
+	var movement := "/".join([ControlNames.key_name(&"move_up"), ControlNames.key_name(&"move_left"), ControlNames.key_name(&"move_down"), ControlNames.key_name(&"move_right")])
+	for text in [movement + "     Move", "Mouse                 Aim", "Left click / " + ControlNames.key_name(&"fire") + "   Fire", ControlNames.key_name(&"dash") + "                    Dash", "Escape                 Pause / resume", ControlNames.key_name(&"reset_sandbox") + "                         Restart the run", "Clear waves. Choose blessings every third wave."]:
 		_label(detail_body, text, Vector2.ZERO, 12, IVORY, false)
 	_refresh_focus()
 	back_button.grab_focus()

@@ -40,6 +40,8 @@ func _run() -> void:
 	key.pressed = true
 	menu._input(key)
 	check(menu.binding_action == &"" and menu.preferences.bindings.get(&"dash") == KEY_Q, "Capture must apply and finish")
+	menu._show_controls()
+	check(menu.detail_body.get_child(4).text.begins_with("Q"), "Help must show the remapped dash key")
 	menu._capture_binding(&"fire")
 	key.keycode = KEY_ESCAPE
 	key.physical_keycode = KEY_ESCAPE
@@ -96,5 +98,7 @@ func _run() -> void:
 	arena.hud_view.main_menu_requested.emit()
 	await scene_changed
 	check(current_scene.scene_file_path == "res://scenes/main/menu.tscn", "Results must return to menu")
+	current_scene.free()
+	await create_timer(0.35).timeout
 	print("Menu checks complete: %d failures" % failures)
 	quit(failures)

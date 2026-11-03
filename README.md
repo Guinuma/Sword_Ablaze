@@ -288,7 +288,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Simular 20 minutos, ondas avançadas, escolhas, pausas e reinício com teste determinista.
 - [ ] Fazer sessões longas de playtesting real e alternância de foco.
 - [ ] Recolher feedback externo sobre clareza, dificuldade e variedade das escolhas.
-- [ ] Registar problemas conhecidos e corrigir bloqueios antes de expandir conteúdo.
+- [x] Registar problemas conhecidos e corrigir bloqueios reproduzidos na validação atual; ver [problemas conhecidos](docs/known-issues.md).
 
 ### 13. Vertical slice e distribuição
 

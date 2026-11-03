@@ -310,6 +310,7 @@ func _update_hud() -> void:
 	hud_view.control_hint.text = tutorial.hint()
 	hud_view.control_hint.visible = run.is_active() and tutorial.step < 5
 	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")
+	hud_view.menu_hint.text = "ESC RESUME    %s RESTART" % CombatTutorial.key_name(&"reset_sandbox")
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
 		hud_view.wave_status.hide()
 
@@ -338,9 +339,6 @@ func _draw() -> void:
 
 func _draw_overlay() -> void:
 	feedback.draw_on(overlay, preferences.reduced_motion, preferences.reduced_flashes)
-	hud_view.control_hint.text = tutorial.hint()
-	hud_view.control_hint.visible = run.is_active() and tutorial.step < 5
-	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
 		return
 	if not run.is_active():

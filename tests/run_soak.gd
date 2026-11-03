@@ -63,4 +63,5 @@ func _run() -> void:
 	print("Soak reached wave %d with %d upgrade choices" % [highest_wave, chosen])
 	print("Run soak complete: %d failures" % failures)
 	arena.free()
+	await create_timer(0.35).timeout
 	quit(0 if failures == 0 else 1)
