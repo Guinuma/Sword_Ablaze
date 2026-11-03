@@ -20,3 +20,6 @@ extends Resource
 
 @export_range(1, 1000) var guardian_start_wave: int = 7
 @export_range(1, 1000) var guardian_every: int = 7
+
+@export var encounters: Array[Resource] = []
+@export_range(1, 1000) var repeat_from_wave: int = 7

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/encounter_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Bulwark"
+pattern = Array[StringName]([&"chaser", &"chaser", &"ranged", &"chaser", &"charger", &"ranged", &"guardian"])
+budget_multiplier = 1.0
+interval_multiplier = 1.15

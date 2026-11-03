@@ -21,7 +21,7 @@ These values define the current Arena prototype, not final balance. Source of tr
 
 One enemy consumes one spawn from the wave budget, including stronger types. Pending spawn warnings count toward the simultaneous limit of 18. Each warning lasts at least 0.7 s; activation waits while the player is within 56 px. Pending enemies cannot move, deal contact damage or receive player shots.
 
-Starting at the listed first wave, every third spawn selects a sentinel, every fifth a ram and every seventh a guardian. Coincident slots prefer guardian, then ram, then sentinel; remaining slots are wisps. This is the current deterministic introduction schedule. Authored encounter configurations and human difficulty/composition playtests remain separate checklist work.
+The first nine waves use authored [encounter recipes](encounters.md); the last three recipes repeat afterward. Opening introductions preserve one sentinel per three spawns in wave three, one ram per five in wave five, and one guardian per seven in wave seven. Later compositions vary by recipe. Human difficulty/composition playtests remain separate checklist work.
 
 ## Rewards
 

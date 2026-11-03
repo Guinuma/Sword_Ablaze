@@ -1,6 +1,24 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/data/wave_settings.gd" id="1"]
+
+[ext_resource type="Resource" path="res://resources/encounters/01_pursuit.tres" id="2"]
+
+[ext_resource type="Resource" path="res://resources/encounters/02_pressure.tres" id="3"]
+
+[ext_resource type="Resource" path="res://resources/encounters/03_crossfire.tres" id="4"]
+
+[ext_resource type="Resource" path="res://resources/encounters/04_breather.tres" id="5"]
+
+[ext_resource type="Resource" path="res://resources/encounters/05_charge.tres" id="6"]
+
+[ext_resource type="Resource" path="res://resources/encounters/06_firing_line.tres" id="7"]
+
+[ext_resource type="Resource" path="res://resources/encounters/07_bulwark.tres" id="8"]
+
+[ext_resource type="Resource" path="res://resources/encounters/08_pincer.tres" id="9"]
+
+[ext_resource type="Resource" path="res://resources/encounters/09_siege.tres" id="10"]
 
 [resource]
 script = ExtResource("1")
@@ -14,3 +32,4 @@ min_spawn_interval = 0.4
 break_duration = 3.0
 initial_delay = 0.8
 next_wave_delay = 0.3
+encounters = Array[Resource]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9"), ExtResource("10")])
