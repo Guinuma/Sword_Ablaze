@@ -245,7 +245,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Gravar recordes em `user://` através de ficheiro temporário e cópia de recuperação.
 - [x] Aplicar escrita segura ao perfil global, com transações de identidade da run e XP; integração no jogo pendente.
 - [x] Criar e carregar perfil inicial quando não existir save, com caminhos isolados nos testes.
-- [ ] Validar dados e tratar saves incompletos ou corrompidos.
+- [x] Validar dados do perfil e recuperar saves incompletos/corrompidos através do backup, com proteção de versões futuras.
 - [ ] Implementar migrações entre versões do esquema.
 - [ ] Guardar nos momentos de recompensa, compra e alteração de preferências.
 - [ ] Oferecer reposição de progresso com confirmação explícita.
