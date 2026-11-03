@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Ainda não existem XP global, hub, boss ou condição de vitória.
+Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Ainda não existem XP global, hub, boss ou condição de vitória.
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -50,6 +50,7 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 - Inimigo à distância: introduzido na onda 3, com composição definida por encontro; mantém cerca de 150 px, avisa durante 0,65 s e dispara na direção fixada. Projéteis dos snipers causam 50 PV de dano e respeitam dash/proteção de contacto.
 - Inimigo de investida: 4 HP; introduzido na onda 5, com composição definida por encontro. Fixa a direção durante 0,85 s, investe a 300 px/s até 0,45 s e recupera imóvel durante 0,8 s. Visual geométrico provisório; contacto usa segmento para evitar atravessar o jogador entre frames.
 - Guardião: 8 HP; introduzido na onda 7, com composição definida por encontro. Escudo frontal de 120°, rotação limitada a 1,1 rad/s e apenas 20% do recuo normal. Tiros frontais causam metade do dano, arredondado para cima (mínimo 1); flancos/costas recebem dano duplo. Visual geométrico provisório.
+- Elite coroado: 10 HP; abre o encontro Siege na onda 9 e nas repetições. Avisa oito direções fixas durante 1,05 s e dispara uma salva radial a 110 px/s, com 20 PV de dano por projétil e 3 s entre ataques.
 - Inimigo básico: 2 HP; persegue o jogador e sofre recuo ao receber tiros.
 - Ondas: nove encontros configuráveis, com variação de composição, orçamento e ritmo; depois repetem os três últimos. Orçamento base de 5 + 2 por ronda, ajustado pelo encontro e limitado a 40; máximo de 18 em simultâneo.
 - Spawns: marcador de aviso de 0,7 s, sem dano ou movimento durante a preparação; ativação adiada a menos de 56 px do jogador. Contam para o limite e orçamento da onda.
@@ -133,7 +134,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Definir estatísticas, recompensas e função dos quatro tipos atuais; ver [inimigos](docs/enemies.md).
 - [x] Introduzir o inimigo à distância na onda 3, inicialmente um por três spawns.
 - [ ] Equilibrar a composição de encontros em playtests.
-- [ ] Criar primeiro elite com comportamento reconhecível.
+- [x] Criar primeiro elite com comportamento reconhecível.
 - [ ] Criar primeiro boss com ataques anunciados, fases e recompensa.
 - [x] Testar dano simultâneo de contacto/projéteis, eliminações em cadeia, congelamento na morte e limpeza de inimigos/projéteis ao reiniciar.
 

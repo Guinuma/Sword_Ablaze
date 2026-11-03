@@ -1,0 +1,18 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+kind = "elite"
+health = 10
+speed = 30.0
+speed_per_wave = 0.5
+max_speed = 45.0
+preferred_distance = 150.0
+attack_range = 600.0
+attack_cooldown = 3.0
+attack_warning = 1.05
+projectile_speed = 110.0
+projectile_damage = 20
+knockback_multiplier = 0.5

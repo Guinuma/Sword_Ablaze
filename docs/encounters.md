@@ -1,6 +1,6 @@
 # Arena encounter recipes
 
-`resources/default_wave.tres` references nine editable Resources in `resources/encounters/`. Each uses `scripts/data/encounter_definition.gd`: a title, ordered enemy pattern, budget multiplier and spawn-interval multiplier. Patterns repeat until the wave budget is consumed. This changes composition and pacing without changing enemy AI.
+`resources/default_wave.tres` references nine editable Resources in `resources/encounters/`. Each uses `scripts/data/encounter_definition.gd`: a title, ordered enemy pattern, optional one-off opener, budget multiplier and spawn-interval multiplier. Patterns repeat until the wave budget is consumed. This changes composition and pacing without changing enemy AI.
 
 | Wave | Recipe | Pattern (C chaser, R ranged, A charger, G guardian) | Budget | Interval multiplier |
 | --- | --- | --- | --- | --- |
@@ -13,6 +13,8 @@
 | 7 | Bulwark | C C R C A R G | 17 | 1.15 |
 | 8 | Pincer | A C R C R G | 19 | 1.1 |
 | 9 | Siege | G C R A C R A C | 21 | 1.25 |
+
+Siege replaces its first pattern entry with one crowned sentinel elite. The opener consumes an ordinary budget slot and does not recur when the rest of the pattern repeats.
 
 From wave 10 onward, recipes 7–9 repeat. Base budget remains 5 + 2 × (wave - 1), multiplied by the recipe factor, rounded and clamped to 1–40. Spawn interval is (1.6 - 0.1 × (wave - 1)) × recipe factor, with a floor of 0.4 s. Longer intervals and reduced budgets provide deliberate relief around new introductions. The 18-enemy simultaneous cap, pending-spawn safety, three-second intermission, healing and upgrade cadence are unchanged.
 

@@ -44,7 +44,7 @@ func _draw() -> void:
 	if state.is_empty():
 		return
 	var profile = state.get("profile")
-	var ranged: bool = profile != null and profile.kind == "ranged"
+	var ranged: bool = profile != null and profile.kind in ["ranged", "elite"]
 	var warning: float = state.get("spawn_time", 0.0)
 	if warning > 0.0:
 		var duration: float = profile.spawn_warning if profile != null else 0.7
@@ -67,7 +67,12 @@ func _draw() -> void:
 	var windup: float = state.get("windup", 0.0)
 	if windup > 0.0:
 		var direction: Vector2 = state["shot_direction"]
-		draw_line(Vector2.ZERO, direction * profile.attack_range, Color(0.95, 0.35, 0.8, 0.65), 1.0)
+		if profile.kind == "elite":
+			for index in range(8):
+				var spoke := direction.rotated(index * TAU / 8)
+				draw_line(spoke * 14, spoke * profile.attack_range, Color(0.95, 0.35, 0.8, 0.5), 1)
+		else:
+			draw_line(Vector2.ZERO, direction * profile.attack_range, Color(0.95, 0.35, 0.8, 0.65), 1.0)
 		draw_arc(Vector2.ZERO, 11.0, 0.0, TAU, 20, Color("ed99eb"), 1.0)
 	var bob: float = 0.0
 	if not reduced_motion:
@@ -84,6 +89,10 @@ func _draw() -> void:
 			draw_texture_rect(body, Rect2(-17, -29 + bob, 34, 39), false, tint)
 	else:
 		draw_texture_rect(WISP, Rect2(-10, -25 + bob, 20, 35), false, tint)
+	if profile != null and profile.kind == "elite":
+		draw_arc(Vector2.ZERO, 14, 0, TAU, 24, Color("c5a46c"), 2)
+		var crown := PackedVector2Array([Vector2(-9, -34), Vector2(-9, -42), Vector2(-4, -38), Vector2(0, -45), Vector2(4, -38), Vector2(9, -42), Vector2(9, -34)])
+		draw_colored_polygon(crown, Color("c5a46c"))
 	var health: int = state["health"]
 	var max_health: int = profile.health if profile != null else 2
 	if health < max_health:

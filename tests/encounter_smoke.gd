@@ -26,7 +26,8 @@ func _run() -> void:
 		for index in range(budget):
 			director.spawn_cooldown = 0.0
 			director.advance(0.01, 0)
-			check(kinds[index] == recipe.pattern[index % recipe.pattern.size()], "Every spawn must follow its recipe")
+			var expected: StringName = recipe.opener if index == 0 and recipe.opener != &"" else recipe.pattern[index % recipe.pattern.size()]
+			check(kinds[index] == expected, "Every spawn must follow its recipe or opener")
 		check(director.remaining == 0 and kinds.size() == budget, "Recipe must consume exact wave budget")
 	# Custom resources without recipes retain the generic fallback.
 	director.settings = director.settings.duplicate()

@@ -8,6 +8,7 @@ var settings: EnemySettings = load("res://resources/default_enemy.tres")
 var ranged_settings: EnemySettings = load("res://resources/default_ranged.tres")
 var charger_settings: EnemySettings = load("res://resources/default_charger.tres")
 var guardian_settings: EnemySettings = load("res://resources/default_guardian.tres")
+var elite_settings: EnemySettings = load("res://resources/default_elite.tres")
 var items: Array[Dictionary] = []
 
 
@@ -24,7 +25,7 @@ func spawn(target: Vector2, bounds: Rect2, random: RandomNumberGenerator, kind: 
 	else:
 		var y := bounds.position.y + 10.0 if target.y > bounds.get_center().y else bounds.end.y - 10.0
 		point = Vector2(random.randf_range(bounds.position.x + 10.0, bounds.end.x - 10.0), y)
-	var profiles := {&"chaser": settings, &"ranged": ranged_settings, &"charger": charger_settings, &"guardian": guardian_settings}
+	var profiles := {&"chaser": settings, &"ranged": ranged_settings, &"charger": charger_settings, &"guardian": guardian_settings, &"elite": elite_settings}
 	var profile: EnemySettings = profiles.get(kind, settings)
 	items.append({"position": point, "health": profile.health, "flash": 0.0, "spawn_time": profile.spawn_warning, "profile": profile, "attack_cooldown": profile.attack_cooldown, "windup": 0.0, "facing": point.direction_to(target)})
 
@@ -51,7 +52,7 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 			enemy["position"] = point.move_toward(target, speed * delta)
 		elif profile.kind == "charger":
 			_advance_charger(enemy, target, delta, speed, profile, bounds)
-		elif profile.kind == "ranged":
+		elif profile.kind in ["ranged", "elite"]:
 			_advance_ranged(enemy, target, delta, speed, profile)
 		else:
 			enemy["position"] = point.move_toward(target, speed * delta)
@@ -123,7 +124,12 @@ func _advance_ranged(enemy: Dictionary, target: Vector2, delta: float, speed: fl
 		enemy["windup"] = maxf(0.0, enemy["windup"] - delta)
 		if enemy["windup"] == 0.0:
 			var direction: Vector2 = enemy["shot_direction"]
-			shot.emit(point + direction * 14.0, direction, profile.projectile_speed, profile.projectile_damage)
+			if profile.kind == "elite":
+				for index in range(8):
+					var spoke := direction.rotated(index * TAU / 8)
+					shot.emit(point + spoke * 14.0, spoke, profile.projectile_speed, profile.projectile_damage)
+			else:
+				shot.emit(point + direction * 14.0, direction, profile.projectile_speed, profile.projectile_damage)
 			enemy["attack_cooldown"] = profile.attack_cooldown
 		return
 	var distance := point.distance_to(target)

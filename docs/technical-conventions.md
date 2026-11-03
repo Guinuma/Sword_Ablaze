@@ -81,3 +81,10 @@ The wave-seven encounter introduces one per seven spawns; later ratios follow th
 Healing emits only for a positive amount actually restored, including drop collection and intermission recovery. Full-health pickup attempts do not produce a cue. Spawn activation emits only after its warning and proximity safety checks. Cues draw above actors and below modal dimming/HUD. Their timers freeze during pause, death and upgrade selection; restart clears them. Reduced motion keeps positions/radii fixed while fading, and reduced flashes lowers their opacity. They never flash the screen or shake the camera.
 
 `tests/feedback_smoke.gd` verifies event-driven creation, failed actions, full-health healing, paused lifetime, expiry, capacity and reset. `tools/capture_feedback.gd` captures normal and reduced settings. Existing particle bursts remain separately bounded at 160.
+
+
+## Crowned sentinel elite
+
+`default_elite.tres` reuses sentinel movement/cast presentation with an original code-drawn crown and gold ground halo. Its attack locks the first direction during a 1.05 s stationary warning and announces eight equally spaced spokes. At release, eight projectile events use those exact directions, at 110 px/s and 20 damage, followed by a 3 s cooldown. Shared hostile-projectile caps, swept player collision and dash protection apply normally. The Siege recipe uses a one-off `opener` to spawn exactly one elite inside the ordinary wave budget. Killing it grants the same one kill and healing-drop roll as other enemies; global elite rewards remain unimplemented.
+
+`tests/elite_smoke.gd` verifies fixed warnings, eight-shot directions, damage/speed, cooldown and one-off encounter placement at five step rates. `tools/capture_elite.gd` captures the warning. Dedicated final elite art and human difficulty testing remain pending.

@@ -49,7 +49,9 @@ func advance(delta: float, living_enemies: int) -> void:
 			kind = &"guardian"
 		if recipe != null and not recipe.pattern.is_empty():
 			kind = recipe.pattern[(spawn_count - 1) % recipe.pattern.size()]
-			if kind not in [&"chaser", &"ranged", &"charger", &"guardian"]:
+			if spawn_count == 1 and recipe.opener != &"":
+				kind = recipe.opener
+			if kind not in [&"chaser", &"ranged", &"charger", &"guardian", &"elite"]:
 				kind = &"chaser"
 		spawn_requested.emit(kind)
 

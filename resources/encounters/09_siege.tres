@@ -8,3 +8,4 @@ title = "Siege"
 pattern = Array[StringName]([&"guardian", &"chaser", &"ranged", &"charger", &"chaser", &"ranged", &"charger", &"chaser"])
 budget_multiplier = 1.0
 interval_multiplier = 1.25
+opener = &"elite"

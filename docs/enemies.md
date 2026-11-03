@@ -8,6 +8,7 @@ These values define the current Arena prototype, not final balance. Source of tr
 | Fractured sentinel / ranged | 2 | 36 / 1 / 60 | 3 | Break predictable kiting with aimed shots; move across the fixed warning line or dash through the shot. |
 | Armored ram / charger | 4 | 32 / 1 / 48 | 5 | Interrupt straight-line retreat; sidestep its locked lane, then attack during recovery. |
 | Stone guardian | 8 | 25 / 0.5 / 38 | 7 | Durable space pressure; circle its slow-turning shield and shoot the exposed sides/rear. |
+| Crowned sentinel / elite | 10 | 30 / 0.5 / 45 | 9 | Radial area pressure; move into the gaps between eight fixed warning spokes before the volley. |
 
 ## Attacks and defensive properties
 
@@ -17,11 +18,13 @@ These values define the current Arena prototype, not final balance. Source of tr
 - The guardian turns its shield at no more than 1.1 rad/s. Front means a 120-degree arc facing the incoming shot. Front damage is ceil(base damage / 2), minimum one; all other angles take double damage. It receives 20% of normal knockback. Other enemies receive full knockback.
 - Wisp, sentinel and ram use a 10 px shot-hit radius, 15 px contact radius, 18 px separation distance and 8 px wall margin. Guardian uses 13 / 18 / 28 / 14 px respectively. Presentation silhouettes do not define collision.
 
+The crowned sentinel uses the ranged spacing behavior, but announces eight radial directions for 1.05 s before firing eight 20-damage shots at 110 px/s. Its cooldown is 3 s and its knockback is 50% of normal. A crown and gold ground halo distinguish it from the regular sentinel; dedicated elite art is still pending. It shares the normal hit/contact radii and rewards.
+
 ## Introduction and encounter budget
 
 One enemy consumes one spawn from the wave budget, including stronger types. Pending spawn warnings count toward the simultaneous limit of 18. Each warning lasts at least 0.7 s; activation waits while the player is within 56 px. Pending enemies cannot move, deal contact damage or receive player shots.
 
-The first nine waves use authored [encounter recipes](encounters.md); the last three recipes repeat afterward. Opening introductions preserve one sentinel per three spawns in wave three, one ram per five in wave five, and one guardian per seven in wave seven. Later compositions vary by recipe. Human difficulty/composition playtests remain separate checklist work.
+The first nine waves use authored [encounter recipes](encounters.md); the last three recipes repeat afterward. Opening introductions preserve one sentinel per three spawns in wave three, one ram per five in wave five, and one guardian per seven in wave seven. Later compositions vary by recipe. Siege has one elite opener replacing its first pattern entry, so it adds no extra spawn budget. Human difficulty/composition playtests remain separate checklist work.
 
 ## Rewards
 

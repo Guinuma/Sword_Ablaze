@@ -11,7 +11,7 @@ extends Resource
 @export_range(0.001, 1000.0) var body_margin: float = 8.0
 @export_range(0.1, 5.0) var spawn_warning: float = 0.7
 @export_range(16.0, 200.0) var spawn_safe_distance: float = 56.0
-@export_enum("chaser", "ranged", "charger", "guardian") var kind: String = "chaser"
+@export_enum("chaser", "ranged", "charger", "guardian", "elite") var kind: String = "chaser"
 @export_range(32.0, 400.0) var preferred_distance: float = 150.0
 @export_range(32.0, 600.0) var attack_range: float = 230.0
 @export_range(0.1, 10.0) var attack_cooldown: float = 1.8
