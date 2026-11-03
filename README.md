@@ -46,8 +46,8 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 
 ### Regras do protótipo
 
-- Jogador: 100 PV iniciais; contacto causa 20 PV de dano, com 0,85 s de proteção entre impactos.
-- Inimigo à distância: surge da onda 3 em diante; mantém cerca de 150 px, avisa durante 0,65 s e dispara na direção fixada. Projéteis causam 20 PV de dano e respeitam dash/proteção de contacto.
+- Jogador: 100 PV iniciais; contacto causa 15 PV de dano, com 0,85 s de proteção entre impactos.
+- Inimigo à distância: surge da onda 3 em diante; mantém cerca de 150 px, avisa durante 0,65 s e dispara na direção fixada. Projéteis dos snipers causam 50 PV de dano e respeitam dash/proteção de contacto.
 - Inimigo básico: 2 HP; persegue o jogador e sofre recuo ao receber tiros.
 - Ondas: 5 inimigos inicialmente, mais 2 por ronda até 40 por onda; máximo de 18 em simultâneo.
 - Spawns: marcador de aviso de 0,7 s, sem dano ou movimento durante a preparação; ativação adiada a menos de 56 px do jogador. Contam para o limite e orçamento da onda.

@@ -51,7 +51,7 @@ func _run() -> void:
 	check(arena.run.health == 100 and arena.run.kills == 0 and arena.upgrades.stacks.is_empty(), "New run must start fresh")
 	# Avoid writing real records while verifying the results exit.
 	arena.run_recorded = true
-	for index in range(5):
+	for index in range(7):
 		arena.run.take_damage()
 	arena.player_visual.defeat_done = true
 	arena._update_hud()

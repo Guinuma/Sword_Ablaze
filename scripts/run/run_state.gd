@@ -6,7 +6,7 @@ signal enemy_defeated(total: int)
 
 enum Phase { COMBAT, INTERMISSION, PAUSED, DEAD, UPGRADE }
 const MAX_HEALTH: int = 100
-const HIT_DAMAGE: int = 20
+const HIT_DAMAGE: int = 15
 var max_health: int = MAX_HEALTH
 var phase: Phase = Phase.COMBAT
 var resume_phase: Phase = Phase.COMBAT
@@ -56,10 +56,10 @@ func finish_upgrade() -> void:
 		_set_phase(Phase.INTERMISSION)
 
 
-func take_damage() -> void:
-	if phase != Phase.COMBAT:
+func take_damage(amount: int = HIT_DAMAGE) -> void:
+	if phase != Phase.COMBAT or amount <= 0:
 		return
-	health = maxi(0, health - HIT_DAMAGE)
+	health = maxi(0, health - amount)
 	if health == 0:
 		_set_phase(Phase.DEAD)
 	damaged.emit(health)

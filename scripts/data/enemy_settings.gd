@@ -17,3 +17,5 @@ extends Resource
 @export_range(0.1, 10.0) var attack_cooldown: float = 1.8
 @export_range(0.1, 3.0) var attack_warning: float = 0.65
 @export_range(20.0, 500.0) var projectile_speed: float = 130.0
+
+@export_range(1, 1000) var projectile_damage: int = 50

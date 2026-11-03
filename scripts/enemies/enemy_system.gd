@@ -1,6 +1,6 @@
 extends RefCounted
 ## Owns enemy spawning, pursuit, separation and contact queries.
-signal shot(origin: Vector2, direction: Vector2, speed: float)
+signal shot(origin: Vector2, direction: Vector2, speed: float, damage: int)
 
 const EnemySettings = preload("res://scripts/data/enemy_settings.gd")
 var settings: EnemySettings = load("res://resources/default_enemy.tres")
@@ -103,7 +103,7 @@ func _advance_ranged(enemy: Dictionary, target: Vector2, delta: float, speed: fl
 		enemy["windup"] = maxf(0.0, enemy["windup"] - delta)
 		if enemy["windup"] == 0.0:
 			var direction: Vector2 = enemy["shot_direction"]
-			shot.emit(point + direction * 14.0, direction, profile.projectile_speed)
+			shot.emit(point + direction * 14.0, direction, profile.projectile_speed, profile.projectile_damage)
 			enemy["attack_cooldown"] = profile.attack_cooldown
 		return
 	var distance := point.distance_to(target)

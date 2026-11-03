@@ -1,13 +1,13 @@
 extends RefCounted
 ## Hostile shots are bounded and use swept collision against the player.
-signal hit_player
+signal hit_player(damage: int)
 const MAX_PROJECTILES: int = 64
 var items: Array[Dictionary] = []
 
 
-func fire(origin: Vector2, direction: Vector2, speed: float) -> void:
+func fire(origin: Vector2, direction: Vector2, speed: float, damage: int = 50) -> void:
 	if items.size() < MAX_PROJECTILES:
-		items.append({"position": origin, "direction": direction, "speed": speed, "life": 5.0})
+		items.append({"position": origin, "direction": direction, "speed": speed, "life": 5.0, "damage": damage})
 
 
 func clear() -> void:
@@ -22,7 +22,7 @@ func advance(delta: float, player_position: Vector2, bounds: Rect2) -> void:
 		bullet["life"] -= delta
 		if start.distance_to(player_position) <= 11.0 or Geometry2D.segment_intersects_circle(start, end, player_position, 11.0) >= 0.0:
 			items.remove_at(index)
-			hit_player.emit()
+			hit_player.emit(bullet.get("damage", 50))
 		elif bullet["life"] <= 0.0 or not bounds.has_point(end):
 			items.remove_at(index)
 		else:

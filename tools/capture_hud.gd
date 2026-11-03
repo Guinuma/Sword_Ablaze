@@ -32,7 +32,7 @@ func _capture() -> void:
 			arena.waves.number = 3
 			arena._on_wave_cleared()
 		if mode == "defeat":
-			arena.run.health = 20
+			arena.run.health = 15
 			arena._take_player_damage()
 			arena.player_visual.advance_defeat(1.0)
 		arena.healing_drops.spawn(Vector2(260, 190), 10)
