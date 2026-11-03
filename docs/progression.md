@@ -57,3 +57,10 @@ Concurrent application instances editing one profile are outside this first impl
 - Verify run allocation, abandonment, mode mismatch, duplicate settlement before/after reload and failed writes followed by retry.
 - Verify complete finite victory/defeat and Endless defeat apply the same base rules, with explicit completed-wave counters and one terminal receipt.
 - Keep skill purchases, hub integration, interrupted-write simulation, migration support and full hub → combat → result → reward → hub tests as separate open work until implemented.
+
+
+## Storage implementation status
+
+`scripts/run/global_profile.gd` now implements profile creation/loading, strict version-1 validation, bounded IDs/XP, safe transactional writes, backup recovery and identity-based reward settlement. It is not connected to combat or UI yet. `skills` and `unlocks` are reserved empty arrays until their definition sets exist; unknown IDs are rejected rather than applied. Profiles recovered from corruption expose `recovered`/`reset` status; future versions expose a write-blocking status. Sequence exhaustion refuses allocation.
+
+`tests/profile_smoke.gd` verifies reward and level boundaries, initial saves, failed writes with unchanged in-memory state, retry, duplicate callbacks/reloads, abandoned IDs, mismatched mode/outcome, capped awards, corruption/incomplete data recovery, backup preservation, future-version protection, cross-field validation, ignored partial temporary data and sequence exhaustion. Test files use isolated `user://profile_smoke.json` paths. Physical power-loss testing and game integration remain pending.
