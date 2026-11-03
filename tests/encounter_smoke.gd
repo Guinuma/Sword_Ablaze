@@ -30,7 +30,8 @@ func _run() -> void:
 		check(director.remaining == 0 and kinds.size() == budget, "Recipe must consume exact wave budget")
 	# Custom resources without recipes retain the generic fallback.
 	director.settings = director.settings.duplicate()
-	director.settings.encounters = []
+	var empty_recipes: Array[Resource] = []
+	director.settings.encounters = empty_recipes
 	director.reset()
 	check(director.remaining == 5 and director.encounter_for_wave(1) == null, "Empty configuration must retain fallback")
 	print("Encounter checks complete: %d failures" % failures)
