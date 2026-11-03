@@ -9,3 +9,5 @@ Usar Godot 4.5.1 Standard e GDScript. Manter alterações pequenas, com um objet
 - Documentar controlos novos, decisões de arquitetura e origem/licença de assets.
 - Antes de propor alterações, importar no editor, executar a cena principal e verificar erros no debugger e o estado do Git.
 - Na descrição da contribuição, indicar o comportamento alterado e como foi verificado.
+
+Convenções de coordenadas, colisão, grupos, desenho e pivôs: [referência técnica](docs/technical-conventions.md). Consultar antes de acrescentar entidades, obstáculos ou substituir sprites.

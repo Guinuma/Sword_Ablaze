@@ -89,7 +89,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Configurar Input Map no projeto sem apagar bindings ao abrir a arena.
 - [x] Guardar e carregar preferências visuais com validação e backup.
 - [ ] Guardar e carregar remapeamentos do jogador.
-- [ ] Definir camadas de colisão, grupos, ordem de desenho e convenções de pivôs.
+- [x] Definir colisões atuais, reserva de camadas físicas, política de grupos, ordem de desenho e pivôs; ver [convenções técnicas](docs/technical-conventions.md).
 - [x] Limitar entidades e medir simulação densa antes de introduzir pooling; ver `docs/performance/`.
 
 ### 2. Jogador e combate base
