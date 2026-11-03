@@ -211,7 +211,7 @@ Os valores são provisórios e precisam de playtesting.
 ### 8. Primeira run roguelite
 
 - [x] Prototipar escolhas a cada três ondas, configuráveis no Resource de ondas.
-- [ ] **Decidir:** duração alvo e estrutura final da run.
+- [x] **Decidido:** primeira run com nove encontros, três escolhas de melhoria e boss final; alvo de 10–15 minutos, sujeito a playtesting. Ver [estrutura da run](docs/run-design.md).
 - [ ] Definir início, vitória, derrota e retorno ao hub da run.
 - [x] Aplicar modificadores temporários a partir dos valores base, com limites por melhoria.
 - [x] Oferecer três melhorias elegíveis após cada terceira onda, com descrição e limite de stacks.
