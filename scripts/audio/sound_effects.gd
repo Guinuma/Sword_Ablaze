@@ -4,6 +4,8 @@ const MAX_VOICES := 8
 const UI_VOICES := 2
 const RATE := 22050
 const TONES := {
+	&"melee": [180.0, 650.0, 0.12],
+	&"critical": [1100.0, 450.0, 0.09],
 	&"shot": [780.0, 160.0, 0.075],
 	&"impact": [340.0, 100.0, 0.055],
 	&"defeat": [260.0, 65.0, 0.16],

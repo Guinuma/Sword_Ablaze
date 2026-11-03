@@ -31,6 +31,8 @@ func configure(profile: Resource, count: int, font: Font) -> void:
 
 
 func _effect_text() -> String:
+	if definition.attribute == "critical_chance":
+		return "Critical chance: +%d%%; critical damage: x2" % int(round(definition.addition * rank * 100))
 	if definition.addition != 0.0:
 		return "%s: +%d" % ["Maximum HP" if definition.attribute == "max_health" else "Projectile damage", int(definition.addition * rank)]
 	var names := {"move_speed": "Movement speed", "fire_interval": "Shot delay", "knockback": "Enemy knockback", "dash_cooldown": "Dash recharge"}
@@ -60,6 +62,10 @@ func _draw() -> void:
 				draw_line(center + direction * 2.0, center + direction * 7.0, gold)
 				draw_line(center + direction * 7.0, center + direction * 4.0 + direction.orthogonal() * 2.0, gold)
 				draw_line(center + direction * 7.0, center + direction * 4.0 - direction.orthogonal() * 2.0, gold)
+		&"critical":
+			draw_line(center + Vector2(-6, -6), center + Vector2(6, 6), gold, 2)
+			draw_line(center + Vector2(-6, 6), center + Vector2(6, -6), gold, 2)
+			draw_circle(center, 3, gold)
 		&"vitality":
 			draw_rect(Rect2(9, 5, 5, 14), gold)
 			draw_rect(Rect2(5, 9, 13, 5), gold)

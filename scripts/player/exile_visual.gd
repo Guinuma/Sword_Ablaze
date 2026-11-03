@@ -8,6 +8,8 @@ var defeated: bool = false
 var defeat_done: bool = false
 var defeat_time: float = 0.0
 
+const PlayerState = preload("res://scripts/player/player_state.gd")
+var melee_time: float = 0.0
 const BODY = preload("res://assets/art/player/exile-body-01.png")
 const WALK = preload("res://assets/art/player/exile-walk-01-frames.tres")
 const WALK_FRONT = preload("res://assets/art/player/exile-front-walk-01-frames.tres")
@@ -53,7 +55,7 @@ func advance_defeat(delta: float) -> void:
 		defeat_finished.emit()
 
 
-func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash: bool, damaged: bool, shot: bool) -> void:
+func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash: bool, damaged: bool, shot: bool, melee: float = 0.0) -> void:
 	position = point.round()
 	facing = aim
 	# A small threshold gap avoids flickering between views near diagonals.
@@ -66,6 +68,7 @@ func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash
 	dashing = dash
 	hurt = damaged
 	firing = shot
+	melee_time = melee
 	clock += delta
 	if movement.length_squared() > 0.01 and not dash:
 		walk_clock += delta * (-1.0 if movement.dot(aim) < -0.1 else 1.0)
@@ -81,6 +84,7 @@ func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash
 	queue_redraw()
 
 func reset_pose() -> void:
+	melee_time = 0.0
 	defeated = false
 	defeat_done = false
 	defeat_time = 0.0
@@ -101,7 +105,7 @@ func _draw() -> void:
 	var bob := roundf(sin(clock * 16.0)) if travel.length_squared() > 0.01 and not reduced_motion else 0.0
 	var neck := Vector2(0, -9 + bob)
 	var tip := cape_tip.round()
-	draw_colored_polygon(PackedVector2Array([neck + Vector2(-4, 0), neck + Vector2(4, 0), tip + Vector2(4, 3), tip + Vector2(0, 1), tip + Vector2(-4, 4)]), Color("176578"))
+	draw_colored_polygon(cape_polygon(neck, tip), Color("176578"))
 	draw_line(neck, tip + Vector2(0, 2), Color("2ca6ad"), 3.0)
 	var tint := Color("fff0b0") if (hurt or dashing) and not reduced_flashes else Color.WHITE
 	var body_rect := Rect2(Vector2(-18, -23 + bob), Vector2(36, 36))
@@ -123,13 +127,24 @@ func _draw() -> void:
 
 func _draw_weapon(bob: float) -> void:
 	# Upward aim places the weapon behind the body at the right-hand grip.
-	var grip := Vector2(7 if facing.y < -0.6 else 0, -2 + bob)
+	var grip := PlayerState.weapon_grip(facing) + Vector2(0, bob)
 	var recoil := -2.0 if firing and not reduced_motion else 0.0
-	draw_set_transform(grip + facing * recoil, facing.angle())
+	var angle := facing.angle()
+	if melee_time > 0.0 and not reduced_motion:
+		angle += lerpf(-0.65, 0.65, 1.0 - melee_time / 0.16)
+	var mount := grip + facing * recoil
+	var side := -1.0 if facing.x < 0.0 else 1.0
+	var trigger_hand := mount + Vector2(5, 2).rotated(angle)
+	var support_hand := mount + Vector2(10, 1).rotated(angle)
+	draw_line(Vector2(side * 5, -8 + bob), trigger_hand, Color("176578"), 3)
+	draw_line(Vector2(-side * 4, -7 + bob), support_hand, Color("23858d"), 2)
+	draw_set_transform(mount, angle)
 	draw_rect(Rect2(3, -2, 12, 4), Color("28313b"))
 	draw_rect(Rect2(5, -2, 7, 1), Color("b88d4d"))
 	draw_line(Vector2(13, 1), Vector2(21, 1), Color("ffe3a3"), 2.0)
 	draw_line(Vector2(15, 2), Vector2(21, 1), Color("ff7b38"), 1.0)
+	draw_rect(Rect2(4, 1, 2, 2), Color("ede3c9"))
+	draw_rect(Rect2(9, 0, 2, 2), Color("ede3c9"))
 	draw_set_transform(Vector2.ZERO)
 
 func draw_ellipse_shadow() -> void:
@@ -144,3 +159,11 @@ func _draw_defeat() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < 0.0 else 1.0, 1.0))
 	draw_texture_rect(DEFEAT.get_frame_texture(&"defeat", frame), Rect2(-20, -26 + DEFEAT_Y_OFFSETS[frame], 40, 40), false)
 	draw_set_transform(Vector2.ZERO)
+
+
+static func cape_polygon(neck: Vector2, tip: Vector2) -> PackedVector2Array:
+	# A convex strip cannot fold over itself when the cape crosses the shoulders.
+	if neck.distance_squared_to(tip) < 4.0:
+		tip = neck + Vector2(0, 3)
+	var side := neck.direction_to(tip).orthogonal()
+	return PackedVector2Array([neck + side * 4, neck - side * 4, tip - side * 3, tip + side * 3])

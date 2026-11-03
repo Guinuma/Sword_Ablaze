@@ -10,7 +10,7 @@ Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um e
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
-- Ondas crescentes, avisos de spawn, recuperação de vida entre rondas, dash e seis melhorias temporárias.
+- Ondas crescentes, avisos de spawn, recuperação de vida entre rondas, dash, ataque corpo a corpo e sete melhorias temporárias.
 - HUD com barra de vida e valor numérico, ronda, inimigos restantes, relógio, eliminações e barra de recarga do dash.
 - Ícones das melhorias adquiridas, com rank e efeito acumulado ao passar o rato; menus de pausa, escolha e resultados com foco visível.
 - Preferências de redução de flashes/movimento e recordes locais com validação e backup.
@@ -37,6 +37,7 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 | WASD / setas | Mover |
 | Rato | Apontar |
 | Botão esquerdo / Espaço | Disparar |
+| Botão direito / E | Ataque corpo a corpo na direção da mira |
 | Shift | Dash na direção do movimento, ou da mira quando parado |
 | Escape / botão II no HUD | Pausar; Escape ou Resume para retomar |
 | R | Reiniciar, incluindo durante pausa ou após morrer |
@@ -58,6 +59,8 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 - Limpar uma onda: recupera 20 PV, até ao máximo, e inicia uma pausa de 3 s.
 - Cura: cada eliminação tem 15% de hipótese de largar uma pena (+10 PV) e 1% de largar um par de asas (+100 PV), em resultados exclusivos. Recolher por proximidade; cura limitada à vida máxima. A vida cheia preserva o item no chão. Expiram após 30 s de simulação; máximo de 64 drops.
 - Angelic Vigor: +20 PV máximos e atuais por rank, até cinco ranks; efeito temporário da run.
+- Corpo a corpo: 2 de dano, setor frontal de 120°, alcance de 32 px mais o raio do alvo, recarga de 0,45 s e animação de 0,16 s. Durante a animação, o disparo fica bloqueado; dash continua disponível.
+- Críticos: Keen Edge acrescenta 10 pontos percentuais por rank (máximo 30%) a tiros e corpo a corpo, com dano ×2 antes da armadura. São temporários e desaparecem ao reiniciar.
 - Dash: duração de 0,14 s e recarga de 1,2 s; proteção contra contacto e projéteis em todos os passos com movimento de dash, incluindo o último. O dano volta a ser possível no passo seguinte.
 - A cada terceira onda, escolher uma de até três melhorias elegíveis. A simulação e o intervalo ficam parados durante a escolha. Os efeitos acumulam até ao limite indicado e são removidos ao reiniciar.
 - Morte e pausa congelam a simulação. A animação de queda dura 0,64 s antes dos resultados; R pode reiniciar durante a queda.
@@ -111,15 +114,15 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Barra de 100 PV iniciais, melhoria de vida máxima e drops aleatórios de cura em forma de pena (+10 PV) e par de asas raro (+100 PV).
 - [x] Dash direcional com recarga e limites da arena.
 - [x] Pausa e retoma com Escape.
-- [ ] Afinar velocidade, alcance do dash, hitboxes e intervalo dos disparos em playtests.
+- [x] Afinar velocidade, alcance do dash, hitboxes e intervalo dos disparos em playtests: alinhamento refinado e parâmetros atuais mantidos após aprovação do utilizador.
 - [x] Verificar proteção de dash nos frames de início/fim a 30, 60, 120, 144 e 240 passos/s, contra contacto e projéteis.
 - [x] Partilhar pivô de arma, origem do tiro e flash, incluindo mira para cima.
-- [ ] Refinar ligação visual das mãos e arma em todos os ângulos.
+- [x] Refinar mãos/antebraços e arma com pivô partilhado e interpolação contínua de mira; revisão visual em oito direções.
 - [x] Exigir largar o disparo antes de disparar após pausa ou reinício.
 - [x] Exigir largar o disparo ao retomar, reiniciar ou escolher melhorias.
 - [x] Pausar ao perder foco e exigir retoma explícita com Escape.
-- [ ] **Decidir:** se a lâmina terá ataque corpo a corpo ou será apenas identidade visual.
-- [ ] **Decidir:** necessidade de munições, recarga, dano crítico e efeitos de estado.
+- [x] **Decidido e implementado:** lâmina com ataque corpo a corpo direcional (botão direito/E), alcance e recarga próprios.
+- [x] **Decidido:** adicionar críticos através de Keen Edge; manter munições ilimitadas e adiar recarga/estados nesta versão.
 
 ### 3. Inimigos e encontros
 

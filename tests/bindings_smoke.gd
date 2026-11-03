@@ -15,10 +15,13 @@ func _run() -> void:
 	check(preferences.set_binding(&"dash", KEY_Q), "New key must apply")
 	check(preferences.set_binding(&"fire", KEY_F), "Fire key must apply")
 	check(InputMap.action_get_events(&"fire").size() == 2, "Mouse fire must survive keyboard remapping")
+	check(preferences.set_binding(&"melee", KEY_V), "Melee key must be remappable")
+	check(InputMap.action_get_events(&"melee").size() == 2, "Right-click melee must survive keyboard remapping")
 	check(preferences.save() == OK, "Bindings must save")
 	var loaded = load("res://scripts/settings/preferences.gd").new(preferences.path)
 	loaded.load_preferences()
 	check(loaded.bindings.get(&"dash") == KEY_Q, "Saved bindings must reload")
+	check(loaded.bindings.get(&"melee") == KEY_V, "Saved melee binding must reload")
 	var event := InputEventKey.new()
 	event.physical_keycode = KEY_Q
 	check(InputMap.event_is_action(event, &"dash"), "Loaded key must drive InputMap")

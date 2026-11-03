@@ -41,7 +41,7 @@ func _run() -> void:
 	menu._show_audio()
 	await cycle(menu.detail_body.get_child(1).get_child(1), 5)
 	menu._show_bindings()
-	await cycle(menu.detail_body.get_child(1).get_child(0), 9)
+	await cycle(menu.detail_body.get_child(1).get_child(0), 10)
 	menu._start_game()
 	await scene_changed
 	var arena = current_scene

@@ -41,6 +41,8 @@ const COURTYARD = preload("res://assets/art/arena/celestial-courtyard-01.png")
 const ARENA := Rect2(34, 70, 572, 258)
 const ProjectileSystem = preload("res://scripts/combat/projectile_system.gd")
 var projectiles = ProjectileSystem.new()
+const MeleeSystem = preload("res://scripts/combat/melee_system.gd")
+var melee = MeleeSystem.new()
 const HostileProjectiles = preload("res://scripts/combat/hostile_projectiles.gd")
 var hostile_projectiles = HostileProjectiles.new()
 const EnemySystem = preload("res://scripts/enemies/enemy_system.gd")
@@ -72,6 +74,11 @@ func _ready() -> void:
 	enemies.shot.connect(hostile_projectiles.fire)
 	hostile_projectiles.hit_player.connect(_take_player_damage)
 	player.shot.connect(projectiles.fire)
+	player.melee.connect(_swing_melee)
+	melee.impacted.connect(_on_projectile_impact)
+	melee.defeated.connect(_on_projectile_defeat)
+	melee.critical_hit.connect(_on_critical_hit)
+	projectiles.critical_hit.connect(_on_critical_hit)
 	projectiles.impacted.connect(_on_projectile_impact)
 	projectiles.defeated.connect(_on_projectile_defeat)
 	waves.wave_started.connect(run.start_combat)
@@ -104,6 +111,7 @@ func _ready() -> void:
 	overlay.draw.connect(_draw_overlay)
 	add_child(overlay)
 	player.fire_requires_release = true
+	player.melee_requires_release = true
 	player_visual.present(player.player_position, player.aim, Vector2.ZERO, 0.0, false, false, false)
 	_update_hud()
 
@@ -118,17 +126,20 @@ func _physics_process(delta: float) -> void:
 		_reset_run()
 	if Input.is_action_just_pressed("pause_run") and run.phase not in [RunState.Phase.DEAD, RunState.Phase.WON]:
 		_set_paused(not (run.phase == RunState.Phase.PAUSED))
+	if not Input.is_action_pressed("melee"):
+		player.melee_requires_release = false
 	if not Input.is_action_pressed("fire"):
 		player.fire_requires_release = false
 	if not run.is_active():
 		return
-	if Input.is_action_pressed("fire") and hud_view.blocks_fire():
+	if (Input.is_action_pressed("fire") or Input.is_action_pressed("melee")) and hud_view.blocks_fire():
 		player.fire_requires_release = true
+		player.melee_requires_release = true
 	_update_effects(delta)
 	run.advance(delta)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var old_aim: Vector2 = player.aim
-	player.advance(delta, movement, get_global_mouse_position(), Input.is_action_just_pressed("dash"), Input.is_action_pressed("fire"), ARENA)
+	player.advance(delta, movement, get_global_mouse_position(), Input.is_action_just_pressed("dash"), Input.is_action_pressed("fire"), ARENA, Input.is_action_pressed("melee"))
 	tutorial.observe(delta, movement, old_aim.distance_squared_to(player.aim) > 0.0001)
 	healing_drops.advance(delta, player.player_position, run)
 	_update_waves(delta)
@@ -140,7 +151,7 @@ func _physics_process(delta: float) -> void:
 	_update_bullets(delta)
 	_check_contact()
 	hostile_projectiles.advance(delta, player.player_position, ARENA)
-	player_visual.present(player.player_position, player.aim, player.dash_direction if player.dash_time > 0.0 else movement, delta, player.dash_time > 0.0, player.hurt_cooldown > 0.0, player.muzzle_time > 0.0)
+	player_visual.present(player.player_position, player.aim, player.dash_direction if player.dash_time > 0.0 else movement, delta, player.dash_time > 0.0, player.hurt_cooldown > 0.0, player.muzzle_time > 0.0, player.melee_time)
 	_update_hud()
 	queue_redraw()
 
@@ -151,6 +162,7 @@ func _set_paused(value: bool) -> void:
 	run.set_paused(value)
 	# Require a fresh trigger after any pause, including focus loss.
 	player.fire_requires_release = true
+	player.melee_requires_release = true
 	_update_hud()
 	queue_redraw()
 
@@ -194,6 +206,7 @@ func _on_wave_cleared() -> void:
 	if waves.number % waves.settings.upgrade_every == 0 and not upgrades.offer(random).is_empty():
 		run.start_upgrade()
 		player.fire_requires_release = true
+		player.melee_requires_release = true
 
 
 
@@ -255,9 +268,11 @@ func _apply_upgrades() -> void:
 	var weapon = base.duplicate()
 	weapon.fire_interval = upgrades.value("fire_interval", base.fire_interval)
 	weapon.damage = int(upgrades.value("damage", base.damage))
+	weapon.critical_chance = clampf(upgrades.value("critical_chance", base.critical_chance), 0.0, 1.0)
 	weapon.knockback = upgrades.value("knockback", base.knockback)
 	player.weapon = weapon
 	projectiles.weapon = weapon
+	melee.weapon = weapon
 	player.move_speed = upgrades.value("move_speed", player.SPEED)
 	run.set_max_health(int(upgrades.value("max_health", run.MAX_HEALTH)))
 	player.dash_recharge = upgrades.value("dash_cooldown", player.DASH_COOLDOWN)
@@ -273,6 +288,7 @@ func _choose_upgrade(id: StringName) -> void:
 	feedback.add(&"upgrade", player.player_position)
 	tutorial.chose_upgrade()
 	player.fire_requires_release = true
+	player.melee_requires_release = true
 	run.finish_upgrade()
 	_update_hud()
 	queue_redraw()
@@ -321,6 +337,7 @@ func _reset_run() -> void:
 	waves.reset()
 	player_visual.reset_pose()
 	player.fire_requires_release = true
+	player.melee_requires_release = true
 	player_visual.present(player.player_position, player.aim, Vector2.ZERO, 0.0, false, false, false)
 	_update_hud()
 	queue_redraw()
@@ -440,3 +457,15 @@ func _settle_reward() -> bool:
 func _retry_reward() -> void:
 	_settle_reward()
 	_update_hud()
+
+
+func _swing_melee(origin: Vector2, direction: Vector2) -> void:
+	if not run.is_active():
+		return
+	sounds.play(&"melee")
+	feedback.add(&"melee", origin, direction)
+	melee.swing(origin, direction, enemies.items)
+
+func _on_critical_hit(point: Vector2) -> void:
+	feedback.add(&"critical", point)
+	sounds.play(&"critical")

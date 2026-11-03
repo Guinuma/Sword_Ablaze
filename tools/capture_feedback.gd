@@ -15,9 +15,9 @@ func _capture() -> void:
 		arena.preferences.reduced_motion = reduced
 		arena.preferences.reduced_flashes = reduced
 		arena.feedback.clear()
-		for index in range(5):
-			arena.feedback.add([&"spawn", &"dash", &"upgrade", &"heal", &"wave"][index], Vector2(160 + index * 80, 180))
-		arena.feedback.advance(0.15)
+		for index in range(7):
+			arena.feedback.add([&"spawn", &"dash", &"upgrade", &"heal", &"wave", &"melee", &"critical"][index], Vector2(80 + index * 80, 180))
+		arena.feedback.advance(0.05)
 		arena.queue_redraw()
 		arena.overlay.queue_redraw()
 		await process_frame

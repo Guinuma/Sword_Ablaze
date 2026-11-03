@@ -34,4 +34,32 @@ The new event-integration regression follows the real scene connections rather t
 
 The existing uncommitted project.godot changes expand InputEvent serialization while preserving the configured physical keys and display/renderer values; they remain outside these commits. Editor configuration and unrelated image import files are also left untouched.
 
-Next review: Section 2 — Player and base combat. Its unchecked playtest, art-alignment and design-decision items are not implied complete by this foundation review.
+## Section 2 — Player and base combat
+
+Section 2 is the last authorized section in this continuation. Do not begin Section 3 after closing it. All 17 items are implemented or explicitly decided for prototype scope. Current movement/fire/dash timings were retained after the user's playtest response: “Current speed and timing feel good.” This does not claim final release balance or external playtesting.
+
+| Checklist item | Evidence |
+| --- | --- |
+| Normalized movement, bounds and mouse aim | Input.get_vector in main; PlayerState movement/clamping and combat checks |
+| Continuous fire and projectile cleanup | PlayerState timing, ProjectileSystem bounds/lifetime; combat and weapon checks |
+| Segment collision | ProjectileSystem segment/circle nearest-hit query; high-speed collision regressions |
+| Nearest enemy only and projectile consumption | combat_smoke target ordering and repeated-hit checks |
+| Health/contact protection/death/restart | RunState and shared damage gate; combat/finite-run checks |
+| 100 base HP, max-health blessing and healing drops | combat/healing regression cases; RunState and HealingDrops |
+| Directional dash, cooldown and bounds | PlayerState; combat checks at multiple physics rates |
+| Pause/resume | RunState phases; combat/menu/navigation checks |
+| Tune control timing/hitboxes in playtests | User approved existing feel; movement/dash/fire timings retained; physical and visual weapon pivot refined |
+| Dash protection at 30/60/120/144/240 Hz | combat_smoke tests start/end against contact and projectiles |
+| Shared weapon/shot/flash pivot | PlayerState.weapon_grip used by muzzle and ExileVisual; cardinal and 360-angle continuity checks |
+| Hands and weapon across aim directions | New sleeves/hand grips, smooth attachment; eight-direction enlarged engine capture and 1,024-combination graphical sweep |
+| Fresh trigger after pause/restart | fire release gates; existing combat tests |
+| Fresh trigger after resume/restart/choice | shared fire/melee release gates; combat and melee-flow checks |
+| Focus-loss pause and explicit resume | application-focus notification and RunState; combat regression checks |
+| Blade behavior decision | User requested melee; right-click/E, forward 120-degree swing, 32 px plus target radius, 2 damage, 0.45 s cooldown |
+| Ammo/critical/status decision | User requested critical hits or statuses; Keen Edge provides up to 30% critical chance and x2 damage. Ammo remains unlimited; reload/status systems deferred |
+
+Melee and projectiles share damage/armor ordering and impact/defeat events, so critical hits do not bypass guardian rules or duplicate rewards. `melee_critical_smoke.gd` verifies targeting, damage, cooldown rates, reset and upgrade limits; `melee_flow_smoke.gd` verifies real input, feedback, kill counting and pause/release behavior.
+
+The live graphical session exposed a self-intersecting cape polygon during direction changes. It was replaced with a convex strip that stays drawable even at a collapsed tip. Geometry checks cover 360 directions and five tip distances; `tools/validate_player_visual.gd` rendered 1,024 facing/travel/state combinations without errors. Final pixel cleanup, directional sprite replacement and broader difficulty testing remain in later sections and were not undertaken here.
+
+Only the new melee input action is staged from project.godot. The user's pre-existing editor serialization changes, .vscode settings and unrelated image import files remain uncommitted.

@@ -65,6 +65,11 @@ reset_sandbox={
 "events": [Object(InputEventKey,"physical_keycode":82)]
 }
 
+melee={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":69), Object(InputEventMouseButton,"button_index":2)]
+}
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

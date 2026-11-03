@@ -7,7 +7,7 @@
 - `player_position` e `enemy["position"]` são a origem de combate e de ordenação por Y. Os visuais recebem essa posição arredondada, sem devolver o arredondamento à simulação.
 - A origem local do ator é o centro de combate, não o canto da textura nem a extremidade dos pés. O corpo estende-se sobretudo para Y negativo; sombras têm deslocamento local positivo (jogador: 8 px; inimigos: 7 px). Preservar estas origens ao substituir atlas.
 - Espelhar a arte em torno de `(0, 0)` com uma transformação local e restaurar a transformação depois de desenhar. Não espelhar a posição global, hitboxes ou direção de mira.
-- O pivô da arma do Exilado é `(0, -2)`, ou `(7, -2)` quando `aim.y < -0.6`. A apresentação acrescenta bob/recuo; a origem física do tiro usa o pivô sem estes efeitos mais `aim * weapon.muzzle_offset` (16 px por defeito).
+- O pivô partilhado da arma vem de `PlayerState.weapon_grip`: Y = -6 px; X interpola suavemente de 0 a 7 px entre mira lateral e vertical, sem saltos de limiar. A apresentação acrescenta bob/recuo; a origem física do tiro usa o pivô sem estes efeitos mais `aim * weapon.muzzle_offset` (16 px por defeito).
 - Animações, capa, flutuação e queda alteram apenas a apresentação. Não deslocam hitboxes nem a origem física do ator.
 
 ## Colisões atuais
@@ -76,7 +76,7 @@ The wave-seven encounter introduces one per seven spawns; later ratios follow th
 
 ## Short combat feedback cues
 
-`CombatFeedback` holds at most 32 cues for 0.55 simulation seconds, replacing the oldest at capacity. Spawn activation produces a ring, successful dash produces chevrons, a selected upgrade produces six short rays, actual healing produces a plus sign, and wave clear produces paired arcs. These are original vector primitives under the repository MIT license, independent of hitboxes and combat results.
+`CombatFeedback` holds at most 32 cues for up to 0.55 simulation seconds (melee 0.16 s; critical 0.3 s), replacing the oldest at capacity. Spawn activation produces a ring, successful dash produces chevrons, a selected upgrade produces six short rays, actual healing produces a plus sign, and wave clear produces paired arcs. These are original vector primitives under the repository MIT license, independent of hitboxes and combat results.
 
 Healing emits only for a positive amount actually restored, including drop collection and intermission recovery. Full-health pickup attempts do not produce a cue. Spawn activation emits only after its warning and proximity safety checks. Cues draw above actors and below modal dimming/HUD. Their timers freeze during pause, death and upgrade selection; restart clears them. Reduced motion keeps positions/radii fixed while fading, and reduced flashes lowers their opacity. They never flash the screen or shake the camera.
 
@@ -88,3 +88,12 @@ Healing emits only for a positive amount actually restored, including drop colle
 `default_elite.tres` reuses sentinel movement/cast presentation with an original code-drawn crown and gold ground halo. Its attack locks the first direction during a 1.05 s stationary warning and announces eight equally spaced spokes. At release, eight projectile events use those exact directions, at 110 px/s and 20 damage, followed by a 3 s cooldown. Shared hostile-projectile caps, swept player collision and dash protection apply normally. The Siege recipe uses a one-off `opener` to spawn exactly one elite inside the ordinary wave budget. Killing it grants the same one kill and healing-drop roll as other enemies; global elite rewards remain unimplemented.
 
 `tests/elite_smoke.gd` verifies fixed warnings, eight-shot directions, damage/speed, cooldown and one-off encounter placement at five step rates. `tools/capture_elite.gd` captures the warning. Dedicated final elite art and human difficulty testing remain pending.
+
+
+## Section 2 melee and critical hits
+
+Right-click/E triggers a forward melee swing through `PlayerState.melee` and `MeleeSystem`. `default_melee.tres` defines 2 damage, 32 px reach plus target radius, a 120-degree cone, 0.45 s cooldown, 0.16 s animation and 170 knockback. Pending spawns are ignored. Every target is hit at most once per accepted swing. Melee shares impact/defeat events, armor rules, kill/drop/reward counters and critical feedback with projectiles. No invulnerability is added by swinging. Gunfire is suppressed during the swing animation; dash remains independent. Pause/reset/choice flows require releasing melee before attacking again.
+
+Keen Edge is a temporary blessing with three ranks, each adding ten percentage points of critical chance to bullets and melee. Base chance is zero; critical multiplier is two. Each bullet rolls once at creation, while a melee swing rolls once per eligible target. `HitRules` applies the critical multiplier before guardian frontal reduction/flank vulnerability. A short X cue and audio accent identify a landed critical. No ammo/reload/status-effect system is added.
+
+Hand and sleeve primitives connect shoulders to both weapon grips, with the same smoothed base pivot used by the physical muzzle. Upward weapon occlusion remains behind the body. Recoil/bob/melee rotation affect presentation only. `tools/capture_aim.gd` renders eight directions at enlarged engine scale; unit checks sample grip continuity over 360 angles. Dedicated final pixel-art poses remain Section 5 work.

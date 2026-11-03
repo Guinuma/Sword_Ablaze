@@ -4,6 +4,9 @@ Reviewed 2026-11-03 against the automated suite and graphical capture tools. Thi
 
 ## Fixed during checklist continuation
 
+- Section 2 live rendering exposed a folded/self-intersecting cape polygon during direction changes. A convex strip and collapsed-tip fallback now avoid triangulation failures; a graphical sweep covers 1,024 aim/movement/state combinations.
+- Section 2 now includes user-requested melee and temporary critical chance via Keen Edge, with shared armor/reward rules. Hands/weapon attachment uses a smoothed shared pivot; final pixel-art poses remain later-section work.
+
 - Charger warning failed to compile after its corridor width was tied to the profile contact radius. Giving the intermediate vector an explicit type fixes the parser error; full import/combat checks and graphical runs now pass.
 - The empty-encounter fallback regression assigned an untyped array to a typed Resource field and stalled. The test now supplies `Array[Resource]`; exact spawn-pattern and fallback checks pass.
 - Keyboard navigation could leave blessing choices for the combat pause button. Closed focus rings now exclude hidden/disabled controls, and keyboard-input tests cover menus, options, pause, choices and results.

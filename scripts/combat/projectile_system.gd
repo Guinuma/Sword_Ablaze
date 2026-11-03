@@ -2,6 +2,7 @@ extends RefCounted
 ## Simulation advances only when the arena supplies active combat time.
 const MAX_PROJECTILES: int = 128
 
+signal critical_hit(point: Vector2)
 signal impacted(point: Vector2)
 signal defeated(point: Vector2)
 
@@ -9,12 +10,17 @@ const WeaponSettings = preload("res://scripts/data/weapon_settings.gd")
 var weapon: WeaponSettings = load("res://resources/default_weapon.tres")
 const EnemySettings = preload("res://scripts/data/enemy_settings.gd")
 var enemy_settings: EnemySettings = load("res://resources/default_enemy.tres")
+const HitRules = preload("res://scripts/combat/hit_rules.gd")
+var critical_random := RandomNumberGenerator.new()
 var items: Array[Dictionary] = []
+
+func _init() -> void:
+	critical_random.randomize()
 
 
 func fire(origin: Vector2, direction: Vector2) -> void:
 	if items.size() < MAX_PROJECTILES:
-		items.append({"position": origin, "direction": direction, "life": 5.0})
+		items.append({"position": origin, "direction": direction, "life": 5.0, "critical": critical_random.randf() < weapon.critical_chance})
 
 
 func clear() -> void:
@@ -45,11 +51,10 @@ func advance(delta: float, enemies: Array[Dictionary], bounds: Rect2) -> void:
 			var profile = enemies[target].get("profile", enemy_settings)
 			var direction: Vector2 = items[index]["direction"]
 			enemies[target]["knockback"] = direction * weapon.knockback * profile.knockback_multiplier
-			var damage: int = weapon.damage
-			if profile.kind == "guardian":
-				var facing: Vector2 = enemies[target].get("facing", Vector2.DOWN)
-				var frontal: bool = facing.dot(-direction.normalized()) >= 0.5
-				damage = maxi(1, int(ceil(weapon.damage * 0.5))) if frontal else weapon.damage * 2
+			var critical: bool = items[index].get("critical", false)
+			var damage: int = HitRules.damage(enemies[target], profile, weapon.damage, critical, weapon.critical_multiplier, direction)
+			if critical:
+				critical_hit.emit(impact)
 			impacted.emit(impact)
 			enemies[target]["health"] -= damage
 			enemies[target]["flash"] = 0.12

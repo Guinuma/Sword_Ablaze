@@ -2,6 +2,7 @@ extends RefCounted
 ## Input-independent player movement, dash and weapon timing.
 signal shot(origin: Vector2, direction: Vector2)
 signal dashed()
+signal melee(origin: Vector2, direction: Vector2)
 
 const SPEED: float = 120.0
 var move_speed: float = SPEED
@@ -23,10 +24,18 @@ var dash_direction := Vector2.RIGHT
 var hurt_cooldown: float = 0.0
 var fire_requires_release: bool = false
 var muzzle_time: float = 0.0
+var melee_settings = load("res://resources/default_melee.tres")
+var melee_cooldown: float = 0.0
+var melee_time: float = 0.0
+var melee_requires_release: bool = false
 
 
-func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pressed: bool, fire_pressed: bool, bounds: Rect2) -> void:
+func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pressed: bool, fire_pressed: bool, bounds: Rect2, melee_pressed: bool = false) -> void:
 	dashed_this_step = false
+	melee_time = maxf(0.0, melee_time - delta)
+	melee_cooldown = maxf(0.0, melee_cooldown - delta)
+	if not melee_pressed:
+		melee_requires_release = false
 	if not fire_pressed:
 		fire_requires_release = false
 	muzzle_time = maxf(0.0, muzzle_time - delta)
@@ -44,8 +53,12 @@ func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pres
 	var mouse_direction := mouse_position - player_position
 	if mouse_direction.length_squared() > 1.0:
 		aim = mouse_direction.normalized()
+	if melee_pressed and not melee_requires_release and melee_cooldown <= 0.0:
+		melee_cooldown = melee_settings.cooldown
+		melee_time = melee_settings.duration
+		melee.emit(player_position, aim)
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
-	if fire_pressed and not fire_requires_release and fire_cooldown <= 0.0:
+	if fire_pressed and not fire_requires_release and fire_cooldown <= 0.0 and melee_time <= 0.0:
 		for index in range(weapon.pellets):
 			var angle := 0.0 if weapon.pellets == 1 else (float(index) / (weapon.pellets - 1) - 0.5) * weapon.spread
 			shot.emit(muzzle_position(), aim.rotated(angle))
@@ -54,7 +67,7 @@ func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pres
 
 
 func muzzle_position() -> Vector2:
-	var grip := Vector2(7 if aim.y < -0.6 else 0, -2)
+	var grip := weapon_grip(aim)
 	return player_position + grip + aim * weapon.muzzle_offset
 
 
@@ -84,3 +97,10 @@ func reset() -> void:
 	hurt_cooldown = 0.0
 	fire_requires_release = true
 	muzzle_time = 0.0
+	melee_cooldown = 0.0
+	melee_time = 0.0
+	melee_requires_release = true
+
+
+static func weapon_grip(direction: Vector2) -> Vector2:
+	return Vector2(7.0 * smoothstep(0.45, 0.8, absf(direction.y)), -6)

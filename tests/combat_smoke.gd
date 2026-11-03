@@ -531,7 +531,7 @@ func _run() -> void:
 	for direction in [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]:
 		arena.player.aim = direction
 		var muzzle: Vector2 = arena.player.muzzle_position()
-		check(muzzle == arena.player.player_position + Vector2(7 if direction.y < -0.6 else 0, -2) + direction * 16.0, "Shot origin and visual muzzle must share the weapon pivot")
+		check(muzzle == arena.player.player_position + arena.PlayerState.weapon_grip(direction) + direction * 16.0, "Shot origin and visual muzzle must share the weapon pivot")
 	for facing_direction in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
 		arena.player_visual.present(arena.player.player_position, facing_direction, facing_direction, 0.15, false, false, false)
 		var expected: StringName = &"back" if facing_direction == Vector2.UP else &"front" if facing_direction == Vector2.DOWN else &"side"

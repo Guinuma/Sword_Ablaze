@@ -4,12 +4,13 @@ const MAX_CUES := 32
 const DURATION := 0.55
 var items: Array[Dictionary] = []
 
-func add(kind: StringName, point: Vector2) -> void:
-	if kind not in [&"spawn", &"dash", &"upgrade", &"heal", &"wave"]:
+func add(kind: StringName, point: Vector2, direction: Vector2 = Vector2.RIGHT) -> void:
+	if kind not in [&"spawn", &"dash", &"upgrade", &"heal", &"wave", &"melee", &"critical"]:
 		return
 	if items.size() == MAX_CUES:
 		items.pop_front()
-	items.append({"kind": kind, "position": point, "life": DURATION})
+	var duration := 0.16 if kind == &"melee" else 0.3 if kind == &"critical" else DURATION
+	items.append({"kind": kind, "position": point, "life": duration, "duration": duration, "direction": direction})
 
 func advance(delta: float) -> void:
 	for index in range(items.size() - 1, -1, -1):
@@ -22,12 +23,19 @@ func clear() -> void:
 
 func draw_on(canvas: Node2D, reduced_motion: bool, reduced_flashes: bool) -> void:
 	for item in items:
-		var progress: float = 1.0 - item.life / DURATION
+		var progress: float = 1.0 - item.life / item.duration
 		var point: Vector2 = item.position
 		var radius := 14.0 if reduced_motion else lerpf(9.0, 23.0, progress)
 		var tint := Color("63b7b3") if item.kind in [&"heal", &"dash"] else Color("c5a46c")
 		tint.a = (1.0 - progress) * (0.45 if reduced_flashes else 0.85)
 		match item.kind:
+			&"melee":
+				var direction: Vector2 = item.direction
+				canvas.draw_arc(point, 32.0, direction.angle() - PI / 3, direction.angle() + PI / 3, 16, tint, 2)
+			&"critical":
+				var center := point + Vector2(0, -18)
+				canvas.draw_line(center + Vector2(-5, -5), center + Vector2(5, 5), tint, 2)
+				canvas.draw_line(center + Vector2(-5, 5), center + Vector2(5, -5), tint, 2)
 			&"heal":
 				var center := point + Vector2(19, -24 if reduced_motion else -24 - progress * 10)
 				canvas.draw_line(center + Vector2(-5, 0), center + Vector2(5, 0), tint, 2)

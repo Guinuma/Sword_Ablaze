@@ -137,7 +137,7 @@ func _show_controls() -> void:
 	_open_detail("HOW TO PLAY")
 	detail_body.add_theme_constant_override("separation", 6)
 	var movement := "/".join([ControlNames.key_name(&"move_up"), ControlNames.key_name(&"move_left"), ControlNames.key_name(&"move_down"), ControlNames.key_name(&"move_right")])
-	for text in [movement + "     Move", "Mouse                 Aim", "Left click / " + ControlNames.key_name(&"fire") + "   Fire", ControlNames.key_name(&"dash") + "                    Dash", "Escape                 Pause / resume", ControlNames.key_name(&"reset_sandbox") + "                         Restart the run", "Clear waves. Choose blessings every third wave."]:
+	for text in [movement + "     Move", "Mouse                 Aim", "Left click / " + ControlNames.key_name(&"fire") + "   Fire", ControlNames.key_name(&"dash") + "                    Dash", "Right click / " + ControlNames.key_name(&"melee") + "   Melee", "Escape                 Pause / resume", ControlNames.key_name(&"reset_sandbox") + "                         Restart the run", "Clear waves. Choose blessings every third wave."]:
 		_label(detail_body, text, Vector2.ZERO, 12, IVORY, false)
 	_refresh_focus()
 	back_button.grab_focus()
@@ -288,7 +288,7 @@ func _show_bindings() -> void:
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 3)
 	detail_body.add_child(grid)
-	var names := ["LEFT", "RIGHT", "UP", "DOWN", "FIRE", "DASH", "RESTART"]
+	var names := ["LEFT", "RIGHT", "UP", "DOWN", "FIRE", "MELEE", "DASH", "RESTART"]
 	var first: Button
 	for index in range(Preferences.REMAPPABLE.size()):
 		var action: StringName = Preferences.REMAPPABLE[index]
