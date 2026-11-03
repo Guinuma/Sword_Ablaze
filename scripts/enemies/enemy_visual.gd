@@ -54,6 +54,9 @@ func _draw() -> void:
 		draw_line(Vector2(-4, 0), Vector2(4, 0), Color("ffe0a3"))
 		draw_line(Vector2(0, -4), Vector2(0, 4), Color("ffe0a3"))
 		return
+	if profile != null and profile.kind == "guardian":
+		_draw_guardian(profile)
+		return
 	if profile != null and profile.kind == "charger":
 		_draw_charger(profile)
 		return
@@ -115,3 +118,27 @@ func _draw_charger(profile: Resource) -> void:
 	if state["health"] < profile.health:
 		draw_rect(Rect2(-10, -33, 20, 2), Color("101421"))
 		draw_rect(Rect2(-10, -33, 20.0 * state["health"] / profile.health, 2), Color("ffb454"))
+
+
+func _draw_guardian(profile: Resource) -> void:
+	var facing: Vector2 = state.get("facing", Vector2.DOWN)
+	var tint := Color("728c9c")
+	if state["flash"] > 0.0 and not reduced_flashes:
+		tint = Color("ffe0a3")
+	draw_set_transform(Vector2(0, 7), 0.0, Vector2(1, 0.4))
+	draw_circle(Vector2.ZERO, 15, Color(0.02, 0.03, 0.06, 0.6))
+	draw_set_transform(Vector2.ZERO)
+	# Broad stone armor and a directional shield, distinct from the pointed charger.
+	draw_rect(Rect2(-13, -23, 26, 27), Color("293847"))
+	draw_rect(Rect2(-11, -21, 22, 23), tint)
+	draw_rect(Rect2(-6, -30, 12, 12), tint)
+	draw_line(Vector2(-4, -25), Vector2(4, -25), Color("ffe0a3"), 2)
+	draw_arc(Vector2.ZERO, 17, facing.angle() - PI / 3, facing.angle() + PI / 3, 12, Color("101d2b"), 6)
+	draw_arc(Vector2.ZERO, 17, facing.angle() - PI / 3, facing.angle() + PI / 3, 12, Color("c5a46c"), 3)
+	# Rear crack marks the weak side without relying on color alone.
+	var rear := -facing * 10
+	draw_line(rear - Vector2(2, 4), rear + Vector2(2, 0), Color("ede3c9"), 2)
+	draw_line(rear + Vector2(2, 0), rear - Vector2(2, -4), Color("ede3c9"), 2)
+	if state["health"] < profile.health:
+		draw_rect(Rect2(-13, -35, 26, 2), Color("101421"))
+		draw_rect(Rect2(-13, -35, 26.0 * state["health"] / profile.health, 2), Color("ffb454"))

@@ -65,3 +65,10 @@ Verificar as quatro direções, diagonais, limites, sobreposição de atores e m
 `default_charger.tres` supplies four HP, slow approach, a locked-direction 0.85 s warning, a 300 px/s charge for 0.45 s and 0.8 s stationary recovery. Bounds end a charge early. Active charge movement uses segment contact; its swept path expires on the next simulation step. Existing dash/damage protection still gates damage. Wave five introduces one charger per five spawns, overriding the ranged slot when both coincide.
 
 The angular armored silhouette is drawn in code under the repository MIT license; it is prototype art. Parallel amber lines mark the contact corridor, a trail marks the rush, and a dim body plus overhead arc marks recovery. Reduced-flash settings suppress hit flashes. `tests/charger_smoke.gd` covers 30/60/120/144/240 Hz, locked aim, stationary warning/recovery, swept contact, walls, cleanup and wave composition. `tools/capture_charger.gd` captures all three attack stages.
+
+
+## Guardian prototype
+
+`default_guardian.tres` defines a slow eight-HP enemy with a larger body/contact radius, 20% knockback and 1.1 rad/s facing rotation. Its front 120-degree shield halves incoming player-shot damage, rounded up with a minimum of one. Shots outside the front arc deal double damage. The front is determined from the incoming shot direction against the simulation facing vector; art position does not affect armor. Because facing turns slowly, circling exposes the weak sides. The guardian never becomes immune to basic shots.
+
+Wave seven introduces one per seven spawns, with guardian selection taking priority over charger and ranged slots. The broad rectangular armor, visible shield arc and rear crack are original code-drawn placeholder art under the repository MIT license. A dedicated sprite remains future art work. `tests/guardian_smoke.gd` covers armor, flanking, upgraded damage, knockback, turning at five step rates, spawn cadence and cleanup. `tools/capture_guardian.gd` captures front/side/rear shield orientations.

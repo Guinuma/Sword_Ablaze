@@ -42,9 +42,16 @@ func advance(delta: float, enemies: Array[Dictionary], bounds: Rect2) -> void:
 				nearest = hit
 		if target >= 0:
 			var impact: Vector2 = enemies[target]["position"]
-			enemies[target]["knockback"] = Vector2(items[index]["direction"]) * weapon.knockback
+			var profile = enemies[target].get("profile", enemy_settings)
+			var direction: Vector2 = items[index]["direction"]
+			enemies[target]["knockback"] = direction * weapon.knockback * profile.knockback_multiplier
+			var damage: int = weapon.damage
+			if profile.kind == "guardian":
+				var facing: Vector2 = enemies[target].get("facing", Vector2.DOWN)
+				var frontal: bool = facing.dot(-direction.normalized()) >= 0.5
+				damage = maxi(1, int(ceil(weapon.damage * 0.5))) if frontal else weapon.damage * 2
 			impacted.emit(impact)
-			enemies[target]["health"] -= weapon.damage
+			enemies[target]["health"] -= damage
 			enemies[target]["flash"] = 0.12
 			if enemies[target]["health"] <= 0:
 				enemies.remove_at(target)

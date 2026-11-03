@@ -43,4 +43,6 @@ func advance(delta: float, living_enemies: int) -> void:
 		var kind: StringName = &"ranged" if number >= settings.ranged_start_wave and spawn_count % settings.ranged_every == 0 else &"chaser"
 		if number >= settings.charger_start_wave and spawn_count % settings.charger_every == 0:
 			kind = &"charger"
+		if number >= settings.guardian_start_wave and spawn_count % settings.guardian_every == 0:
+			kind = &"guardian"
 		spawn_requested.emit(kind)
