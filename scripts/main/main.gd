@@ -358,6 +358,7 @@ func _update_hud() -> void:
 		hud_view.wave_heading.text = "BOSS" if waves.number == 10 else "WAVE %02d / 09" % waves.number
 		hud_view.record_label.text = "FINITE RUNS: %d  /  WINS: %d" % [records.data["runs"], records.data["wins"]]
 		hud_view.record_label.text += "\nCould not save records" if records.last_error != OK else ""
+	hud_view.quit_button.text = "SANCTUARY" if bool(get_tree().get_meta("return_to_hub", false)) else "MAIN MENU"
 	hud_view.present_reward(run.phase in [RunState.Phase.WON, RunState.Phase.DEAD], reward_pending, reward_received, reward_awarded, GlobalProfile.level(profile.data.xp), active_run_id == 0)
 	hud_view.control_hint.text = tutorial.hint() if active_run_id > 0 else "GLOBAL XP UNAVAILABLE THIS RUN"
 	hud_view.control_hint.visible = run.is_active() and (tutorial.step < 5 or active_run_id == 0)
@@ -402,7 +403,7 @@ func _return_to_menu() -> void:
 		_update_hud()
 		return
 	# Leaving a live run abandons it; only terminal results settle progression.
-	get_tree().change_scene_to_file("res://scenes/main/menu.tscn")
+	get_tree().change_scene_to_file("res://scenes/main/hub.tscn" if bool(get_tree().get_meta("return_to_hub", false)) else "res://scenes/main/menu.tscn")
 
 
 func _draw_healing_drop(item: Dictionary) -> void:

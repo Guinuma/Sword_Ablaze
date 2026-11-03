@@ -1,6 +1,6 @@
 # Global progression contract
 
-Prototype decision, 2026-11-03. Global XP and the profile are now integrated with terminal results in both modes. The hub and skill purchases remain pending. Local records and loadout/preferences remain independent.
+Prototype decision, 2026-11-03. Global XP and the profile are now integrated with terminal results in both modes. The Sanctuary hub displays progression and connects modes/settings; skill purchases remain pending. Local records and loadout/preferences remain independent.
 
 ## Global XP and levels
 

@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. XP global é atribuído uma vez por vitória/derrota, com nível e resumo guardados; o hub continua pendente.
+Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. XP global é atribuído uma vez por vitória/derrota, com nível e resumo guardados; o Sanctuary liga modos, progressão, loadout e configurações.
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -230,7 +230,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Distinguir GLOBAL XP persistente de melhorias temporárias da run, no perfil, regras e apresentação.
 - [x] Garantir regras globais partilhadas entre Courtyard Run e Endless Arena, com bónus explícito de vitória.
 - [x] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves, com identidade persistente e transação única.
-- [ ] Criar hub com acesso aos modos, progressão e configurações.
+- [x] Criar Sanctuary com acesso aos modos, progressão, loadout e configurações.
 - [ ] Desenhar skill trees com custos, requisitos e efeitos compreensíveis.
 - [ ] Implementar compra e aplicação dos nós desbloqueados.
 - [ ] **Decidir:** respec, limites de poder e desbloqueios de conteúdo versus bónus diretos.

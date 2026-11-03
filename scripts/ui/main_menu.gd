@@ -1,5 +1,6 @@
 extends Control
-## Front door only: the arena is instantiated when PLAY is activated.
+## Title and sanctuary presentation; combat is instantiated only after mode selection.
+@export var is_hub: bool = false
 const ControlNames = preload("res://scripts/ui/combat_tutorial.gd")
 const FocusNavigation = preload("res://scripts/ui/focus_navigation.gd")
 const GlobalProfile = preload("res://scripts/run/global_profile.gd")
@@ -37,21 +38,21 @@ func _ready() -> void:
 	pixel_font.antialiasing = 0
 	home = Control.new()
 	add_child(home)
-	_label(home, "A FALLEN HEAVEN. AN UNBROKEN WILL.", Vector2(36, 37), 8, GOLD)
-	_label(home, "SWORD", Vector2(32, 57), 32, IVORY)
-	_label(home, "ABLAZE", Vector2(32, 91), 40, GOLD)
-	_label(home, "Enter the courtyard. Survive the fallen.", Vector2(36, 143), 12, MUTED, false)
+	_label(home, "REST. PREPARE. RETURN TO THE LIGHT." if is_hub else "A FALLEN HEAVEN. AN UNBROKEN WILL.", Vector2(36, 37), 8, GOLD)
+	_label(home, "THE" if is_hub else "SWORD", Vector2(32, 57), 32, IVORY)
+	_label(home, "SANCTUARY" if is_hub else "ABLAZE", Vector2(32, 91), 24 if is_hub else 40, GOLD)
+	_label(home, "Your strength endures between journeys." if is_hub else "Enter the courtyard. Survive the fallen.", Vector2(36, 143), 12, MUTED, false)
 	var actions := VBoxContainer.new()
 	actions.position = Vector2(36, 176)
 	actions.custom_minimum_size.x = 224
 	actions.add_theme_constant_override("separation", 4)
 	home.add_child(actions)
-	play_button = _button(actions, "PLAY ARENA", _show_modes, true)
-	var controls := _button(actions, "HOW TO PLAY", _show_controls)
+	play_button = _button(actions, "CHOOSE ARENA" if is_hub else "ENTER SANCTUARY", _show_modes if is_hub else _enter_hub, true)
+	var controls := _button(actions, "PROGRESSION" if is_hub else "HOW TO PLAY", _show_progression if is_hub else _show_controls)
 	var options := _button(actions, "OPTIONS", _show_options)
 	loadout_button = _button(actions, "WEAPON LOADOUT", _show_loadout)
 	loadout_button.pressed.connect(func(): return_focus = loadout_button)
-	_button(actions, "QUIT", func(): get_tree().quit())
+	_button(actions, "TITLE SCREEN" if is_hub else "QUIT", _return_to_title if is_hub else func(): get_tree().quit())
 	for button in actions.get_children():
 		button.custom_minimum_size.y = 26
 	controls.pressed.connect(func(): return_focus = controls)
@@ -78,6 +79,8 @@ func _ready() -> void:
 	back_button = _button(detail, "BACK", _back)
 	back_button.position = Vector2(124, 280)
 	back_button.size = Vector2(392, 28)
+	if is_hub:
+		_build_hub_overview()
 	_refresh_focus()
 	play_button.grab_focus()
 
@@ -114,6 +117,7 @@ func _start_game(finite: bool = false) -> void:
 		return
 	starting = true
 	get_tree().set_meta("finite_run", finite)
+	get_tree().set_meta("return_to_hub", is_hub)
 	var error := get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 	if error != OK:
 		starting = false
@@ -218,6 +222,8 @@ func _draw() -> void:
 	draw_line(Vector2(36, 163), Vector2(260, 163), GOLD)
 	draw_line(Vector2(36, 332), Vector2(604, 332), Color("6b573a"))
 	# Code-native pixel sword and rising embers; no new external art.
+	if is_hub:
+		return
 	var center := Vector2(461, 161)
 	draw_arc(center, 83, 0, TAU, 64, Color("5c5542"), 1.0)
 	draw_arc(center, 89, -PI * 0.8, PI * 0.15, 40, GOLD, 1.0)
@@ -361,3 +367,54 @@ func _show_modes() -> void:
 		_label(detail_body, "Profile recovered from backup or reset after corruption.", Vector2.ZERO, 11, MUTED, false)
 	_refresh_focus()
 	finite.grab_focus()
+
+
+func _enter_hub() -> void:
+	get_tree().change_scene_to_file("res://scenes/main/hub.tscn")
+
+func _return_to_title() -> void:
+	get_tree().change_scene_to_file("res://scenes/main/menu.tscn")
+
+func _build_hub_overview() -> void:
+	var profile = GlobalProfile.for_tree(get_tree())
+	profile.load_profile()
+	var panel := Panel.new()
+	panel.position = Vector2(326, 62)
+	panel.size = Vector2(280, 194)
+	panel.add_theme_stylebox_override("panel", _style(Color("0c1521"), GOLD))
+	home.add_child(panel)
+	_label(panel, "THE EXILE'S PATH", Vector2(16, 15), 12, GOLD)
+	_label(panel, "LEVEL %d" % GlobalProfile.level(profile.data.xp), Vector2(16, 45), 16, IVORY)
+	_label(panel, "GLOBAL XP %d / 1900" % profile.data.xp, Vector2(16, 76), 8, GOLD)
+	_label(panel, "SKILL POINTS %d" % (GlobalProfile.level(profile.data.xp) - 1), Vector2(16, 96), 8, IVORY)
+	var caption := "XP endures. Blessings reset each run."
+	if profile.last_error != OK:
+		caption = "Progression unavailable. Check your save."
+	elif profile.load_status in [&"recovered", &"reset"]:
+		caption = "Profile recovered after a save problem."
+	_label(panel, caption, Vector2(16, 127), 12, MUTED, false)
+	_label(panel, "Prepare a weapon. Choose your arena.", Vector2(16, 151), 12, MUTED, false)
+
+func _show_progression() -> void:
+	_open_detail("GLOBAL PROGRESSION")
+	detail_body.add_theme_constant_override("separation", 9)
+	var profile = GlobalProfile.for_tree(get_tree())
+	profile.load_profile()
+	_label(detail_body, "LEVEL %d   /   GLOBAL XP %d" % [GlobalProfile.level(profile.data.xp), profile.data.xp], Vector2.ZERO, 12, GOLD)
+	var bar := ProgressBar.new()
+	bar.custom_minimum_size = Vector2(392, 20)
+	bar.max_value = 100
+	bar.value = 100 if profile.data.xp == 1900 else profile.data.xp % 100
+	bar.add_theme_stylebox_override("background", _style(Color("101d2b"), GOLD))
+	bar.add_theme_stylebox_override("fill", _style(Color("63b7b3"), GOLD))
+	bar.show_percentage = false
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	detail_body.add_child(bar)
+	_label(detail_body, "MAXIMUM LEVEL" if profile.data.xp == 1900 else "%d / 100 XP TO NEXT LEVEL" % (profile.data.xp % 100), Vector2.ZERO, 8, IVORY)
+	_label(detail_body, "SKILL POINTS AVAILABLE: %d" % (GlobalProfile.level(profile.data.xp) - 1), Vector2.ZERO, 8, GOLD)
+	_label(detail_body, "Victories and defeats earn global XP in both arenas.", Vector2.ZERO, 12, MUTED, false)
+	_label(detail_body, "Blessings last one run. Global XP lasts between runs.", Vector2.ZERO, 12, MUTED, false)
+	if profile.last_error != OK:
+		_label(detail_body, "Profile cannot be saved. XP is unavailable.", Vector2.ZERO, 12, Color("ed8c82"), false)
+	_refresh_focus()
+	back_button.grab_focus()
