@@ -1,11 +1,14 @@
 extends RefCounted
 ## Advances only when combat explicitly supplies simulation time.
 signal spawn_requested(kind: StringName)
+signal run_cleared
 signal wave_cleared
 signal wave_started(number: int)
 
 const WaveSettings = preload("res://scripts/data/wave_settings.gd")
 var settings: WaveSettings = load("res://resources/default_wave.tres")
+var final_wave: int = 0
+var finished: bool = false
 var spawn_count: int = 0
 var number: int = 1
 var remaining: int = budget_for_wave(1)
@@ -14,6 +17,7 @@ var spawn_cooldown: float = settings.initial_delay
 
 
 func reset() -> void:
+	finished = false
 	spawn_count = 0
 	number = 1
 	remaining = budget_for_wave(1)
@@ -22,6 +26,8 @@ func reset() -> void:
 
 
 func advance(delta: float, living_enemies: int) -> void:
+	if finished:
+		return
 	if break_time > 0.0:
 		break_time = maxf(0.0, break_time - delta)
 		if break_time == 0.0:
@@ -32,6 +38,10 @@ func advance(delta: float, living_enemies: int) -> void:
 			wave_started.emit(number)
 		return
 	if remaining == 0 and living_enemies == 0:
+		if final_wave > 0 and number == final_wave:
+			finished = true
+			run_cleared.emit()
+			return
 		break_time = settings.break_duration
 		wave_cleared.emit()
 		return
@@ -53,6 +63,8 @@ func advance(delta: float, living_enemies: int) -> void:
 				kind = recipe.opener
 			if kind not in [&"chaser", &"ranged", &"charger", &"guardian", &"elite"]:
 				kind = &"chaser"
+		if final_wave > 0 and number == final_wave:
+			kind = &"boss"
 		spawn_requested.emit(kind)
 
 
@@ -66,6 +78,8 @@ func encounter_for_wave(wave: int) -> Resource:
 	return settings.encounters[index]
 
 func budget_for_wave(wave: int) -> int:
+	if final_wave > 0 and wave == final_wave:
+		return 1
 	var recipe = encounter_for_wave(wave)
 	var multiplier: float = recipe.budget_multiplier if recipe != null else 1.0
 	return clampi(int(round((settings.initial_budget + (wave - 1) * settings.budget_growth) * multiplier)), 1, settings.max_budget)

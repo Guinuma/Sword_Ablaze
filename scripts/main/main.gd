@@ -13,6 +13,7 @@ const SoundEffects = preload("res://scripts/audio/sound_effects.gd")
 var sounds = SoundEffects.new()
 const CombatTutorial = preload("res://scripts/ui/combat_tutorial.gd")
 var tutorial = CombatTutorial.new()
+var finite_mode: bool = false
 var run_recorded: bool = false
 const UpgradeSystem = preload("res://scripts/run/upgrade_system.gd")
 var upgrades = UpgradeSystem.new()
@@ -46,6 +47,10 @@ var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	finite_mode = bool(get_tree().get_meta("finite_run", false))
+	waves.final_wave = 10 if finite_mode else 0
+	if finite_mode and records.path == "user://arena_records.json":
+		records.path = "user://finite_records.json"
 	preferences.load_preferences()
 	add_child(sounds)
 	player.shot.connect(func(_origin, _direction): sounds.play(&"shot"); tutorial.shot())
@@ -64,6 +69,7 @@ func _ready() -> void:
 	waves.wave_started.connect(run.start_combat)
 	waves.spawn_requested.connect(_spawn_enemy)
 	waves.wave_cleared.connect(_on_wave_cleared)
+	waves.run_cleared.connect(_on_run_won)
 	random.randomize()
 	hud_view = ArenaHud.new()
 	hud_view.pause_requested.connect(func(): _set_paused(true))
@@ -94,14 +100,14 @@ func _ready() -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_node_ready() and not (run.phase == RunState.Phase.DEAD):
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_node_ready() and run.phase not in [RunState.Phase.DEAD, RunState.Phase.WON]:
 		_set_paused(true)
 
 
 func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("reset_sandbox"):
 		_reset_run()
-	if Input.is_action_just_pressed("pause_run") and not (run.phase == RunState.Phase.DEAD):
+	if Input.is_action_just_pressed("pause_run") and run.phase not in [RunState.Phase.DEAD, RunState.Phase.WON]:
 		_set_paused(not (run.phase == RunState.Phase.PAUSED))
 	if not Input.is_action_pressed("fire"):
 		player.fire_requires_release = false
@@ -117,6 +123,10 @@ func _physics_process(delta: float) -> void:
 	tutorial.observe(delta, movement, old_aim.distance_squared_to(player.aim) > 0.0001)
 	healing_drops.advance(delta, player.player_position, run)
 	_update_waves(delta)
+	if not run.is_active():
+		_update_hud()
+		queue_redraw()
+		return
 	_update_enemies(delta)
 	_update_bullets(delta)
 	_check_contact()
@@ -179,6 +189,8 @@ func _on_wave_cleared() -> void:
 
 func _spawn_enemy(kind: StringName = &"chaser") -> void:
 	enemies.spawn(player.player_position, ARENA, random, kind)
+	if kind == &"boss":
+		enemies.items.back()["position"] = ARENA.get_center() + Vector2(0, -85)
 
 
 func _update_enemies(delta: float) -> void:
@@ -256,7 +268,19 @@ func _choose_upgrade(id: StringName) -> void:
 	queue_redraw()
 
 
+func _on_run_won() -> void:
+	if finite_mode and waves.number == 10 and waves.remaining == 0 and enemies.items.is_empty():
+		run.win()
+
+
 func _on_run_phase_changed(phase: RunState.Phase) -> void:
+	if phase == RunState.Phase.WON and not run_recorded:
+		run_recorded = true
+		projectiles.clear()
+		hostile_projectiles.clear()
+		healing_drops.clear()
+		sounds.stop_combat()
+		records.record(waves.number, run.kills, run.elapsed, true)
 	if phase == RunState.Phase.DEAD and not run_recorded:
 		run_recorded = true
 		player_visual.begin_defeat()
@@ -305,8 +329,18 @@ func _update_hud() -> void:
 	hud_view.present_preferences(preferences.reduced_flashes, preferences.reduced_motion, preferences.last_error != OK)
 	hud_view.present_upgrades(upgrades.offered, run.phase == RunState.Phase.UPGRADE, upgrades.stacks, upgrades.definitions)
 	hud_view.present_records(records.data, records.last_error != OK)
-	hud_view.present(run.health, run.max_health, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD and player_visual.defeat_done), (run.phase == RunState.Phase.PAUSED), player.dash_recharge)
+	hud_view.present(run.health, run.max_health, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, ((run.phase == RunState.Phase.DEAD and player_visual.defeat_done) or run.phase == RunState.Phase.WON), (run.phase == RunState.Phase.PAUSED), player.dash_recharge)
 
+	if run.phase == RunState.Phase.WON:
+		hud_view.status.text = "COURTYARD CLEARED"
+		hud_view.summary.text = "Crown broken  /  %d kills\nCompleted in %d:%02d" % [run.kills, int(run.elapsed) / 60, int(run.elapsed) % 60]
+	if finite_mode:
+		for enemy in enemies.items:
+			if enemy.get("profile") != null and enemy.profile.kind == "boss" and run.is_active():
+				hud_view.wave_status.text = "WARDEN %d / %d  PHASE %d" % [enemy.health, enemy.profile.health, enemy.get("boss_phase", 1)]
+		hud_view.wave_heading.text = "BOSS" if waves.number == 10 else "WAVE %02d / 09" % waves.number
+		hud_view.record_label.text = "FINITE RUNS: %d  /  WINS: %d" % [records.data["runs"], records.data["wins"]]
+		hud_view.record_label.text += "\nCould not save records" if records.last_error != OK else ""
 	hud_view.control_hint.text = tutorial.hint()
 	hud_view.control_hint.visible = run.is_active() and tutorial.step < 5
 	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")

@@ -20,8 +20,10 @@ func load_records() -> void:
 		data = _defaults()
 
 
-func record(wave: int, kills: int, elapsed: float) -> Error:
+func record(wave: int, kills: int, elapsed: float, victory: bool = false) -> Error:
 	data["runs"] += 1
+	if victory:
+		data["wins"] += 1
 	data["best_wave"] = maxi(data["best_wave"], wave)
 	data["best_kills"] = maxi(data["best_kills"], kills)
 	data["best_seconds"] = maxf(data["best_seconds"], elapsed)
@@ -72,8 +74,12 @@ func _read(file_path: String) -> Dictionary:
 		if field != "best_seconds" and float(value) != floorf(float(value)):
 			return {}
 		clean[field] = float(value) if field == "best_seconds" else int(value)
+	var wins = parsed.get("wins", 0)
+	if not (wins is int or wins is float) or not is_finite(float(wins)) or wins < 0 or wins > clean["runs"] or float(wins) != floorf(float(wins)):
+		return {}
+	clean["wins"] = int(wins)
 	return clean
 
 
 static func _defaults() -> Dictionary:
-	return {"version": VERSION, "runs": 0, "best_wave": 0, "best_kills": 0, "best_seconds": 0.0}
+	return {"version": VERSION, "runs": 0, "wins": 0, "best_wave": 0, "best_kills": 0, "best_seconds": 0.0}

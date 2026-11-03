@@ -5,7 +5,7 @@ signal damaged(health: int)
 signal healed(amount: int)
 signal enemy_defeated(total: int)
 
-enum Phase { COMBAT, INTERMISSION, PAUSED, DEAD, UPGRADE }
+enum Phase { COMBAT, INTERMISSION, PAUSED, DEAD, UPGRADE, WON }
 const MAX_HEALTH: int = 100
 const HIT_DAMAGE: int = 15
 var max_health: int = MAX_HEALTH
@@ -26,7 +26,7 @@ func advance(delta: float) -> void:
 
 
 func set_paused(value: bool) -> void:
-	if phase == Phase.DEAD:
+	if phase in [Phase.DEAD, Phase.WON]:
 		return
 	if value and (is_active() or phase == Phase.UPGRADE):
 		resume_phase = phase
@@ -104,3 +104,10 @@ func set_max_health(value: int) -> void:
 	max_health = next
 	if health > 0:
 		health = mini(max_health, health + increase)
+
+
+func win() -> bool:
+	if phase != Phase.COMBAT or health <= 0:
+		return false
+	_set_phase(Phase.WON)
+	return true

@@ -27,6 +27,8 @@ func _run() -> void:
 	await cycle(menu.play_button, 5)
 	await cycle(menu.play_button, 5, KEY_TAB, true)
 	await cycle(menu.play_button, 5, KEY_DOWN)
+	menu._show_modes()
+	await cycle(menu.detail_body.get_child(1), 3)
 	menu._show_loadout()
 	await cycle(menu.detail_body.get_child(1), 3)
 	menu._show_controls()

@@ -104,6 +104,15 @@ func _run() -> void:
 	arena.hud_view.main_menu_requested.emit()
 	await scene_changed
 	check(current_scene.scene_file_path == "res://scenes/main/menu.tscn", "Results must return to menu")
+	current_scene._show_modes()
+	current_scene._start_game(true)
+	await scene_changed
+	arena = current_scene
+	arena.set_physics_process(false)
+	check(arena.finite_mode and arena.waves.final_wave == 10 and arena.records.path == "user://finite_records.json", "Finite menu route must select finale and separate records")
+	arena._set_paused(true)
+	arena.hud_view.main_menu_requested.emit()
+	await scene_changed
 	current_scene.free()
 	await create_timer(0.35).timeout
 	print("Menu checks complete: %d failures" % failures)

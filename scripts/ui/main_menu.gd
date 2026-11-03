@@ -45,7 +45,7 @@ func _ready() -> void:
 	actions.custom_minimum_size.x = 224
 	actions.add_theme_constant_override("separation", 4)
 	home.add_child(actions)
-	play_button = _button(actions, "PLAY ARENA", _start_game, true)
+	play_button = _button(actions, "PLAY ARENA", _show_modes, true)
 	var controls := _button(actions, "HOW TO PLAY", _show_controls)
 	var options := _button(actions, "OPTIONS", _show_options)
 	loadout_button = _button(actions, "WEAPON LOADOUT", _show_loadout)
@@ -108,10 +108,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		_back()
 		get_viewport().set_input_as_handled()
 
-func _start_game() -> void:
+func _start_game(finite: bool = false) -> void:
 	if starting:
 		return
 	starting = true
+	get_tree().set_meta("finite_run", finite)
 	var error := get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 	if error != OK:
 		starting = false
@@ -335,3 +336,20 @@ func _equip_weapon(id: StringName) -> void:
 	preferences.save()
 	_show_loadout()
 	save_error.text = "Could not save weapon choice." if preferences.last_error != OK else ""
+
+
+func _show_modes() -> void:
+	return_focus = play_button
+	_open_detail("CHOOSE ARENA")
+	detail_body.add_theme_constant_override("separation", 8)
+	var finite := _button(detail_body, "COURTYARD RUN", _start_game.bind(true))
+	finite.custom_minimum_size.x = 392
+	_label(detail_body, "Nine waves, three blessings, then the Warden.", Vector2.ZERO, 12, MUTED, false)
+	var endless := _button(detail_body, "ENDLESS ARENA", _start_game.bind(false))
+	endless.custom_minimum_size.x = 392
+	_label(detail_body, "Survive repeating encounters. Chase your records.", Vector2.ZERO, 12, MUTED, false)
+	var finite_records = ArenaRecords.new("user://finite_records.json")
+	finite_records.load_records()
+	_label(detail_body, "COURTYARD VICTORIES: %d" % finite_records.data["wins"], Vector2.ZERO, 8, GOLD)
+	_refresh_focus()
+	finite.grab_focus()

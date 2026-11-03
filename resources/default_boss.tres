@@ -1,0 +1,22 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/enemy_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+kind = "boss"
+health = 120
+speed = 15.0
+speed_per_wave = 0.001
+max_speed = 15.0
+hit_radius = 22.0
+contact_radius = 25.0
+separation_distance = 44.0
+body_margin = 24.0
+attack_range = 600.0
+attack_cooldown = 2.4
+attack_warning = 1.1
+projectile_speed = 130.0
+projectile_damage = 20
+knockback_multiplier = 0.0
+spawn_warning = 1.5

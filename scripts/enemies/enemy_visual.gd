@@ -1,5 +1,6 @@
 extends Node2D
 ## Art presentation only; grounded origin matches the simulation position.
+const EnemySystem = preload("res://scripts/enemies/enemy_system.gd")
 const WISP = preload("res://assets/art/enemies/corrupted-wisp-01-atlas.tres")
 const SENTINEL = preload("res://assets/art/enemies/fractured-sentinel-01-atlas.tres")
 const WALK = preload("res://assets/art/enemies/fractured-sentinel-walk-01-frames.tres")
@@ -53,6 +54,9 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, 13.0 - progress * 3.0, 0.0, TAU, 24, Color("ffb454"), 1.0)
 		draw_line(Vector2(-4, 0), Vector2(4, 0), Color("ffe0a3"))
 		draw_line(Vector2(0, -4), Vector2(0, 4), Color("ffe0a3"))
+		return
+	if profile != null and profile.kind == "boss":
+		_draw_boss(profile)
 		return
 	if profile != null and profile.kind == "guardian":
 		_draw_guardian(profile)
@@ -151,3 +155,26 @@ func _draw_guardian(profile: Resource) -> void:
 	if state["health"] < profile.health:
 		draw_rect(Rect2(-13, -35, 26, 2), Color("101421"))
 		draw_rect(Rect2(-13, -35, 26.0 * state["health"] / profile.health, 2), Color("ffb454"))
+
+
+func _draw_boss(profile: Resource) -> void:
+	var second: bool = state.get("boss_phase", 1) == 2
+	var gold := Color("ed8c82") if second else Color("c5a46c")
+	if state.get("windup", 0.0) > 0.0:
+		for direction in EnemySystem.boss_directions(state):
+			draw_line(direction * 27, direction * 600, Color(0.95, 0.35, 0.8, 0.55), 1)
+	draw_set_transform(Vector2(0, 12), 0.0, Vector2(1, 0.4))
+	draw_circle(Vector2.ZERO, 25, Color(0.02, 0.03, 0.06, 0.65))
+	draw_set_transform(Vector2.ZERO)
+	var body := Color("304858")
+	if state.flash > 0.0 and not reduced_flashes:
+		body = Color("e0cc9d")
+	draw_colored_polygon(PackedVector2Array([Vector2(-22, 7), Vector2(-24, -25), Vector2(-15, -39), Vector2(0, -46), Vector2(15, -39), Vector2(24, -25), Vector2(22, 7), Vector2(0, 17)]), body)
+	draw_arc(Vector2(0, -17), 29, -PI * 0.9, -PI * 0.1, 24, gold, 3)
+	if second:
+		draw_arc(Vector2(0, -17), 33, PI * 0.1, PI * 0.9, 24, gold, 2)
+	draw_colored_polygon(PackedVector2Array([Vector2(-15, -39), Vector2(-18, -52), Vector2(-7, -46), Vector2(0, -57), Vector2(7, -46), Vector2(18, -52), Vector2(15, -39)]), gold)
+	draw_line(Vector2(-10, -23), Vector2(10, -23), gold, 3)
+	draw_polyline(PackedVector2Array([Vector2(-2, -14), Vector2(4, -4), Vector2(-4, 4), Vector2(2, 13)]), gold, 2)
+	draw_rect(Rect2(-25, -65, 50, 4), Color("101421"))
+	draw_rect(Rect2(-25, -65, 50.0 * state.health / profile.health, 4), gold)

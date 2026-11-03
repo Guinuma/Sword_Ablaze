@@ -9,6 +9,7 @@ var ranged_settings: EnemySettings = load("res://resources/default_ranged.tres")
 var charger_settings: EnemySettings = load("res://resources/default_charger.tres")
 var guardian_settings: EnemySettings = load("res://resources/default_guardian.tres")
 var elite_settings: EnemySettings = load("res://resources/default_elite.tres")
+var boss_settings: EnemySettings = load("res://resources/default_boss.tres")
 var items: Array[Dictionary] = []
 
 
@@ -25,7 +26,7 @@ func spawn(target: Vector2, bounds: Rect2, random: RandomNumberGenerator, kind: 
 	else:
 		var y := bounds.position.y + 10.0 if target.y > bounds.get_center().y else bounds.end.y - 10.0
 		point = Vector2(random.randf_range(bounds.position.x + 10.0, bounds.end.x - 10.0), y)
-	var profiles := {&"chaser": settings, &"ranged": ranged_settings, &"charger": charger_settings, &"guardian": guardian_settings, &"elite": elite_settings}
+	var profiles := {&"chaser": settings, &"ranged": ranged_settings, &"charger": charger_settings, &"guardian": guardian_settings, &"elite": elite_settings, &"boss": boss_settings}
 	var profile: EnemySettings = profiles.get(kind, settings)
 	items.append({"position": point, "health": profile.health, "flash": 0.0, "spawn_time": profile.spawn_warning, "profile": profile, "attack_cooldown": profile.attack_cooldown, "windup": 0.0, "facing": point.direction_to(target)})
 
@@ -45,7 +46,9 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 				activated.emit(point)
 			continue
 		var speed: float = minf(profile.speed + (wave - 1) * profile.speed_per_wave, profile.max_speed)
-		if profile.kind == "guardian":
+		if profile.kind == "boss":
+			_advance_boss(enemy, target, delta, profile)
+		elif profile.kind == "guardian":
 			var facing: Vector2 = enemy.get("facing", Vector2.DOWN)
 			var angle := facing.angle_to(point.direction_to(target))
 			enemy["facing"] = facing.rotated(clampf(angle, -profile.turn_speed * delta, profile.turn_speed * delta))
@@ -180,3 +183,34 @@ func _advance_charger(enemy: Dictionary, target: Vector2, delta: float, speed: f
 			break
 		if remaining <= 0.0:
 			break
+
+
+func _advance_boss(enemy: Dictionary, target: Vector2, delta: float, profile: EnemySettings) -> void:
+	if enemy.windup > 0.0:
+		enemy.windup = maxf(0.0, enemy.windup - delta)
+		if enemy.windup == 0.0:
+			for direction in boss_directions(enemy):
+				shot.emit(enemy.position + direction * 27, direction, profile.projectile_speed * (1.2 if enemy.boss_phase == 2 else 1.0), profile.projectile_damage)
+			enemy.attack_cooldown = 1.6 if enemy.boss_phase == 2 else profile.attack_cooldown
+			enemy["attack_index"] = int(enemy.get("attack_index", 0)) + 1
+		return
+	enemy.attack_cooldown = maxf(0.0, enemy.attack_cooldown - delta)
+	if enemy.attack_cooldown == 0.0:
+		enemy["boss_phase"] = 2 if enemy.health <= profile.health / 2 else 1
+		enemy["boss_attack"] = "ring" if int(enemy.get("attack_index", 0)) % 2 == 0 else "fan"
+		enemy["shot_direction"] = Vector2(enemy.position).direction_to(target)
+		enemy.windup = 0.8 if enemy.boss_phase == 2 else profile.attack_warning
+
+static func boss_directions(enemy: Dictionary) -> Array[Vector2]:
+	var result: Array[Vector2] = []
+	var direction: Vector2 = enemy.get("shot_direction", Vector2.RIGHT)
+	var second_phase: bool = enemy.get("boss_phase", 1) == 2
+	if enemy.get("boss_attack", "ring") == "ring":
+		var count := 12 if second_phase else 8
+		for index in range(count):
+			result.append(direction.rotated(index * TAU / count))
+	else:
+		var count := 5 if second_phase else 3
+		for index in range(count):
+			result.append(direction.rotated((index - (count - 1) * 0.5) * 0.18))
+	return result

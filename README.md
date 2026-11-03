@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Ainda não existem XP global, hub, boss ou condição de vitória.
+Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. Ainda não existem XP global ou hub.
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -137,7 +137,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Introduzir o inimigo à distância na onda 3, inicialmente um por três spawns.
 - [ ] Equilibrar a composição de encontros em playtests.
 - [x] Criar primeiro elite com comportamento reconhecível.
-- [ ] Criar primeiro boss com ataques anunciados, fases e recompensa.
+- [x] Criar primeiro boss com ataques anunciados, duas fases e vitória local registada como recompensa; XP global pendente.
 - [x] Testar dano simultâneo de contacto/projéteis, eliminações em cadeia, congelamento na morte e limpeza de inimigos/projéteis ao reiniciar.
 
 ### 4. Ondas e modo Arena
@@ -148,7 +148,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Recuperar 20 PV uma única vez entre rondas.
 - [x] Mostrar ronda, inimigos restantes, HP, eliminações, tempo e recarga do dash.
 - [x] Substituir escalada uniforme por configurações de encontros e composição de ondas; ver [encontros](docs/encounters.md).
-- [x] **Decidido:** nove ondas + boss na décima, alvo de 10–15 minutos e variante Endless separada; ver [estrutura da run](docs/run-design.md). Implementação finita pendente.
+- [x] **Decidido:** nove ondas + boss na décima, alvo de 10–15 minutos e variante Endless separada; ver [estrutura da run](docs/run-design.md). Courtyard Run e Endless Arena selecionáveis no menu.
 - [x] Mostrar resumo de derrota com ronda, tempo, eliminações e opção de repetir.
 - [ ] Acrescentar recompensas ao resumo quando existir progressão.
 - [ ] Criar fluxo completo: iniciar arena, jogar, terminar, repetir ou regressar ao hub.

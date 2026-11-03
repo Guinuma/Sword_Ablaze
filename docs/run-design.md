@@ -1,6 +1,6 @@
 # First finite run: prototype decisions
 
-Decision date: 2026-11-03. This defines the implementation target for the first complete run. It does not claim that finite mode, the boss, victory, hub or permanent rewards are already implemented. The currently playable Arena remains endless until the finite flow is complete and selectable.
+Decision date: 2026-11-03. This defines the implementation target for the first complete run. Finite Courtyard Run, the Warden boss, terminal victory, separate local win records and mode selection are now implemented. The hub and permanent progression rewards remain pending. Human run duration/difficulty testing is still required.
 
 ## Structure and duration
 
@@ -26,7 +26,7 @@ The result screen returns to the main menu while a hub is absent. Once the minim
 
 Keep Endless Arena as an explicit separate selection. It continues cycling recipes 7–9 after wave nine, with the existing budget, simultaneous-enemy and spawn-rate caps. It has no finite boss win condition. Its defeats retain their survival-oriented wave/kill/time records. Finite results must be labeled separately so a ten-wave completion is not confused with an endless survival record.
 
-During implementation, the existing Play Arena route continues to work. Make the finite route selectable only once entry, boss, terminal result, retry and return are all functional. The 20-minute soak must continue exercising Endless Arena; add separate finite-run coverage rather than silently truncating the existing stress test.
+Play Arena now opens a mode choice between Courtyard Run and Endless Arena. Entry, boss, terminal result, retry and return are implemented. The 20-minute soak must continue exercising Endless Arena; add separate finite-run coverage rather than silently truncating the existing stress test.
 
 ## Implementation and acceptance gates
 
@@ -38,3 +38,12 @@ During implementation, the existing Play Arena route continues to work. Make the
 6. Play complete runs with both weapons, record actual duration and difficulty, and tune toward the target. Keep playtest and final-balance items open until human evidence exists.
 
 Global XP, skill trees, global reward amounts, boss permanent drops, save migration and export platforms are not decided by this document. Those contracts must be defined and validated in their own checklist work.
+
+
+## Implemented Warden and local reward
+
+The Warden has 120 HP, a 22 px projectile hit radius, a 25 px contact radius and no knockback. It appears with a 1.5 s safe spawn warning in the upper center of the arena. It remains stationary and alternates radial rings and aimed fans, each with fixed warning lines. Phase one uses eight ring shots or three fan shots, a 1.1 s warning and 2.4 s cooldown. At half HP, the next announced attack enters phase two: twelve ring shots or five fan shots, a 0.8 s warning and 1.6 s cooldown. Projectiles deal 20 damage and travel at 130 px/s (156 in phase two). A phase change never changes an already announced pattern mid-warning.
+
+The current reward is a persistent local victory count and the “Crown broken” result, not XP or a permanent power upgrade. Finite outcomes save to `user://finite_records.json`, separately from endless records. Successful completion increments optional version-1 `wins`; defeats increment runs without wins. Old records without `wins` load with zero. The menu mode selector shows finite victories. The result is delivered once; no projectile or contact can damage a won run. Death already registered before the final-clear event takes precedence.
+
+Boss art is an original code-drawn armored crown/halo placeholder under the MIT license. Final boss art remains pending. `tests/finite_run_smoke.gd` checks both attack phases, matching telegraph/projectile directions, complete automated runs with both weapons, three blessing choices, pause, victory persistence/deduplication, retry and death precedence. Menu tests check finite entry and return. `tools/capture_finite.gd` captures both phases and victory. These tests do not measure the 10–15-minute target or establish fair difficulty.
