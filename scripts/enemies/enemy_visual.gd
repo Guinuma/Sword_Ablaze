@@ -94,7 +94,7 @@ func _draw_charger(profile: Resource) -> void:
 	if phase == "warning":
 		var length: float = profile.charge_speed * profile.charge_duration
 		var end := direction * length
-		var side := direction.orthogonal() * profile.contact_radius
+		var side: Vector2 = direction.orthogonal() * profile.contact_radius
 		draw_line(side, end + side, Color("ffb454"), 1.0)
 		draw_line(-side, end - side, Color("ffb454"), 1.0)
 		draw_line(end + side, end, Color("ffe0a3"), 2.0)
