@@ -104,6 +104,7 @@ func _show_controls() -> void:
 
 func _show_options() -> void:
 	_open_detail("OPTIONS")
+	detail_body.add_theme_constant_override("separation", 6)
 	for entry in [["Reduce flashes", preferences.reduced_flashes], ["Reduce visual motion", preferences.reduced_motion]]:
 		var toggle := CheckButton.new()
 		toggle.text = entry[0]
@@ -116,6 +117,7 @@ func _show_options() -> void:
 			toggle.toggled.connect(func(value): preferences.reduced_flashes = value; _save_preferences())
 		else:
 			toggle.toggled.connect(func(value): preferences.reduced_motion = value; _save_preferences(); queue_redraw())
+	_button(detail_body, "AUDIO VOLUMES", _show_audio)
 	_label(detail_body, "Applies to the menu and arena. Saved automatically.", Vector2.ZERO, 12, MUTED, false)
 	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
 	detail_body.get_child(1).grab_focus()
@@ -197,3 +199,34 @@ func _draw() -> void:
 	for y in [233, 240, 247]:
 		draw_line(Vector2(457, y), Vector2(465, y), GOLD)
 	draw_colored_polygon(PackedVector2Array([Vector2(461, 251), Vector2(467, 257), Vector2(461, 263), Vector2(455, 257)]), GOLD)
+
+
+func _show_audio() -> void:
+	_open_detail("AUDIO")
+	detail_body.add_theme_constant_override("separation", 6)
+	var first_slider: HSlider
+	for bus in Preferences.AUDIO_BUSES:
+		var row := HBoxContainer.new()
+		row.custom_minimum_size.y = 28
+		detail_body.add_child(row)
+		var caption := _label(row, bus.to_upper(), Vector2.ZERO, 8, IVORY)
+		caption.custom_minimum_size.x = 74
+		var slider := HSlider.new()
+		slider.custom_minimum_size = Vector2(228, 24)
+		slider.min_value = 0.0
+		slider.max_value = 100.0
+		slider.step = 5.0
+		slider.value = preferences.volumes[bus] * 100.0
+		slider.tooltip_text = "%s volume. Left / right to adjust; zero mutes." % bus
+		slider.add_theme_stylebox_override("focus", _style(Color.TRANSPARENT, GOLD))
+		row.add_child(slider)
+		var amount := _label(row, "%d%%" % slider.value, Vector2.ZERO, 8, GOLD)
+		amount.custom_minimum_size.x = 54
+		slider.value_changed.connect(func(value):
+			preferences.set_volume(bus, value / 100.0)
+			amount.text = "%d%%" % value
+			_save_preferences())
+		if first_slider == null:
+			first_slider = slider
+	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
+	first_slider.grab_focus()

@@ -31,6 +31,27 @@ func _run() -> void:
 	var frozen: float = menu.clock
 	menu._process(1.0)
 	check(menu.clock == frozen, "Reduced motion must stop menu animation")
+	menu._show_audio()
+	for bus in menu.Preferences.AUDIO_BUSES:
+		var index := AudioServer.get_bus_index(bus)
+		check(index >= 0, "Audio bus must exist: " + bus)
+		if bus != "Master":
+			check(AudioServer.get_bus_send(index) == &"Master", "Category must route to Master")
+	var master_slider = menu.detail_body.get_child(1).get_child(1)
+	master_slider.value = 0.0
+	check(AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")), "Zero Master must mute output")
+	var music_slider = menu.detail_body.get_child(2).get_child(1)
+	music_slider.value = 35.0
+	saved.load_preferences()
+	check(saved.volumes["Music"] == 0.35 and saved.volumes["Master"] == 0.0, "Independent audio values must survive reload")
+	check(absf(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music")) - linear_to_db(0.35)) < 0.01, "Music gain must apply to its bus")
+	master_slider.value = 100.0
+	check(not AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")), "Raising Master must unmute output")
+	check(menu.preferences.volumes["Music"] == 0.35, "Master adjustment must preserve category volume")
+	menu.preferences.set_volume("Music", 2.0)
+	check(menu.preferences.volumes["Music"] == 1.0, "Audio values must clamp to supported range")
+	for bus in menu.Preferences.AUDIO_BUSES:
+		menu.preferences.set_volume(bus, 1.0)
 	for suffix in ["", ".bak", ".tmp"]:
 		DirAccess.remove_absolute(menu.preferences.path + suffix)
 	menu._back()

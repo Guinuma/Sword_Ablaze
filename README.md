@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Ainda não existem áudio, XP global, hub, boss ou condição de vitória.
+Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Os canais e volumes de áudio estão preparados, mas ainda não existem sons ou música. Ainda não existem XP global, hub, boss ou condição de vitória.
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -62,7 +62,7 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 
 Perder foco pausa o jogo; Escape retoma. Após pausa, reinício, escolha de melhoria ou interação com os indicadores do HUD, largar o disparo antes de voltar a disparar.
 
-Os recordes de onda, eliminações e sobrevivência são máximos independentes e ficam em `user://arena_records.json`. As preferências visuais ficam em `user://preferences.json`. As melhorias da partida não são progresso persistente. Detalhes: [recordes e recuperação](docs/arena-records.md).
+Os recordes de onda, eliminações e sobrevivência são máximos independentes e ficam em `user://arena_records.json`. As preferências visuais e os volumes ficam em `user://preferences.json`. As melhorias da partida não são progresso persistente. Detalhes: [recordes e recuperação](docs/arena-records.md).
 
 Os valores são provisórios e precisam de playtesting.
 
@@ -197,7 +197,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Criar efeitos para spawn, dash, melhoria, recuperação de vida e fim de onda.
 - [ ] Criar sons de tiro, impacto, eliminação, dano, dash e interação de menus.
 - [ ] Criar música de combate e ambiente do hub com transições.
-- [ ] Configurar buses Master, Music, SFX e UI, com volumes independentes.
+- [x] Configurar buses Master, Music, SFX e UI, com volumes independentes guardados em Options → Audio Volumes.
 - [ ] Limitar sons simultâneos e evitar volume excessivo em combate denso.
 - [ ] **Decidir:** incluir hit-stop e screen shake; se usados, oferecer redução/desativação.
 

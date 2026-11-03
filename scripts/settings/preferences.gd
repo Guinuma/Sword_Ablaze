@@ -1,8 +1,10 @@
 extends RefCounted
-## Local visual preferences; never modifies combat stats or timing.
+## Local visual and audio preferences; never modifies combat stats or timing.
 var path: String
 var reduced_flashes: bool = false
 var reduced_motion: bool = false
+const AUDIO_BUSES = ["Master", "Music", "SFX", "UI"]
+var volumes: Dictionary = {"Master": 1.0, "Music": 1.0, "SFX": 1.0, "UI": 1.0}
 var last_error: Error = OK
 var unsupported_version: bool = false
 
@@ -18,6 +20,11 @@ func load_preferences() -> void:
 		data = _read(path + ".bak")
 	reduced_flashes = data.get("reduced_flashes", false)
 	reduced_motion = data.get("reduced_motion", false)
+	var audio: Dictionary = data.get("volumes", {}) if data.get("volumes", {}) is Dictionary else {}
+	for bus in AUDIO_BUSES:
+		var value = audio.get(bus, 1.0)
+		volumes[bus] = clampf(float(value), 0.0, 1.0) if (value is float or value is int) and is_finite(float(value)) else 1.0
+	apply_audio()
 
 
 func save() -> Error:
@@ -28,7 +35,7 @@ func save() -> Error:
 	if file == null:
 		last_error = FileAccess.get_open_error()
 		return last_error
-	file.store_string(JSON.stringify({"version": 1, "reduced_flashes": reduced_flashes, "reduced_motion": reduced_motion}))
+	file.store_string(JSON.stringify({"version": 1, "reduced_flashes": reduced_flashes, "reduced_motion": reduced_motion, "volumes": volumes}))
 	file.flush()
 	last_error = file.get_error()
 	file.close()
@@ -59,3 +66,19 @@ func _read(file_path: String) -> Dictionary:
 	if data.get("version") != 1 or not data.get("reduced_flashes") is bool or not data.get("reduced_motion") is bool:
 		return {}
 	return data
+
+
+func set_volume(bus: String, value: float) -> void:
+	if bus not in AUDIO_BUSES or not is_finite(value):
+		return
+	volumes[bus] = clampf(value, 0.0, 1.0)
+	apply_audio()
+
+
+func apply_audio() -> void:
+	for bus in AUDIO_BUSES:
+		var index := AudioServer.get_bus_index(bus)
+		if index >= 0:
+			var value: float = volumes[bus]
+			AudioServer.set_bus_mute(index, value <= 0.0)
+			AudioServer.set_bus_volume_db(index, linear_to_db(maxf(value, 0.0001)))
