@@ -198,7 +198,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Partículas de impacto, morte e dano recebido, com limite e expiração.
 - [x] Flash de disparo e flash de dano nos inimigos.
 - [ ] Afinar intensidade, duração e ordem das camadas dos efeitos.
-- [ ] Criar efeitos para spawn, dash, melhoria, recuperação de vida e fim de onda.
+- [x] Criar efeitos para spawn, dash, melhoria, recuperação de vida e fim de onda.
 - [x] Criar sons de tiro, impacto, eliminação, dano, dash e interação de menus.
 - [ ] Criar música de combate e ambiente do hub com transições.
 - [x] Configurar buses Master, Music, SFX e UI, com volumes independentes guardados em Options → Audio Volumes.

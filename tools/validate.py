@@ -22,6 +22,7 @@ def main():
         ("Guardian", ["--script", "tests/guardian_smoke.gd"], "Guardian checks complete: 0 failures"),
         ("Encounters", ["--script", "tests/encounter_smoke.gd"], "Encounter checks complete: 0 failures"),
         ("Navigation", ["--script", "tests/navigation_smoke.gd"], "Navigation checks complete: 0 failures"),
+        ("Feedback", ["--script", "tests/feedback_smoke.gd"], "Feedback checks complete: 0 failures"),
         ("Startup", ["--quit-after", "120"], None),
         ("Long session", ["--script", "tests/run_soak.gd"], "Run soak complete: 0 failures"),
     ]

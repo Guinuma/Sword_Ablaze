@@ -2,6 +2,7 @@ extends RefCounted
 ## Owns run statistics and legal lifecycle transitions.
 signal phase_changed(phase: Phase)
 signal damaged(health: int)
+signal healed(amount: int)
 signal enemy_defeated(total: int)
 
 enum Phase { COMBAT, INTERMISSION, PAUSED, DEAD, UPGRADE }
@@ -91,7 +92,10 @@ func heal(amount: int) -> int:
 		return 0
 	var previous := health
 	health = mini(max_health, health + amount)
-	return health - previous
+	var recovered := health - previous
+	if recovered > 0:
+		healed.emit(recovered)
+	return recovered
 
 
 func set_max_health(value: int) -> void:

@@ -39,6 +39,8 @@ var hostile_projectiles = HostileProjectiles.new()
 const EnemySystem = preload("res://scripts/enemies/enemy_system.gd")
 var enemies = EnemySystem.new()
 var particles: Array[Dictionary] = []
+const CombatFeedback = preload("res://scripts/ui/combat_feedback.gd")
+var feedback = CombatFeedback.new()
 var hud_view: CanvasLayer
 var random := RandomNumberGenerator.new()
 
@@ -47,7 +49,9 @@ func _ready() -> void:
 	preferences.load_preferences()
 	add_child(sounds)
 	player.shot.connect(func(_origin, _direction): sounds.play(&"shot"); tutorial.shot())
-	player.dashed.connect(func(): sounds.play(&"dash"); tutorial.dashed())
+	player.dashed.connect(func(): sounds.play(&"dash"); tutorial.dashed(); feedback.add(&"dash", player.player_position))
+	run.healed.connect(func(_amount): feedback.add(&"heal", player.player_position))
+	enemies.activated.connect(func(point): feedback.add(&"spawn", point))
 	run.damaged.connect(func(_health): sounds.play(&"damage"))
 	_apply_upgrades()
 	records.load_records()
@@ -143,6 +147,7 @@ func _burst(point: Vector2, color: Color, count: int) -> void:
 
 
 func _update_effects(delta: float) -> void:
+	feedback.advance(delta)
 	for index in range(particles.size() - 1, -1, -1):
 		particles[index]["life"] -= delta
 		if particles[index]["life"] <= 0.0:
@@ -162,6 +167,7 @@ func _update_waves(delta: float) -> void:
 
 func _on_wave_cleared() -> void:
 	sounds.play(&"wave")
+	feedback.add(&"wave", player.player_position)
 	projectiles.clear()
 	hostile_projectiles.clear()
 	run.start_intermission()
@@ -242,6 +248,7 @@ func _choose_upgrade(id: StringName) -> void:
 		return
 	_apply_upgrades()
 	sounds.play(&"upgrade")
+	feedback.add(&"upgrade", player.player_position)
 	tutorial.chose_upgrade()
 	player.fire_requires_release = true
 	run.finish_upgrade()
@@ -269,6 +276,7 @@ func _reset_run() -> void:
 	hostile_projectiles.clear()
 	enemies.clear()
 	particles.clear()
+	feedback.clear()
 	waves.reset()
 	player_visual.reset_pose()
 	player.fire_requires_release = true
@@ -329,6 +337,7 @@ func _draw() -> void:
 
 
 func _draw_overlay() -> void:
+	feedback.draw_on(overlay, preferences.reduced_motion, preferences.reduced_flashes)
 	hud_view.control_hint.text = tutorial.hint()
 	hud_view.control_hint.visible = run.is_active() and tutorial.step < 5
 	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")

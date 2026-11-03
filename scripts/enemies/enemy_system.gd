@@ -1,5 +1,6 @@
 extends RefCounted
 ## Owns enemy spawning, pursuit, separation and contact queries.
+signal activated(point: Vector2)
 signal shot(origin: Vector2, direction: Vector2, speed: float, damage: int)
 
 const EnemySettings = preload("res://scripts/data/enemy_settings.gd")
@@ -39,6 +40,8 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 			# Never activate on top of a player who moved into the warning.
 			if point.distance_to(target) < profile.spawn_safe_distance:
 				enemy["spawn_time"] = maxf(0.001, enemy["spawn_time"])
+			if enemy["spawn_time"] == 0.0:
+				activated.emit(point)
 			continue
 		var speed: float = minf(profile.speed + (wave - 1) * profile.speed_per_wave, profile.max_speed)
 		if profile.kind == "guardian":

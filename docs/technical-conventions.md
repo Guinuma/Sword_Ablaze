@@ -49,7 +49,7 @@ Reservar `player_visuals`, `enemy_visuals` e `arena_ui` para consultas de aprese
 | --- | --- | --- |
 | Mundo, Z = 0 | Pátio, faixa superior, rasto de dash, flash, partículas, tiros do jogador, tiros hostis, nessa sequência | `_draw()` da arena |
 | Mundo, Z = 1 | Atores, ordenados pelo Y da origem arredondada | `world.y_sort_enabled = true`; todos os visuais de ator com Z local 0 |
-| Mundo, Z = 2 | Escurecimento de pausa/escolha/resultados | `overlay` |
+| Mundo, Z = 2 | Cues de spawn/dash/melhoria/cura/fim de onda, depois escurecimento de pausa/escolha/resultados | `overlay` |
 | Canvas, layer = 3 | HUD, botões, menus e tooltips | `ArenaHud` |
 
 Dentro do Exilado: sombra → capa → arma quando aponta para cima → corpo → arma nos restantes ângulos. Dentro do inimigo: aviso de spawn isolado; após ativação, sombra → aviso de ataque → corpo → vida.
@@ -72,3 +72,12 @@ The angular armored silhouette is drawn in code under the repository MIT license
 `default_guardian.tres` defines a slow eight-HP enemy with a larger body/contact radius, 20% knockback and 1.1 rad/s facing rotation. Its front 120-degree shield halves incoming player-shot damage, rounded up with a minimum of one. Shots outside the front arc deal double damage. The front is determined from the incoming shot direction against the simulation facing vector; art position does not affect armor. Because facing turns slowly, circling exposes the weak sides. The guardian never becomes immune to basic shots.
 
 The wave-seven encounter introduces one per seven spawns; later ratios follow the configured encounter recipe. The broad rectangular armor, visible shield arc and rear crack are original code-drawn placeholder art under the repository MIT license. A dedicated sprite remains future art work. `tests/guardian_smoke.gd` covers armor, flanking, upgraded damage, knockback, turning at five step rates, spawn cadence and cleanup. `tools/capture_guardian.gd` captures front/side/rear shield orientations.
+
+
+## Short combat feedback cues
+
+`CombatFeedback` holds at most 32 cues for 0.55 simulation seconds, replacing the oldest at capacity. Spawn activation produces a ring, successful dash produces chevrons, a selected upgrade produces six short rays, actual healing produces a plus sign, and wave clear produces paired arcs. These are original vector primitives under the repository MIT license, independent of hitboxes and combat results.
+
+Healing emits only for a positive amount actually restored, including drop collection and intermission recovery. Full-health pickup attempts do not produce a cue. Spawn activation emits only after its warning and proximity safety checks. Cues draw above actors and below modal dimming/HUD. Their timers freeze during pause, death and upgrade selection; restart clears them. Reduced motion keeps positions/radii fixed while fading, and reduced flashes lowers their opacity. They never flash the screen or shake the camera.
+
+`tests/feedback_smoke.gd` verifies event-driven creation, failed actions, full-health healing, paused lifetime, expiry, capacity and reset. `tools/capture_feedback.gd` captures normal and reduced settings. Existing particle bursts remain separately bounded at 160.
