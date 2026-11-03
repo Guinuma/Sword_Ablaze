@@ -229,7 +229,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Definir XP global, níveis, fontes de recompensa e limites por modo; ver [progressão](docs/progression.md).
 - [ ] Distinguir XP global de experiência ou moeda temporária de uma run.
 - [x] Garantir regras globais partilhadas entre Courtyard Run e Endless Arena, com bónus explícito de vitória.
-- [ ] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves.
+- [x] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves, com identidade persistente e transação única.
 - [ ] Criar hub com acesso aos modos, progressão e configurações.
 - [ ] Desenhar skill trees com custos, requisitos e efeitos compreensíveis.
 - [ ] Implementar compra e aplicação dos nós desbloqueados.
