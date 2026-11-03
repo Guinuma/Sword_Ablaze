@@ -148,7 +148,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Recuperar 20 PV uma única vez entre rondas.
 - [x] Mostrar ronda, inimigos restantes, HP, eliminações, tempo e recarga do dash.
 - [x] Substituir escalada uniforme por configurações de encontros e composição de ondas; ver [encontros](docs/encounters.md).
-- [ ] **Decidir:** condição de vitória, duração alvo e eventual variante endless.
+- [x] **Decidido:** nove ondas + boss na décima, alvo de 10–15 minutos e variante Endless separada; ver [estrutura da run](docs/run-design.md). Implementação finita pendente.
 - [x] Mostrar resumo de derrota com ronda, tempo, eliminações e opção de repetir.
 - [ ] Acrescentar recompensas ao resumo quando existir progressão.
 - [ ] Criar fluxo completo: iniciar arena, jogar, terminar, repetir ou regressar ao hub.
