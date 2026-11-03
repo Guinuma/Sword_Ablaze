@@ -1,0 +1,34 @@
+{
+  "engine": "4.5.1-stable (official)",
+  "fps_cap": 0,
+  "frame_interval_ms": {
+    "max": 7.198,
+    "mean": 4.33324,
+    "p95": 5.86
+  },
+  "gpu": "AMD Radeon (TM) Graphics",
+  "limitations": "Frame intervals include refill, CPU work, rendering and scheduling. frame_post_draw measures CPU-side rendering completion, not isolated GPU time. Fixed 1/60 simulation step; automated load, not difficulty playtesting. Hardware-specific; not a minimum-spec claim.",
+  "measured_frames": 600,
+  "peak_draw_calls": 162,
+  "peak_static_memory_bytes": 34576169,
+  "platform": "Windows",
+  "post_simulation_to_frame_post_draw_ms": {
+    "max": 3.321,
+    "mean": 1.70974833333333,
+    "p95": 2.591
+  },
+  "processor": "AMD Ryzen 7 5825U with Radeon Graphics",
+  "renderer": "gl_compatibility",
+  "scenario": "Rendered dense arena, 18 enemies (6 each type), 128 player shots, 64 hostile shots, 160 particles; refill before each simulation step; stationary invulnerable player; seeded automation",
+  "simulation_ms": {
+    "max": 4.373,
+    "mean": 2.52900333333333,
+    "p95": 3.571
+  },
+  "vsync": "disabled",
+  "warmup_frames": 120,
+  "window_size": [
+    1280,
+    720
+  ]
+}

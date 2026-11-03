@@ -282,7 +282,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Testar a run completa: hub → combate → resultado → recompensa → hub.
 - [ ] Verificar alinhamento visual e hitboxes nas quatro direções e junto aos limites.
 - [x] Registar baseline de tempo de simulação e memória com entidades no limite.
-- [ ] Medir renderização e frame time em combate denso real.
+- [x] Medir renderização e frame time em combate denso real.
 - [ ] Definir hardware mínimo e objetivo de desempenho com base em medições.
 - [x] Simular 20 minutos, ondas avançadas, escolhas, pausas e reinício com teste determinista.
 - [ ] Fazer sessões longas de playtesting real e alternância de foco.
