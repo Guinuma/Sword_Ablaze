@@ -11,7 +11,7 @@ Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhori
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
 - Ondas crescentes, avisos de spawn, recuperação de vida entre rondas, dash e cinco melhorias temporárias.
-- HUD com vida em losangos e valor numérico, ronda, inimigos restantes, relógio, eliminações e barra de recarga do dash.
+- HUD com vida em asas pixel-art e valor numérico, ronda, inimigos restantes, relógio, eliminações e barra de recarga do dash.
 - Ícones das melhorias adquiridas, com rank e efeito acumulado ao passar o rato; menus de pausa, escolha e resultados com foco visível.
 - Preferências de redução de flashes/movimento e recordes locais com validação e backup.
 - Importação, regressões de combate, arranque e simulação prolongada automatizados no GitHub Actions.

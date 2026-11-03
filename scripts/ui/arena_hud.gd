@@ -182,16 +182,38 @@ func _build_upgrades() -> void:
 	_set_upgrade_visible(false)
 
 
+# One pixel per cell: rising flight feathers, gold edge and ivory plumage.
+const HEALTH_WING = [
+	"          g ",
+	"         gig",
+	"        giig",
+	"       giiig",
+	"      giigig",
+	"     giigiig",
+	"    giigiig ",
+	"   giigiig  ",
+	"  giiigiig  ",
+	" giiiigig   ",
+	"giiiigig    ",
+	" gggggg     ",
+]
+
+
 func _draw_health() -> void:
 	for index in range(mini(health_max, 12)):
-		var center := Vector2(index * 14, 0)
-		var shape := PackedVector2Array([center + Vector2(0, -5), center + Vector2(5, 0), center + Vector2(0, 5), center + Vector2(-5, 0)])
+		var origin := Vector2(index * 15 - 5, -7)
 		var filled := index < health_value
-		var tint := Color("ed8c82") if health_value <= 1 else GOLD
-		health_pips.draw_colored_polygon(shape, tint if filled else Color("26313d"))
-		health_pips.draw_polyline(PackedVector2Array([shape[0], shape[1], shape[2], shape[3], shape[0]]), GOLD if filled else Color("55616a"), 1.0)
-		if filled:
-			health_pips.draw_rect(Rect2(center + Vector2(-1, -2), Vector2(2, 2)), IVORY)
+		for row in range(HEALTH_WING.size()):
+			for column in range(HEALTH_WING[row].length()):
+				var cell: String = HEALTH_WING[row][column]
+				if cell == " ":
+					continue
+				var tint := GOLD if cell == "g" else IVORY
+				if not filled:
+					tint = Color("55616a") if cell == "g" else Color("18232f")
+				elif health_value <= 1:
+					tint = Color("ed8c82") if cell == "g" else Color("ffe2ce")
+				health_pips.draw_rect(Rect2(origin + Vector2(column, row), Vector2.ONE), tint)
 
 
 func present(health: int, max_health: int, kills: int, elapsed: float, wave: int, remaining: int, break_time: float, dash_cooldown: float, game_over: bool, paused: bool, dash_max: float = 1.2) -> void:
