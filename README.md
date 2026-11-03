@@ -198,7 +198,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Criar sons de tiro, impacto, eliminação, dano, dash e interação de menus.
 - [ ] Criar música de combate e ambiente do hub com transições.
 - [x] Configurar buses Master, Music, SFX e UI, com volumes independentes guardados em Options → Audio Volumes.
-- [ ] Limitar sons simultâneos e evitar volume excessivo em combate denso.
+- [x] Limitar sons simultâneos e evitar volume excessivo em combate denso.
 - [ ] **Decidir:** incluir hit-stop e screen shake; se usados, oferecer redução/desativação.
 
 ### 8. Primeira run roguelite
