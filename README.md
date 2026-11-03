@@ -257,7 +257,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] HUD funcional e mensagens de morte/pausa.
 - [x] Integrar ecrã de derrota com resultados, recordes e reinício.
 - [x] Criar menu principal com entrada na arena, controlos, opções e recordes locais.
-- [ ] Criar seleção de modo quando existir outro modo jogável.
+- [x] Criar seleção entre Courtyard Run finita e Endless Arena, com recordes separados.
 - [x] Criar botões de pausa para retomar, reiniciar e sair, com foco por teclado.
 - [x] Partilhar preferências visuais entre menu principal e pausa.
 - [x] Integrar escolha de melhorias e indicadores das melhorias adquiridas no HUD.
