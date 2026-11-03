@@ -1,0 +1,12 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/upgrade_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"vitality"
+title = "Angelic Vigor"
+description = "Maximum HP +20. Restore the added 20 HP. Up to 5 ranks."
+attribute = "max_health"
+addition = 20.0
+max_stacks = 5

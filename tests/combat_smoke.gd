@@ -33,10 +33,10 @@ func _run() -> void:
 			arena._check_contact()
 			arena.hostile_projectiles.fire(arena.player.player_position, Vector2.LEFT, 100.0)
 			arena.hostile_projectiles.advance(step, arena.player.player_position, arena.ARENA)
-			check(arena.run.health == 5, "Dash must protect every movement step at %s Hz" % hz)
+			check(arena.run.health == 100, "Dash must protect every movement step at %s Hz" % hz)
 		arena.player.advance(step, Vector2.ZERO, Vector2(600, 200), false, false, arena.ARENA)
 		arena._check_contact()
-		check(arena.run.health == 4, "Contact must resume on the step after dash at %s Hz" % hz)
+		check(arena.run.health == 80, "Contact must resume on the step after dash at %s Hz" % hz)
 		arena.player.reset()
 		check(not arena.player.is_dash_protected(), "Reset must clear final-step protection")
 	arena._reset_run()
@@ -52,7 +52,7 @@ func _run() -> void:
 	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
 	arena._check_contact()
-	check(arena.run.health == 4, "Overlapping enemies must respect contact invulnerability")
+	check(arena.run.health == 80, "Overlapping enemies must respect contact invulnerability")
 	for index in range(4):
 		arena.player.hurt_cooldown = 0.0
 		arena._check_contact()
@@ -62,7 +62,7 @@ func _run() -> void:
 	arena._physics_process(1.0)
 	check(arena.player.player_position == before and arena.run.elapsed == time_before, "Death must freeze the simulation")
 	arena._reset_run()
-	check(arena.run.health == 5 and not (arena.run.phase == arena.RunState.Phase.DEAD), "Restart must restore health and alive state")
+	check(arena.run.health == 100 and not (arena.run.phase == arena.RunState.Phase.DEAD), "Restart must restore health and alive state")
 	check(arena.enemies.items.is_empty() and arena.projectiles.items.is_empty() and arena.run.kills == 0, "Restart must clear combat state")
 	for index in range(100):
 		arena._spawn_enemy()
@@ -95,19 +95,19 @@ func _run() -> void:
 	check(arena.enemies.items.size() == arena.waves.settings.max_enemies, "Automatic spawning must respect enemy cap")
 	arena._reset_run()
 	check(arena.run.elapsed == 0.0 and arena.player.hurt_cooldown == 0.0 and arena.player.fire_cooldown == 0.0 and arena.waves.spawn_cooldown == 0.8, "Restart must reset timers")
-	arena.run.health = 3
+	arena.run.health = 60
 	arena.waves.remaining = 0
 	arena._update_waves(0.016)
-	check(arena.waves.break_time == arena.waves.settings.break_duration and arena.run.health == 4, "Cleared wave must start break and heal once")
+	check(arena.waves.break_time == arena.waves.settings.break_duration and arena.run.health == 80, "Cleared wave must start break and heal once")
 	arena._update_waves(1.0)
-	check(arena.waves.number == 1 and arena.run.health == 4, "Break must delay next wave and not repeat healing")
+	check(arena.waves.number == 1 and arena.run.health == 80, "Break must delay next wave and not repeat healing")
 	arena._update_waves(2.0)
 	check(arena.waves.number == 2 and arena.waves.remaining == 7, "Next wave must increase enemy budget")
 	arena._try_dash(Vector2.UP)
 	check(arena.player.dash_direction == Vector2.UP and arena.player.dash_time > 0.0, "Dash must follow movement")
 	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
-	check(arena.run.health == 4, "Dash must protect against contact")
+	check(arena.run.health == 80, "Dash must protect against contact")
 	arena._try_dash(Vector2.DOWN)
 	check(arena.player.dash_direction == Vector2.UP, "Cooldown must prevent a second dash")
 	arena._physics_process(0.2)
@@ -172,8 +172,8 @@ func _run() -> void:
 	arena._set_paused(true)
 	check(arena.hud_view.status.visible and arena.hud_view.status.text.begins_with("PAUSED"), "HUD must present pause state")
 	arena._reset_run()
-	check(not arena.hud_view.status.visible and arena.hud_view.stats.text.contains("HP 5/5"), "HUD must refresh after restart")
-	arena.run.health = 1
+	check(not arena.hud_view.status.visible and arena.hud_view.stats.text.contains("HP 100/100"), "HUD must refresh after restart")
+	arena.run.health = 20
 	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
 	arena._check_contact()
 	arena._update_hud()
@@ -181,14 +181,14 @@ func _run() -> void:
 	arena.player_visual.advance_defeat(1.0)
 	check(arena.hud_view.status.visible and arena.hud_view.status.text.begins_with("YOU FELL") and not arena.hud_view.wave_status.visible, "HUD must present death and hide wave prompt")
 	arena._reset_run()
-	arena.run.health = 3
+	arena.run.health = 60
 	arena.waves.remaining = 0
 	arena.projectiles.items.append({"position": Vector2(100, 100), "direction": Vector2.RIGHT})
 	arena._update_waves(0.01)
 	check(arena.projectiles.items.is_empty(), "Wave clear event must remove projectiles")
 	arena._set_paused(true)
 	arena._physics_process(10.0)
-	check(arena.waves.break_time == 3.0 and arena.run.health == 4, "Pause must freeze intermission without duplicate healing")
+	check(arena.waves.break_time == 3.0 and arena.run.health == 80, "Pause must freeze intermission without duplicate healing")
 	arena._set_paused(false)
 	arena._update_waves(3.0)
 	check(arena.waves.number == 2 and arena.enemies.items.is_empty(), "Intermission must end before spawning next wave")
@@ -213,7 +213,7 @@ func _run() -> void:
 	lifecycle.set_paused(true)
 	lifecycle.advance(10.0)
 	lifecycle.take_damage()
-	check(lifecycle.elapsed == 0.0 and lifecycle.health == 5, "Paused lifecycle must reject time and damage")
+	check(lifecycle.elapsed == 0.0 and lifecycle.health == 100, "Paused lifecycle must reject time and damage")
 	lifecycle.set_paused(false)
 	check(lifecycle.phase == lifecycle.Phase.INTERMISSION, "Repeated pause must preserve intermission resume state")
 	lifecycle.start_combat(2)
@@ -228,7 +228,7 @@ func _run() -> void:
 	check(lifecycle.phase == lifecycle.Phase.DEAD and lifecycle.health == 0, "Death must reject pause, wave transitions and extra damage")
 	check(events["damage"] == 5 and events["kills"] == 1, "Lifecycle events must count actual damage and kills only")
 	lifecycle.reset()
-	check(lifecycle.phase == lifecycle.Phase.COMBAT and lifecycle.health == 5 and lifecycle.kills == 0, "Reset must restore lifecycle from death")
+	check(lifecycle.phase == lifecycle.Phase.COMBAT and lifecycle.health == 100 and lifecycle.kills == 0, "Reset must restore lifecycle from death")
 	# Exercise player simulation without scene input or rendering.
 	for rate in [30, 60, 144]:
 		var simulation = arena.PlayerState.new()
@@ -279,7 +279,7 @@ func _run() -> void:
 	arena.player.player_position = warning_point
 	arena._update_enemies(1.0)
 	arena._check_contact()
-	check(arena.run.health == 5 and arena.enemies.items[0]["spawn_time"] > 0.0, "Warning must postpone activation when player enters spawn point")
+	check(arena.run.health == 100 and arena.enemies.items[0]["spawn_time"] > 0.0, "Warning must postpone activation when player enters spawn point")
 	arena.projectiles.fire(warning_point - Vector2(20, 0), Vector2.RIGHT)
 	arena._update_bullets(0.1)
 	check(arena.enemies.items[0]["health"] == 2, "Pending spawn must not receive projectile damage")
@@ -319,15 +319,15 @@ func _run() -> void:
 	arena.player.player_position = Vector2(320, 200)
 	arena.hostile_projectiles.fire(Vector2(200, 200), Vector2.RIGHT, 360.0)
 	arena.hostile_projectiles.advance(0.5, arena.player.player_position, arena.ARENA)
-	check(arena.run.health == 4 and arena.hostile_projectiles.items.is_empty(), "Swept hostile shot must damage player and be consumed")
+	check(arena.run.health == 80 and arena.hostile_projectiles.items.is_empty(), "Swept hostile shot must damage player and be consumed")
 	arena.hostile_projectiles.fire(Vector2(300, 200), Vector2.RIGHT, 360.0)
 	arena.hostile_projectiles.advance(0.1, arena.player.player_position, arena.ARENA)
-	check(arena.run.health == 4, "Hostile shots must share contact invulnerability cooldown")
+	check(arena.run.health == 80, "Hostile shots must share contact invulnerability cooldown")
 	arena.player.hurt_cooldown = 0.0
 	arena._try_dash(Vector2.RIGHT)
 	arena.hostile_projectiles.fire(Vector2(300, 200), Vector2.RIGHT, 360.0)
 	arena.hostile_projectiles.advance(0.1, arena.player.player_position, arena.ARENA)
-	check(arena.run.health == 4, "Dash must protect against hostile projectiles")
+	check(arena.run.health == 80, "Dash must protect against hostile projectiles")
 	for index in range(100):
 		arena.hostile_projectiles.fire(Vector2(30, 100), Vector2.RIGHT, 130.0)
 	check(arena.hostile_projectiles.items.size() == 64, "Hostile projectile count must be bounded")
@@ -359,9 +359,9 @@ func _run() -> void:
 	arena._set_paused(true)
 	arena.hud_view.restart_button.pressed.emit()
 	arena._physics_process(0.01)
-	check(arena.run.health == 5 and not arena.hud_view.menu.visible and arena.projectiles.items.is_empty(), "Restart button must reset run and block held fire")
+	check(arena.run.health == 100 and not arena.hud_view.menu.visible and arena.projectiles.items.is_empty(), "Restart button must reset run and block held fire")
 	Input.action_release("fire")
-	arena.run.health = 1
+	arena.run.health = 20
 	arena.run.elapsed = 125.0
 	arena.waves.number = 4
 	arena.player.hurt_cooldown = 0.0
@@ -387,7 +387,7 @@ func _run() -> void:
 	arena.hostile_projectiles.items[0]["life"] = 0.1
 	arena.player.player_position = Vector2(200, 100)
 	arena.hostile_projectiles.advance(2.0, arena.player.player_position, arena.ARENA)
-	check(arena.run.health == 5 and arena.hostile_projectiles.items.is_empty(), "Expired hostile shot must not hit beyond its remaining lifetime")
+	check(arena.run.health == 100 and arena.hostile_projectiles.items.is_empty(), "Expired hostile shot must not hit beyond its remaining lifetime")
 	var storage = arena.ArenaRecords.new("user://record_storage_test.json")
 	for suffix in ["", ".bak", ".tmp"]:
 		DirAccess.remove_absolute(storage.path + suffix)
@@ -406,7 +406,7 @@ func _run() -> void:
 	check(reloaded.record(4, 20, 100.0) == OK, "Recovered records must save successfully")
 	arena._reset_run()
 	var prior_runs: int = arena.records.data["runs"]
-	arena.run.health = 1
+	arena.run.health = 20
 	arena._take_player_damage()
 	arena._on_run_phase_changed(arena.RunState.Phase.DEAD)
 	check(arena.records.data["runs"] == prior_runs + 1, "Repeated death notifications must record a run only once")
@@ -534,7 +534,7 @@ func _run() -> void:
 		var expected: StringName = &"back" if facing_direction == Vector2.UP else &"front" if facing_direction == Vector2.DOWN else &"side"
 		check(arena.player_visual.body_direction == expected, "Player view must match cardinal aim direction")
 	arena._reset_run()
-	arena.run.health = 1
+	arena.run.health = 20
 	arena._take_player_damage()
 	arena.player_visual.advance_defeat(0.2)
 	check(arena.player_visual.defeated and not arena.player_visual.defeat_done, "Defeat animation must advance while combat stays frozen")
@@ -558,7 +558,7 @@ func _run() -> void:
 		arena.hostile_projectiles.fire(arena.player.player_position, Vector2.LEFT, 100.0)
 	arena._check_contact()
 	arena.hostile_projectiles.advance(1.0 / 60.0, arena.player.player_position, arena.ARENA)
-	check(arena.run.health == 4 and arena.hostile_projectiles.items.is_empty(), "Simultaneous contact and six shots must cause exactly one damage")
+	check(arena.run.health == 80 and arena.hostile_projectiles.items.is_empty(), "Simultaneous contact and six shots must cause exactly one damage")
 	# Multiple bullets remove successive targets without stale indices or double kills.
 	arena._reset_run()
 	for index in range(6):
@@ -573,7 +573,7 @@ func _run() -> void:
 	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
 	arena.projectiles.fire(Vector2(100, 200), Vector2.RIGHT)
 	arena.hostile_projectiles.fire(arena.player.player_position, Vector2.LEFT, 100.0)
-	arena.run.health = 1
+	arena.run.health = 20
 	arena._check_contact()
 	var dead_enemies: Array = arena.enemies.items.duplicate(true)
 	var dead_shots: Array = arena.projectiles.items.duplicate(true)
@@ -582,6 +582,51 @@ func _run() -> void:
 	check(arena.run.health == 0 and arena.enemies.items == dead_enemies and arena.projectiles.items == dead_shots and arena.hostile_projectiles.items == dead_hostile, "Death must freeze active and pending enemies and both projectile types")
 	arena._reset_run()
 	check(arena.enemies.items.is_empty() and arena.projectiles.items.is_empty() and arena.hostile_projectiles.items.is_empty() and arena.particles.is_empty(), "Restart after death must clear all threats and effects")
+	# Maximum-health upgrades are idempotent, heal only the added capacity and reset.
+	arena._reset_run()
+	arena.run.health = 50
+	arena.upgrades.stacks = {&"vitality": 2}
+	arena._apply_upgrades()
+	check(arena.run.max_health == 140 and arena.run.health == 90, "Vitality must add 20 maximum and current HP per rank")
+	arena._apply_upgrades()
+	check(arena.run.health == 90, "Reapplying vitality must not heal again")
+	check(arena.run.heal(100) == 50 and arena.run.health == 140, "Healing must clamp to upgraded maximum")
+	arena._reset_run()
+	check(arena.run.health == 100 and arena.run.max_health == 100, "Restart must restore base maximum and current HP")
+	arena.run.set_max_health(200)
+	arena.run.health = 50
+	check(arena.run.heal(100) == 100 and arena.run.health == 150, "Wings healing amount must be exactly one hundred below upgraded cap")
+	arena._reset_run()
+	var drops = arena.healing_drops
+	drops.spawn(arena.player.player_position, 10)
+	drops.advance(0.1, arena.player.player_position, arena.run)
+	check(drops.items.size() == 1, "Full health must leave pickup available")
+	arena.run.health = 85
+	drops.advance(0.1, arena.player.player_position, arena.run)
+	check(arena.run.health == 95 and drops.items.is_empty(), "Feather must heal exactly ten and be consumed once")
+	drops.spawn(arena.player.player_position, 100)
+	arena.run.health = 20
+	arena._set_paused(true)
+	drops.advance(10.0, arena.player.player_position, arena.run)
+	check(arena.run.health == 20 and drops.items[0]["life"] == 30.0, "Pause must freeze pickup lifetime and healing")
+	arena._set_paused(false)
+	drops.advance(0.1, arena.player.player_position, arena.run)
+	check(arena.run.health == 100 and drops.items.is_empty(), "Wings must heal up to one hundred without exceeding maximum")
+	drops.feather_chance = 1.0
+	drops.wings_chance = 0.0
+	drops.roll(Vector2.ZERO, arena.random)
+	check(drops.items.size() == 1 and drops.items[0]["amount"] == 10, "Forced feather roll must create a feather")
+	drops.clear()
+	drops.wings_chance = 1.0
+	drops.roll(Vector2.ZERO, arena.random)
+	check(drops.items.size() == 1 and drops.items[0]["amount"] == 100, "Rare roll must create only one wings pickup")
+	drops.advance(31.0, arena.player.player_position, arena.run)
+	check(drops.items.is_empty(), "Uncollected healing drops must expire")
+	for index in range(80):
+		drops.spawn(Vector2.ZERO, 10)
+	check(drops.items.size() == drops.MAX_ITEMS, "Healing drops must respect entity cap")
+	arena._reset_run()
+	check(drops.items.is_empty(), "Restart must remove healing drops")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

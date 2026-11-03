@@ -32,7 +32,7 @@ func configure(profile: Resource, count: int, font: Font) -> void:
 
 func _effect_text() -> String:
 	if definition.addition != 0.0:
-		return "Projectile damage: +%d" % int(definition.addition * rank)
+		return "%s: +%d" % ["Maximum HP" if definition.attribute == "max_health" else "Projectile damage", int(definition.addition * rank)]
 	var names := {"move_speed": "Movement speed", "fire_interval": "Shot delay", "knockback": "Enemy knockback", "dash_cooldown": "Dash recharge"}
 	var percent: float = (pow(definition.multiplier, rank) - 1.0) * 100.0
 	return "%s: %+.1f%%" % [names.get(definition.attribute, definition.attribute), percent]
@@ -60,6 +60,9 @@ func _draw() -> void:
 				draw_line(center + direction * 2.0, center + direction * 7.0, gold)
 				draw_line(center + direction * 7.0, center + direction * 4.0 + direction.orthogonal() * 2.0, gold)
 				draw_line(center + direction * 7.0, center + direction * 4.0 - direction.orthogonal() * 2.0, gold)
+		&"vitality":
+			draw_rect(Rect2(9, 5, 5, 14), gold)
+			draw_rect(Rect2(5, 9, 13, 5), gold)
 		&"dash":
 			draw_colored_polygon(PackedVector2Array([center + Vector2(2, -8), center + Vector2(-5, 1), center + Vector2(0, 1), center + Vector2(-2, 8), center + Vector2(6, -2), center + Vector2(1, -2)]), gold)
 

@@ -48,7 +48,7 @@ func _run() -> void:
 	await scene_changed
 	arena = current_scene
 	arena.set_physics_process(false)
-	check(arena.run.health == 5 and arena.run.kills == 0 and arena.upgrades.stacks.is_empty(), "New run must start fresh")
+	check(arena.run.health == 100 and arena.run.kills == 0 and arena.upgrades.stacks.is_empty(), "New run must start fresh")
 	# Avoid writing real records while verifying the results exit.
 	arena.run_recorded = true
 	for index in range(5):

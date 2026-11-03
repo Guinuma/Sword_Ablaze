@@ -21,9 +21,9 @@ var wave_status: Label
 var wave_heading: Label
 var time_label: Label
 var kill_label: Label
-var health_pips: Control
-var health_value: int = 5
-var health_max: int = 5
+var health_bar: Control
+var health_value: int = 100
+var health_max: int = 100
 var dash_panel: Panel
 var dash_key: Label
 var dash_label: Label
@@ -67,13 +67,13 @@ func _build_status_bar() -> void:
 	_panel(Rect2(0, 0, 640, 62), INK, Color("6b573a"))
 	var name_label := _label(Vector2(20, 8), Vector2(150, 14), 8, true, GOLD)
 	name_label.text = "THE EXILE"
-	health_pips = Control.new()
-	health_pips.position = Vector2(24, 34)
-	health_pips.size = Vector2(72, 14)
-	health_pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	health_pips.draw.connect(_draw_health)
-	add_child(health_pips)
-	stats = _label(Vector2(105, 28), Vector2(72, 18), 8, true)
+	health_bar = Control.new()
+	health_bar.position = Vector2(24, 34)
+	health_bar.size = Vector2(92, 14)
+	health_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	health_bar.draw.connect(_draw_health)
+	add_child(health_bar)
+	stats = _label(Vector2(120, 28), Vector2(86, 18), 8, true)
 	var location := _label(Vector2(210, 8), Vector2(220, 14), 8, true, GOLD)
 	location.text = "CELESTIAL COURTYARD"
 	location.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -182,46 +182,21 @@ func _build_upgrades() -> void:
 	_set_upgrade_visible(false)
 
 
-# One pixel per cell: rising flight feathers, gold edge and ivory plumage.
-const HEALTH_WING = [
-	"          g ",
-	"         gig",
-	"        giig",
-	"       giiig",
-	"      giigig",
-	"     giigiig",
-	"    giigiig ",
-	"   giigiig  ",
-	"  giiigiig  ",
-	" giiiigig   ",
-	"giiiigig    ",
-	" gggggg     ",
-]
-
-
 func _draw_health() -> void:
-	for index in range(mini(health_max, 12)):
-		var origin := Vector2(index * 15 - 5, -7)
-		var filled := index < health_value
-		for row in range(HEALTH_WING.size()):
-			for column in range(HEALTH_WING[row].length()):
-				var cell: String = HEALTH_WING[row][column]
-				if cell == " ":
-					continue
-				var tint := GOLD if cell == "g" else IVORY
-				if not filled:
-					tint = Color("55616a") if cell == "g" else Color("18232f")
-				elif health_value <= 1:
-					tint = Color("ed8c82") if cell == "g" else Color("ffe2ce")
-				health_pips.draw_rect(Rect2(origin + Vector2(column, row), Vector2.ONE), tint)
+	var bounds := Rect2(-4, -6, 92, 12)
+	health_bar.draw_rect(bounds, Color("26313d"))
+	var ratio := clampf(float(health_value) / maxf(1.0, health_max), 0.0, 1.0)
+	var tint := Color("ed8c82") if ratio <= 0.2 else TEAL
+	health_bar.draw_rect(Rect2(-2, -4, floorf(88.0 * ratio), 8), tint)
+	health_bar.draw_rect(bounds, GOLD, false, 1.0)
 
 
 func present(health: int, max_health: int, kills: int, elapsed: float, wave: int, remaining: int, break_time: float, dash_cooldown: float, game_over: bool, paused: bool, dash_max: float = 1.2) -> void:
 	health_value = health
 	health_max = max_health
-	health_pips.queue_redraw()
+	health_bar.queue_redraw()
 	stats.text = "HP %d/%d" % [health, max_health]
-	stats.modulate = Color("ed8c82") if health <= 1 else IVORY
+	stats.modulate = Color("ed8c82") if health <= max_health * 0.2 else IVORY
 	wave_heading.text = "WAVE %02d" % wave
 	time_label.text = "%02d:%02d" % [int(elapsed) / 60, int(elapsed) % 60]
 	kill_label.text = "%d KILLS" % kills

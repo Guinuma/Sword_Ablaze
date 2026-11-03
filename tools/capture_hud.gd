@@ -22,7 +22,7 @@ func _capture() -> void:
 			arena.upgrades.stacks = {&"swift": 2, &"rapid": 2, &"heavy": 1, &"force": 1, &"dash": 2}
 			arena._apply_upgrades()
 		if mode == "critical":
-			arena.run.health = 1
+			arena.run.health = 20
 			arena.run.elapsed = 5999.0
 			arena.run.kills = 99999
 			arena.waves.number = 125
@@ -32,9 +32,11 @@ func _capture() -> void:
 			arena.waves.number = 3
 			arena._on_wave_cleared()
 		if mode == "defeat":
-			arena.run.health = 1
+			arena.run.health = 20
 			arena._take_player_damage()
 			arena.player_visual.advance_defeat(1.0)
+		arena.healing_drops.spawn(Vector2(260, 190), 10)
+		arena.healing_drops.spawn(Vector2(380, 190), 100)
 		arena._update_hud()
 		arena.queue_redraw()
 		var review_tooltip: Control

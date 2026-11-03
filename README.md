@@ -10,8 +10,8 @@ Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhori
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
-- Ondas crescentes, avisos de spawn, recuperação de vida entre rondas, dash e cinco melhorias temporárias.
-- HUD com vida em asas pixel-art e valor numérico, ronda, inimigos restantes, relógio, eliminações e barra de recarga do dash.
+- Ondas crescentes, avisos de spawn, recuperação de vida entre rondas, dash e seis melhorias temporárias.
+- HUD com barra de vida e valor numérico, ronda, inimigos restantes, relógio, eliminações e barra de recarga do dash.
 - Ícones das melhorias adquiridas, com rank e efeito acumulado ao passar o rato; menus de pausa, escolha e resultados com foco visível.
 - Preferências de redução de flashes/movimento e recordes locais com validação e backup.
 - Importação, regressões de combate, arranque e simulação prolongada automatizados no GitHub Actions.
@@ -46,13 +46,15 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 
 ### Regras do protótipo
 
-- Jogador: 5 HP; contacto causa 1 de dano, com 0,85 s de proteção entre impactos.
-- Inimigo à distância: surge da onda 3 em diante; mantém cerca de 150 px, avisa durante 0,65 s e dispara na direção fixada. Projéteis causam 1 de dano e respeitam dash/proteção de contacto.
+- Jogador: 100 PV iniciais; contacto causa 20 PV de dano, com 0,85 s de proteção entre impactos.
+- Inimigo à distância: surge da onda 3 em diante; mantém cerca de 150 px, avisa durante 0,65 s e dispara na direção fixada. Projéteis causam 20 PV de dano e respeitam dash/proteção de contacto.
 - Inimigo básico: 2 HP; persegue o jogador e sofre recuo ao receber tiros.
 - Ondas: 5 inimigos inicialmente, mais 2 por ronda até 40 por onda; máximo de 18 em simultâneo.
 - Spawns: marcador de aviso de 0,7 s, sem dano ou movimento durante a preparação; ativação adiada a menos de 56 px do jogador. Contam para o limite e orçamento da onda.
 - Spawns: longe do jogador; intervalo começa em 1,6 s e desce até 0,4 s. A velocidade dos inimigos também aumenta, até um limite.
-- Limpar uma onda: recupera 1 HP, até ao máximo, e inicia uma pausa de 3 s.
+- Limpar uma onda: recupera 20 PV, até ao máximo, e inicia uma pausa de 3 s.
+- Cura: cada eliminação tem 15% de hipótese de largar uma pena (+10 PV) e 1% de largar um par de asas (+100 PV), em resultados exclusivos. Recolher por proximidade; cura limitada à vida máxima. A vida cheia preserva o item no chão. Expiram após 30 s de simulação; máximo de 64 drops.
+- Angelic Vigor: +20 PV máximos e atuais por rank, até cinco ranks; efeito temporário da run.
 - Dash: duração de 0,14 s e recarga de 1,2 s; proteção contra contacto e projéteis em todos os passos com movimento de dash, incluindo o último. O dano volta a ser possível no passo seguinte.
 - A cada terceira onda, escolher uma de até três melhorias elegíveis. A simulação e o intervalo ficam parados durante a escolha. Os efeitos acumulam até ao limite indicado e são removidos ao reiniciar.
 - Morte e pausa congelam a simulação. A animação de queda dura 0,64 s antes dos resultados; R pode reiniciar durante a queda.
@@ -99,6 +101,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Colisão por segmento para evitar tiros atravessarem inimigos entre frames.
 - [x] Acertar apenas no inimigo mais próximo e consumir o projétil.
 - [x] Vida, dano de contacto, proteção temporária, morte e reinício.
+- [x] Barra de 100 PV iniciais, melhoria de vida máxima e drops aleatórios de cura em forma de pena (+10 PV) e par de asas raro (+100 PV).
 - [x] Dash direcional com recarga e limites da arena.
 - [x] Pausa e retoma com Escape.
 - [ ] Afinar velocidade, alcance do dash, hitboxes e intervalo dos disparos em playtests.
@@ -135,7 +138,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Ondas com orçamento crescente de inimigos.
 - [x] Aumentar frequência de spawn e velocidade com limites definidos.
 - [x] Detetar fim da onda, limpar tiros e iniciar intervalo.
-- [x] Recuperar 1 HP uma única vez entre rondas.
+- [x] Recuperar 20 PV uma única vez entre rondas.
 - [x] Mostrar ronda, inimigos restantes, HP, eliminações, tempo e recarga do dash.
 - [ ] Substituir escalada uniforme por configurações de encontros e composição de ondas.
 - [ ] **Decidir:** condição de vitória, duração alvo e eventual variante endless.
@@ -180,7 +183,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Desenvolver o conceito da aberração.
 - [ ] Criar arte de elites e boss após validar os respetivos comportamentos.
 - [x] Distinguir projéteis do jogador (quadrados dourados) e inimigos (losangos magenta).
-- [x] Criar cinco ícones de melhorias no HUD, com rank e descrição do efeito acumulado.
+- [x] Criar seis ícones de melhorias no HUD, com rank e descrição do efeito acumulado.
 - [ ] Criar os restantes ícones de armas, recursos e habilidades.
 - [ ] Rever escala e contraste de todos os assets no jogo, não apenas nas pranchas.
 - [x] Registar origem, ferramenta, prompts e hashes da arte integrada; incluir licença da fonte.
@@ -205,7 +208,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Definir início, vitória, derrota e retorno ao hub da run.
 - [x] Aplicar modificadores temporários a partir dos valores base, com limites por melhoria.
 - [x] Oferecer três melhorias elegíveis após cada terceira onda, com descrição e limite de stacks.
-- [x] Criar cinco melhorias: movimento, cadência, dano, recuo e recarga do dash.
+- [x] Criar seis melhorias: movimento, cadência, dano, recuo, recarga do dash e vida máxima.
 - [ ] Criar segunda arma e validar que oferece uma alternativa real à primeira.
 - [ ] Definir raridade, pré-requisitos e exclusões de melhorias, se necessários.
 - [x] Recalcular melhorias sem duplicação e removê-las ao reiniciar.

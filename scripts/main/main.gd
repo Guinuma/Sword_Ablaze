@@ -3,6 +3,8 @@ extends Node2D
 
 const RunState = preload("res://scripts/run/run_state.gd")
 var run = RunState.new()
+const HealingDrops = preload("res://scripts/run/healing_drops.gd")
+var healing_drops = HealingDrops.new()
 const ArenaRecords = preload("res://scripts/run/arena_records.gd")
 var records = ArenaRecords.new()
 const Preferences = preload("res://scripts/settings/preferences.gd")
@@ -98,6 +100,7 @@ func _physics_process(delta: float) -> void:
 	run.advance(delta)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	player.advance(delta, movement, get_global_mouse_position(), Input.is_action_just_pressed("dash"), Input.is_action_pressed("fire"), ARENA)
+	healing_drops.advance(delta, player.player_position, run)
 	_update_waves(delta)
 	_update_enemies(delta)
 	_update_bullets(delta)
@@ -173,6 +176,8 @@ func _on_projectile_impact(point: Vector2) -> void:
 func _on_projectile_defeat(point: Vector2) -> void:
 	_burst(point, Color("e76170"), 10)
 	run.record_kill()
+	if run.phase == RunState.Phase.COMBAT:
+		healing_drops.roll(point, random)
 
 
 func _check_contact() -> void:
@@ -210,6 +215,7 @@ func _apply_upgrades() -> void:
 	player.weapon = weapon
 	projectiles.weapon = weapon
 	player.move_speed = upgrades.value("move_speed", player.SPEED)
+	run.set_max_health(int(upgrades.value("max_health", run.MAX_HEALTH)))
 	player.dash_recharge = upgrades.value("dash_cooldown", player.DASH_COOLDOWN)
 	if is_instance_valid(player_visual):
 		player_visual.walk_rate = 8.0 * player.move_speed / player.SPEED
@@ -235,12 +241,13 @@ func _on_run_phase_changed(phase: RunState.Phase) -> void:
 func _reset_run() -> void:
 	run_recorded = false
 	upgrades.reset()
+	run.reset()
+	healing_drops.clear()
 	player.reset()
 	_apply_upgrades()
 	projectiles.clear()
 	hostile_projectiles.clear()
 	enemies.clear()
-	run.reset()
 	particles.clear()
 	waves.reset()
 	player_visual.reset_pose()
@@ -270,7 +277,7 @@ func _update_hud() -> void:
 	hud_view.present_preferences(preferences.reduced_flashes, preferences.reduced_motion, preferences.last_error != OK)
 	hud_view.present_upgrades(upgrades.offered, run.phase == RunState.Phase.UPGRADE, upgrades.stacks, upgrades.definitions)
 	hud_view.present_records(records.data, records.last_error != OK)
-	hud_view.present(run.health, run.MAX_HEALTH, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD and player_visual.defeat_done), (run.phase == RunState.Phase.PAUSED), player.dash_recharge)
+	hud_view.present(run.health, run.max_health, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD and player_visual.defeat_done), (run.phase == RunState.Phase.PAUSED), player.dash_recharge)
 
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
 		hud_view.wave_status.hide()
@@ -284,6 +291,8 @@ func _draw() -> void:
 		draw_line(player.player_position - player.dash_direction * 26.0, player.player_position, Color("388fba"), 10.0)
 	if player.muzzle_time > 0.0 and not preferences.reduced_flashes:
 		draw_circle(player.muzzle_position().round(), 4.0, Color("fff0b0"))
+	for item in healing_drops.items:
+		_draw_healing_drop(item)
 	for particle in particles:
 		var tint: Color = particle["color"]
 		tint.a = clampf(particle["life"] / 0.3, 0.0, 1.0)
@@ -306,3 +315,15 @@ func _draw_overlay() -> void:
 func _return_to_menu() -> void:
 	# Leaving a live run abandons it; only defeats contribute to records.
 	get_tree().change_scene_to_file("res://scenes/main/menu.tscn")
+
+
+func _draw_healing_drop(item: Dictionary) -> void:
+	var point: Vector2 = Vector2(item["position"]).round()
+	var wings: bool = item["amount"] == 100
+	draw_circle(point, 12.0 if wings else 8.0, Color(0.04, 0.1, 0.15, 0.85))
+	for side in ([-1, 1] if wings else [1]):
+		var feather := PackedVector2Array([point + Vector2(-2 * side, 5), point + Vector2(2 * side, -3), point + Vector2(9 * side, -8), point + Vector2(7 * side, 1), point + Vector2(2 * side, 6)])
+		draw_colored_polygon(feather, Color("ede3c9"))
+		draw_polyline(PackedVector2Array([point + Vector2(-1 * side, 5), point + Vector2(7 * side, -6)]), Color("c5a46c"), 1.0)
+		for offset in [0, 3]:
+			draw_line(point + Vector2((2 + offset) * side, 1 - offset), point + Vector2((5 + offset) * side, 2 - offset), Color("7c9da7"), 1.0)

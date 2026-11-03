@@ -7,7 +7,7 @@ var offered: Array[Resource] = []
 
 
 func _init() -> void:
-	for id in ["swift", "rapid", "heavy", "force", "dash"]:
+	for id in ["swift", "rapid", "heavy", "force", "dash", "vitality"]:
 		definitions.append(load("res://resources/upgrades/%s.tres" % id))
 
 
