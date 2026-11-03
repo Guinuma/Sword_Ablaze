@@ -181,7 +181,7 @@ func _check_contact() -> void:
 
 
 func _take_player_damage() -> void:
-	if player.hurt_cooldown > 0.0 or player.dash_time > 0.0 or run.phase != RunState.Phase.COMBAT:
+	if player.hurt_cooldown > 0.0 or player.is_dash_protected() or run.phase != RunState.Phase.COMBAT:
 		return
 	run.take_damage()
 	_burst(player.player_position, Color("65dfc1"), 10)

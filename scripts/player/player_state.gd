@@ -15,6 +15,8 @@ const DASH_DURATION: float = 0.14
 const DASH_COOLDOWN: float = 1.2
 var dash_recharge: float = DASH_COOLDOWN
 var dash_time: float = 0.0
+# Keep protection through collision checks on the final dash step.
+var dashed_this_step: bool = false
 var dash_cooldown: float = 0.0
 var dash_direction := Vector2.RIGHT
 var hurt_cooldown: float = 0.0
@@ -23,6 +25,7 @@ var muzzle_time: float = 0.0
 
 
 func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pressed: bool, fire_pressed: bool, bounds: Rect2) -> void:
+	dashed_this_step = false
 	if not fire_pressed:
 		fire_requires_release = false
 	muzzle_time = maxf(0.0, muzzle_time - delta)
@@ -31,6 +34,7 @@ func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pres
 	if dash_pressed:
 		try_dash(movement)
 	if dash_time > 0.0:
+		dashed_this_step = true
 		player_position += dash_direction * DASH_SPEED * minf(delta, dash_time)
 		dash_time = maxf(0.0, dash_time - delta)
 	else:
@@ -59,6 +63,10 @@ func try_dash(movement: Vector2) -> void:
 	dash_cooldown = dash_recharge
 
 
+func is_dash_protected() -> bool:
+	return dash_time > 0.0 or dashed_this_step
+
+
 func reset() -> void:
 	move_speed = SPEED
 	dash_recharge = DASH_COOLDOWN
@@ -66,6 +74,7 @@ func reset() -> void:
 	aim = Vector2.RIGHT
 	fire_cooldown = 0.0
 	dash_time = 0.0
+	dashed_this_step = false
 	dash_cooldown = 0.0
 	dash_direction = Vector2.RIGHT
 	hurt_cooldown = 0.0

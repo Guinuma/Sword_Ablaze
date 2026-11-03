@@ -53,7 +53,7 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 - Spawns: marcador de aviso de 0,7 s, sem dano ou movimento durante a preparação; ativação adiada a menos de 56 px do jogador. Contam para o limite e orçamento da onda.
 - Spawns: longe do jogador; intervalo começa em 1,6 s e desce até 0,4 s. A velocidade dos inimigos também aumenta, até um limite.
 - Limpar uma onda: recupera 1 HP, até ao máximo, e inicia uma pausa de 3 s.
-- Dash: duração de 0,14 s e recarga de 1,2 s; proteção de contacto enquanto o dash está ativo.
+- Dash: duração de 0,14 s e recarga de 1,2 s; proteção contra contacto e projéteis em todos os passos com movimento de dash, incluindo o último. O dano volta a ser possível no passo seguinte.
 - A cada terceira onda, escolher uma de até três melhorias elegíveis. A simulação e o intervalo ficam parados durante a escolha. Os efeitos acumulam até ao limite indicado e são removidos ao reiniciar.
 - Morte e pausa congelam a simulação. A animação de queda dura 0,64 s antes dos resultados; R pode reiniciar durante a queda.
 - Tiros são limitados a 128 do jogador e 64 hostis; expiram após 5 s ou ao sair da arena. Partículas limitadas a 160.
@@ -102,7 +102,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Dash direcional com recarga e limites da arena.
 - [x] Pausa e retoma com Escape.
 - [ ] Afinar velocidade, alcance do dash, hitboxes e intervalo dos disparos em playtests.
-- [ ] Verificar proteção de dash nos frames de início/fim e sob diferentes taxas de atualização.
+- [x] Verificar proteção de dash nos frames de início/fim a 30, 60, 120, 144 e 240 passos/s, contra contacto e projéteis.
 - [x] Partilhar pivô de arma, origem do tiro e flash, incluindo mira para cima.
 - [ ] Refinar ligação visual das mãos e arma em todos os ângulos.
 - [x] Exigir largar o disparo antes de disparar após pausa ou reinício.
@@ -312,7 +312,7 @@ Os valores são provisórios e precisam de playtesting.
 1. Recolher feedback sobre o HUD e fazer playtesting real de legibilidade, controlos e dificuldade.
 2. Afinar animações, mãos, arma, capa e leitura em combate denso; preparar sprites limpos à resolução nativa.
 3. Equilibrar os dois inimigos, composição das ondas e combinações de melhorias.
-4. Criar menu principal, fluxo de entrada/saída da arena e primeiros efeitos sonoros.
+4. Acrescentar primeiros efeitos sonoros ao menu principal e ao fluxo de entrada/saída da arena já implementados.
 5. Definir estrutura, duração e condição de vitória da primeira run antes de acrescentar boss e recompensas.
 6. Desenhar o perfil persistente, XP global, hub mínimo e pequena skill tree.
 7. Validar e exportar uma vertical slice antes de expandir conteúdo ou Campaign.

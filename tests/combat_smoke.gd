@@ -20,6 +20,26 @@ func _run() -> void:
 		DirAccess.remove_absolute(arena.records.path + suffix)
 	root.add_child(arena)
 	arena.set_physics_process(false)
+	# Exercise the damage gate after movement, as in the real physics loop.
+	for hz in [30, 60, 120, 144, 240]:
+		arena._reset_run()
+		var step := 1.0 / float(hz)
+		var first := true
+		while first or arena.player.dash_time > 0.0:
+			arena.player.advance(step, Vector2.RIGHT, Vector2(600, 200), first, false, arena.ARENA)
+			first = false
+			arena.enemies.items.clear()
+			arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
+			arena._check_contact()
+			arena.hostile_projectiles.fire(arena.player.player_position, Vector2.LEFT, 100.0)
+			arena.hostile_projectiles.advance(step, arena.player.player_position, arena.ARENA)
+			check(arena.run.health == 5, "Dash must protect every movement step at %s Hz" % hz)
+		arena.player.advance(step, Vector2.ZERO, Vector2(600, 200), false, false, arena.ARENA)
+		arena._check_contact()
+		check(arena.run.health == 4, "Contact must resume on the step after dash at %s Hz" % hz)
+		arena.player.reset()
+		check(not arena.player.is_dash_protected(), "Reset must clear final-step protection")
+	arena._reset_run()
 	arena.enemies.items.append({"position": Vector2(150, 200), "health": 2, "flash": 0.0})
 	arena.projectiles.items.append({"position": Vector2(100, 200), "direction": Vector2.RIGHT})
 	arena._update_bullets(0.3)
