@@ -1,5 +1,5 @@
 extends RefCounted
-## Local visual and audio preferences; never modifies combat stats or timing.
+## Local presentation, input and starting-loadout preferences.
 var path: String
 var reduced_flashes: bool = false
 var reduced_motion: bool = false
@@ -7,6 +7,7 @@ const AUDIO_BUSES = ["Master", "Music", "SFX", "UI"]
 var volumes: Dictionary = {"Master": 1.0, "Music": 1.0, "SFX": 1.0, "UI": 1.0}
 const REMAPPABLE = [&"move_left", &"move_right", &"move_up", &"move_down", &"fire", &"dash", &"reset_sandbox"]
 var bindings: Dictionary = {}
+var selected_weapon: StringName = &"blade"
 var last_error: Error = OK
 var unsupported_version: bool = false
 
@@ -20,6 +21,8 @@ func load_preferences() -> void:
 	var data := _read(path)
 	if data.is_empty():
 		data = _read(path + ".bak")
+	var weapon_id = data.get("selected_weapon", "blade")
+	selected_weapon = StringName(weapon_id) if weapon_id is String and weapon_id in ["blade", "scatter"] else &"blade"
 	reduced_flashes = data.get("reduced_flashes", false)
 	reduced_motion = data.get("reduced_motion", false)
 	var audio: Dictionary = data.get("volumes", {}) if data.get("volumes", {}) is Dictionary else {}
@@ -45,7 +48,7 @@ func save() -> Error:
 	if file == null:
 		last_error = FileAccess.get_open_error()
 		return last_error
-	file.store_string(JSON.stringify({"version": 1, "reduced_flashes": reduced_flashes, "reduced_motion": reduced_motion, "volumes": volumes, "bindings": bindings}))
+	file.store_string(JSON.stringify({"version": 1, "reduced_flashes": reduced_flashes, "reduced_motion": reduced_motion, "volumes": volumes, "bindings": bindings, "selected_weapon": selected_weapon}))
 	file.flush()
 	last_error = file.get_error()
 	file.close()

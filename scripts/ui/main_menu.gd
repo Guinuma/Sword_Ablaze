@@ -17,6 +17,7 @@ var home: Control
 var detail: Control
 var detail_body: VBoxContainer
 var play_button: Button
+var loadout_button: Button
 var back_button: Button
 var return_focus: Button
 var save_error: Label
@@ -42,12 +43,16 @@ func _ready() -> void:
 	var actions := VBoxContainer.new()
 	actions.position = Vector2(36, 176)
 	actions.custom_minimum_size.x = 224
-	actions.add_theme_constant_override("separation", 6)
+	actions.add_theme_constant_override("separation", 4)
 	home.add_child(actions)
 	play_button = _button(actions, "PLAY ARENA", _start_game, true)
 	var controls := _button(actions, "HOW TO PLAY", _show_controls)
 	var options := _button(actions, "OPTIONS", _show_options)
+	loadout_button = _button(actions, "WEAPON LOADOUT", _show_loadout)
+	loadout_button.pressed.connect(func(): return_focus = loadout_button)
 	_button(actions, "QUIT", func(): get_tree().quit())
+	for button in actions.get_children():
+		button.custom_minimum_size.y = 26
 	controls.pressed.connect(func(): return_focus = controls)
 	options.pressed.connect(func(): return_focus = options)
 	var data: Dictionary = records.data
@@ -308,3 +313,25 @@ func _refresh_focus() -> void:
 	var controls: Array[Control] = []
 	FocusNavigation.collect(detail if detail.visible else home, controls)
 	FocusNavigation.ring(controls)
+
+
+func _show_loadout() -> void:
+	_open_detail("WEAPON LOADOUT")
+	detail_body.add_theme_constant_override("separation", 7)
+	for entry in [[&"blade", "BLADE RIFLE", "Precise single shots. Fast fire; reliable at range."], [&"scatter", "EMBER FAN", "Five-shot spread. Slow fire; strongest up close."]]:
+		var id: StringName = entry[0]
+		var button := _button(detail_body, ("SELECTED: " if preferences.selected_weapon == id else "EQUIP: ") + entry[1], _equip_weapon.bind(id))
+		button.custom_minimum_size = Vector2(392, 30)
+		_label(detail_body, entry[2], Vector2.ZERO, 12, MUTED, false)
+	_label(detail_body, "Choose before entering. Blessings reset each run.", Vector2.ZERO, 12, MUTED, false)
+	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
+	_refresh_focus()
+	detail_body.get_child(1).grab_focus()
+
+func _equip_weapon(id: StringName) -> void:
+	if id not in [&"blade", &"scatter"]:
+		return
+	preferences.selected_weapon = id
+	preferences.save()
+	_show_loadout()
+	save_error.text = "Could not save weapon choice." if preferences.last_error != OK else ""

@@ -24,6 +24,7 @@ def main():
         ("Navigation", ["--script", "tests/navigation_smoke.gd"], "Navigation checks complete: 0 failures"),
         ("Feedback", ["--script", "tests/feedback_smoke.gd"], "Feedback checks complete: 0 failures"),
         ("Elite", ["--script", "tests/elite_smoke.gd"], "Elite checks complete: 0 failures"),
+        ("Weapons", ["--script", "tests/weapon_smoke.gd"], "Weapon checks complete: 0 failures"),
         ("Startup", ["--quit-after", "120"], None),
         ("Long session", ["--script", "tests/run_soak.gd"], "Run soak complete: 0 failures"),
     ]

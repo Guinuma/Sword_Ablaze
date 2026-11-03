@@ -6,3 +6,6 @@ extends Resource
 @export_range(1, 1000) var damage: int = 1
 @export_range(0.001, 1000.0) var knockback: float = 135.0
 @export_range(0.001, 1000.0) var muzzle_offset: float = 16.0
+
+@export_range(1, 9) var pellets: int = 1
+@export_range(0.0, 1.5) var spread: float = 0.0

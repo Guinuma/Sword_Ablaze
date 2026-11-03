@@ -24,9 +24,11 @@ func _run() -> void:
 	change_scene_to_file("res://scenes/main/menu.tscn")
 	await scene_changed
 	var menu = current_scene
-	await cycle(menu.play_button, 4)
-	await cycle(menu.play_button, 4, KEY_TAB, true)
-	await cycle(menu.play_button, 4, KEY_DOWN)
+	await cycle(menu.play_button, 5)
+	await cycle(menu.play_button, 5, KEY_TAB, true)
+	await cycle(menu.play_button, 5, KEY_DOWN)
+	menu._show_loadout()
+	await cycle(menu.detail_body.get_child(1), 3)
 	menu._show_controls()
 	await cycle(menu.back_button, 1)
 	menu._show_options()

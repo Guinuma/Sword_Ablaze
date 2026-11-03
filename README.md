@@ -69,6 +69,8 @@ Os recordes de onda, eliminações e sobrevivência são máximos independentes 
 
 Options → Keyboard Bindings permite remapear movimento, disparo, dash e reinício, com deteção de conflitos e reposição dos valores iniciais. Escape e o disparo pelo rato mantêm-se disponíveis. Ver [controlos](docs/controls.md).
 
+O menu **WEAPON LOADOUT** permite escolher Blade Rifle (tiro preciso a cada 0,16 s) ou Ember Fan (cinco projéteis num leque de 0,5 rad a cada 0,55 s). A escolha é guardada; as melhorias temporárias aplicam-se à arma escolhida e desaparecem ao reiniciar. Ver [armas](docs/weapons.md).
+
 Os valores são provisórios e precisam de playtesting.
 
 ## Checklist de desenvolvimento
@@ -214,7 +216,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Aplicar modificadores temporários a partir dos valores base, com limites por melhoria.
 - [x] Oferecer três melhorias elegíveis após cada terceira onda, com descrição e limite de stacks.
 - [x] Criar seis melhorias: movimento, cadência, dano, recuo, recarga do dash e vida máxima.
-- [ ] Criar segunda arma e validar que oferece uma alternativa real à primeira.
+- [x] Criar segunda arma e validar a alternativa mecânica: Ember Fan de curta distância; equilíbrio em playtests pendente.
 - [ ] Definir raridade, pré-requisitos e exclusões de melhorias, se necessários.
 - [x] Recalcular melhorias sem duplicação e removê-las ao reiniciar.
 - [ ] **Decidir:** recuperação, moeda temporária, lojas, rerolls e outros sistemas de economia.

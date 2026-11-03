@@ -46,7 +46,9 @@ func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pres
 		aim = mouse_direction.normalized()
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	if fire_pressed and not fire_requires_release and fire_cooldown <= 0.0:
-		shot.emit(muzzle_position(), aim)
+		for index in range(weapon.pellets):
+			var angle := 0.0 if weapon.pellets == 1 else (float(index) / (weapon.pellets - 1) - 0.5) * weapon.spread
+			shot.emit(muzzle_position(), aim.rotated(angle))
 		fire_cooldown = weapon.fire_interval
 		muzzle_time = 0.06
 

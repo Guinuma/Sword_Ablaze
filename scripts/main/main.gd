@@ -229,7 +229,7 @@ func _change_preferences(reduced_flashes: bool, reduced_motion: bool) -> void:
 
 
 func _apply_upgrades() -> void:
-	var base = load("res://resources/default_weapon.tres")
+	var base = load("res://resources/scatter_weapon.tres" if preferences.selected_weapon == &"scatter" else "res://resources/default_weapon.tres")
 	var weapon = base.duplicate()
 	weapon.fire_interval = upgrades.value("fire_interval", base.fire_interval)
 	weapon.damage = int(upgrades.value("damage", base.damage))
