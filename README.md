@@ -6,7 +6,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Os canais e volumes de áudio estão preparados, mas ainda não existem sons ou música. Ainda não existem XP global, hub, boss ou condição de vitória.
+Arena jogável com um pátio celestial ilustrado, dois tipos de inimigo, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Ainda não existem XP global, hub, boss ou condição de vitória.
 
 - Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -195,7 +195,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Flash de disparo e flash de dano nos inimigos.
 - [ ] Afinar intensidade, duração e ordem das camadas dos efeitos.
 - [ ] Criar efeitos para spawn, dash, melhoria, recuperação de vida e fim de onda.
-- [ ] Criar sons de tiro, impacto, eliminação, dano, dash e interação de menus.
+- [x] Criar sons de tiro, impacto, eliminação, dano, dash e interação de menus.
 - [ ] Criar música de combate e ambiente do hub com transições.
 - [x] Configurar buses Master, Music, SFX e UI, com volumes independentes guardados em Options → Audio Volumes.
 - [ ] Limitar sons simultâneos e evitar volume excessivo em combate denso.

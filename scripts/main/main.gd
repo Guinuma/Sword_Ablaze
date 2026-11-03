@@ -9,6 +9,8 @@ const ArenaRecords = preload("res://scripts/run/arena_records.gd")
 var records = ArenaRecords.new()
 const Preferences = preload("res://scripts/settings/preferences.gd")
 var preferences = Preferences.new()
+const SoundEffects = preload("res://scripts/audio/sound_effects.gd")
+var sounds = SoundEffects.new()
 var run_recorded: bool = false
 const UpgradeSystem = preload("res://scripts/run/upgrade_system.gd")
 var upgrades = UpgradeSystem.new()
@@ -41,6 +43,10 @@ var random := RandomNumberGenerator.new()
 
 func _ready() -> void:
 	preferences.load_preferences()
+	add_child(sounds)
+	player.shot.connect(func(_origin, _direction): sounds.play(&"shot"))
+	player.dashed.connect(func(): sounds.play(&"dash"))
+	run.damaged.connect(func(_health): sounds.play(&"damage"))
 	_apply_upgrades()
 	records.load_records()
 	run.phase_changed.connect(_on_run_phase_changed)
@@ -62,6 +68,7 @@ func _ready() -> void:
 	hud_view.main_menu_requested.connect(_return_to_menu)
 	hud_view.quit_requested.connect(func(): get_tree().quit())
 	add_child(hud_view)
+	sounds.watch_buttons(hud_view)
 	world = Node2D.new()
 	world.y_sort_enabled = true
 	world.z_index = 1
@@ -112,6 +119,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _set_paused(value: bool) -> void:
+	if value:
+		sounds.stop_combat()
 	run.set_paused(value)
 	# Require a fresh trigger after any pause, including focus loss.
 	player.fire_requires_release = true
@@ -148,6 +157,7 @@ func _update_waves(delta: float) -> void:
 
 
 func _on_wave_cleared() -> void:
+	sounds.play(&"wave")
 	projectiles.clear()
 	hostile_projectiles.clear()
 	run.start_intermission()
@@ -170,10 +180,12 @@ func _update_bullets(delta: float) -> void:
 
 
 func _on_projectile_impact(point: Vector2) -> void:
+	sounds.play(&"impact")
 	_burst(point, Color("ffb454"), 5)
 
 
 func _on_projectile_defeat(point: Vector2) -> void:
+	sounds.play(&"defeat")
 	_burst(point, Color("e76170"), 10)
 	run.record_kill()
 	if run.phase == RunState.Phase.COMBAT:
@@ -225,6 +237,7 @@ func _choose_upgrade(id: StringName) -> void:
 	if run.phase != RunState.Phase.UPGRADE or not upgrades.choose(id):
 		return
 	_apply_upgrades()
+	sounds.play(&"upgrade")
 	player.fire_requires_release = true
 	run.finish_upgrade()
 	_update_hud()
@@ -239,6 +252,7 @@ func _on_run_phase_changed(phase: RunState.Phase) -> void:
 
 
 func _reset_run() -> void:
+	sounds.stop_combat()
 	run_recorded = false
 	upgrades.reset()
 	run.reset()

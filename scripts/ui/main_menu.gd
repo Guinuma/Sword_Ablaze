@@ -7,6 +7,8 @@ const FONT = preload("res://assets/fonts/Silkscreen-Regular.ttf")
 const GOLD = Color("c5a46c")
 const IVORY = Color("ede3c9")
 const MUTED = Color("9aabb8")
+const SoundEffects = preload("res://scripts/audio/sound_effects.gd")
+var sounds = SoundEffects.new()
 var preferences = Preferences.new()
 var records = ArenaRecords.new()
 var home: Control
@@ -22,6 +24,7 @@ var pixel_font: Font
 
 func _ready() -> void:
 	preferences.load_preferences()
+	add_child(sounds)
 	records.load_records()
 	pixel_font = FONT.duplicate()
 	pixel_font.antialiasing = 0
@@ -153,6 +156,7 @@ func _button(parent: Node, text: String, action: Callable, primary: bool = false
 	button.add_theme_stylebox_override("hover", _style(IVORY if primary else Color("293847"), IVORY))
 	button.add_theme_stylebox_override("pressed", _style(GOLD if primary else Color("354351"), GOLD))
 	button.add_theme_stylebox_override("focus", _style(Color.TRANSPARENT, IVORY))
+	button.pressed.connect(func(): sounds.play(&"ui"))
 	button.pressed.connect(action)
 	parent.add_child(button)
 	return button

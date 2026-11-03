@@ -1,6 +1,7 @@
 extends RefCounted
 ## Input-independent player movement, dash and weapon timing.
 signal shot(origin: Vector2, direction: Vector2)
+signal dashed()
 
 const SPEED: float = 120.0
 var move_speed: float = SPEED
@@ -61,6 +62,7 @@ func try_dash(movement: Vector2) -> void:
 	dash_direction = movement.normalized() if movement.length_squared() > 0.0 else aim
 	dash_time = DASH_DURATION
 	dash_cooldown = dash_recharge
+	dashed.emit()
 
 
 func is_dash_protected() -> bool:
