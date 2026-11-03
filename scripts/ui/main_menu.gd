@@ -1,5 +1,6 @@
 extends Control
 ## Front door only: the arena is instantiated when PLAY is activated.
+const FocusNavigation = preload("res://scripts/ui/focus_navigation.gd")
 const Preferences = preload("res://scripts/settings/preferences.gd")
 const ArenaRecords = preload("res://scripts/run/arena_records.gd")
 const COURTYARD = preload("res://assets/art/arena/celestial-courtyard-01.png")
@@ -70,6 +71,7 @@ func _ready() -> void:
 	back_button = _button(detail, "BACK", _back)
 	back_button.position = Vector2(124, 280)
 	back_button.size = Vector2(392, 28)
+	_refresh_focus()
 	play_button.grab_focus()
 
 func _process(delta: float) -> void:
@@ -124,6 +126,7 @@ func _show_controls() -> void:
 	detail_body.add_theme_constant_override("separation", 6)
 	for text in ["WASD / arrows     Move", "Mouse                 Aim", "Left click / Space   Fire", "Shift                    Dash", "Escape                 Pause / resume", "R                         Restart the run", "Clear waves. Choose blessings every third wave."]:
 		_label(detail_body, text, Vector2.ZERO, 12, IVORY, false)
+	_refresh_focus()
 	back_button.grab_focus()
 
 func _show_options() -> void:
@@ -145,6 +148,7 @@ func _show_options() -> void:
 	_button(detail_body, "KEYBOARD BINDINGS", _show_bindings)
 	_label(detail_body, "Applies to the menu and arena. Saved automatically.", Vector2.ZERO, 12, MUTED, false)
 	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
+	_refresh_focus()
 	detail_body.get_child(1).grab_focus()
 
 func _save_preferences() -> void:
@@ -155,6 +159,7 @@ func _back() -> void:
 	binding_action = &""
 	detail.hide()
 	home.show()
+	_refresh_focus()
 	if is_instance_valid(return_focus):
 		return_focus.grab_focus()
 	else:
@@ -256,6 +261,7 @@ func _show_audio() -> void:
 		if first_slider == null:
 			first_slider = slider
 	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
+	_refresh_focus()
 	first_slider.grab_focus()
 
 
@@ -288,8 +294,15 @@ func _show_bindings() -> void:
 	reset.custom_minimum_size = Vector2(190, 26)
 	binding_status = _label(detail_body, "Choose an action, then press a key. Escape cancels.", Vector2.ZERO, 12, MUTED, false)
 	_label(detail_body, "Mouse fire and Escape pause stay available.", Vector2.ZERO, 12, MUTED, false)
+	_refresh_focus()
 	first.grab_focus()
 
 func _capture_binding(action: StringName) -> void:
 	binding_action = action
 	binding_status.text = "Press a key for %s. Escape cancels." % String(action).trim_prefix("move_").to_upper()
+
+
+func _refresh_focus() -> void:
+	var controls: Array[Control] = []
+	FocusNavigation.collect(detail if detail.visible else home, controls)
+	FocusNavigation.ring(controls)

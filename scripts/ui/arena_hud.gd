@@ -8,6 +8,7 @@ signal restart_requested
 signal main_menu_requested
 signal quit_requested
 
+const FocusNavigation = preload("res://scripts/ui/focus_navigation.gd")
 const BlessingBadge = preload("res://scripts/ui/blessing_badge.gd")
 const PIXEL_FONT = preload("res://assets/fonts/Silkscreen-Regular.ttf")
 const INK := Color("0a111c")
@@ -215,7 +216,7 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 	control_hint.visible = elapsed < 20.0 and stack_total == 0 and not modal
 	blessing_tray.visible = stack_total > 0 and not modal
 	pause_hint.visible = not modal
-	pause_button.disabled = paused or game_over
+	pause_button.disabled = modal
 	var was_open := menu.visible
 	var was_dead := not resume_button.visible
 	menu_backdrop.visible = game_over or paused
@@ -232,6 +233,14 @@ func present(health: int, max_health: int, kills: int, elapsed: float, wave: int
 	preference_error.visible = paused and preference_error.get_meta("failed", false)
 	menu_hint.visible = paused and not preference_error.visible
 	menu_hint.text = "ESC RESUME    R RESTART"
+	if menu.visible:
+		var controls: Array[Control] = []
+		if resume_button.visible:
+			controls.append(resume_button)
+		controls.append_array([restart_button, quit_button])
+		if flashes_toggle.visible:
+			controls.append_array([flashes_toggle, motion_toggle])
+		FocusNavigation.ring(controls)
 	if menu.visible and (not was_open or was_dead != game_over):
 		if resume_button.visible:
 			resume_button.grab_focus()
@@ -264,6 +273,12 @@ func present_upgrades(choices: Array[Resource], choosing: bool, stacks: Dictiona
 		if button.visible:
 			var definition = choices[index]
 			button.text = "%s   /   RANK %d OF %d\n%s" % [definition.title.to_upper(), stacks.get(definition.id, 0) + 1, definition.max_stacks, definition.description]
+	if choosing:
+		var controls: Array[Control] = []
+		for button in choice_buttons:
+			if button.visible:
+				controls.append(button)
+		FocusNavigation.ring(controls)
 	if choosing and not was_visible and not choices.is_empty():
 		choice_buttons[0].grab_focus()
 

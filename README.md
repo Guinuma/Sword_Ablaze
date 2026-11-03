@@ -262,7 +262,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Aplicar HUD e menus em marinho, ouro e marfim, com fonte pixel e hierarquia de informação.
 - [x] Oferecer remapeamento de teclas e guardar preferências.
 - [ ] **Decidir:** suporte de comando; se incluído, implementar mira, foco e navegação completos.
-- [ ] Garantir navegação por teclado e foco visível nos menus.
+- [x] Garantir navegação por teclado e foco visível nos menus.
 - [x] Rever HUD e menus a 640 × 360 e 1280 × 720, incluindo vida crítica e contadores maiores.
 - [ ] Oferecer opções de escala de UI e testar fullscreen e outras proporções.
 - [ ] Distinguir perigos por forma e movimento, além da cor.
