@@ -265,7 +265,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Oferecer opções de escala de UI e testar fullscreen e outras proporções.
 - [ ] Distinguir perigos por forma e movimento, além da cor.
 - [x] Guardar opções de redução de flashes e movimento decorativo no menu de pausa.
-- [ ] Criar tutorial curto para mover, apontar, disparar, dash e escolher melhorias.
+- [x] Criar tutorial curto para mover, apontar, disparar, dash e escolher melhorias.
 - [ ] **Decidir:** idiomas suportados e preparar textos para localização.
 
 ### 12. Validação, equilíbrio e desempenho

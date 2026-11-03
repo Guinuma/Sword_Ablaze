@@ -11,6 +11,8 @@ const Preferences = preload("res://scripts/settings/preferences.gd")
 var preferences = Preferences.new()
 const SoundEffects = preload("res://scripts/audio/sound_effects.gd")
 var sounds = SoundEffects.new()
+const CombatTutorial = preload("res://scripts/ui/combat_tutorial.gd")
+var tutorial = CombatTutorial.new()
 var run_recorded: bool = false
 const UpgradeSystem = preload("res://scripts/run/upgrade_system.gd")
 var upgrades = UpgradeSystem.new()
@@ -44,8 +46,8 @@ var random := RandomNumberGenerator.new()
 func _ready() -> void:
 	preferences.load_preferences()
 	add_child(sounds)
-	player.shot.connect(func(_origin, _direction): sounds.play(&"shot"))
-	player.dashed.connect(func(): sounds.play(&"dash"))
+	player.shot.connect(func(_origin, _direction): sounds.play(&"shot"); tutorial.shot())
+	player.dashed.connect(func(): sounds.play(&"dash"); tutorial.dashed())
 	run.damaged.connect(func(_health): sounds.play(&"damage"))
 	_apply_upgrades()
 	records.load_records()
@@ -106,7 +108,9 @@ func _physics_process(delta: float) -> void:
 	_update_effects(delta)
 	run.advance(delta)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var old_aim: Vector2 = player.aim
 	player.advance(delta, movement, get_global_mouse_position(), Input.is_action_just_pressed("dash"), Input.is_action_pressed("fire"), ARENA)
+	tutorial.observe(delta, movement, old_aim.distance_squared_to(player.aim) > 0.0001)
 	healing_drops.advance(delta, player.player_position, run)
 	_update_waves(delta)
 	_update_enemies(delta)
@@ -238,6 +242,7 @@ func _choose_upgrade(id: StringName) -> void:
 		return
 	_apply_upgrades()
 	sounds.play(&"upgrade")
+	tutorial.chose_upgrade()
 	player.fire_requires_release = true
 	run.finish_upgrade()
 	_update_hud()
@@ -252,6 +257,7 @@ func _on_run_phase_changed(phase: RunState.Phase) -> void:
 
 
 func _reset_run() -> void:
+	tutorial.reset()
 	sounds.stop_combat()
 	run_recorded = false
 	upgrades.reset()
@@ -293,6 +299,9 @@ func _update_hud() -> void:
 	hud_view.present_records(records.data, records.last_error != OK)
 	hud_view.present(run.health, run.max_health, run.kills, run.elapsed, waves.number, waves.remaining + enemies.items.size(), waves.break_time, player.dash_cooldown, (run.phase == RunState.Phase.DEAD and player_visual.defeat_done), (run.phase == RunState.Phase.PAUSED), player.dash_recharge)
 
+	hud_view.control_hint.text = tutorial.hint()
+	hud_view.control_hint.visible = run.is_active() and tutorial.step < 5
+	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
 		hud_view.wave_status.hide()
 
@@ -320,6 +329,9 @@ func _draw() -> void:
 
 
 func _draw_overlay() -> void:
+	hud_view.control_hint.text = tutorial.hint()
+	hud_view.control_hint.visible = run.is_active() and tutorial.step < 5
+	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
 		return
 	if not run.is_active():
