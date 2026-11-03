@@ -551,6 +551,37 @@ func _run() -> void:
 	check(arena.run.phase == arena.RunState.Phase.PAUSED and arena.hud_view.resume_button.has_focus(), "HUD pause control must open the keyboard-focused pause menu")
 	arena.hud_view.resume_button.pressed.emit()
 	check(arena.run.is_active() and not arena.hud_view.menu.visible, "HUD Resume must return to combat")
+	# Mixed contact and projectile hits in one step share a single damage window.
+	arena._reset_run()
+	for index in range(6):
+		arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
+		arena.hostile_projectiles.fire(arena.player.player_position, Vector2.LEFT, 100.0)
+	arena._check_contact()
+	arena.hostile_projectiles.advance(1.0 / 60.0, arena.player.player_position, arena.ARENA)
+	check(arena.run.health == 4 and arena.hostile_projectiles.items.is_empty(), "Simultaneous contact and six shots must cause exactly one damage")
+	# Multiple bullets remove successive targets without stale indices or double kills.
+	arena._reset_run()
+	for index in range(6):
+		arena.enemies.items.append({"position": Vector2(150 + index * 30, 200), "health": 1, "flash": 0.0})
+		arena.projectiles.fire(Vector2(100, 200), Vector2.RIGHT)
+	arena._update_bullets(1.0)
+	check(arena.enemies.items.is_empty() and arena.projectiles.items.is_empty() and arena.run.kills == 6, "Six shots must kill six successive targets exactly once in one step")
+	arena._update_bullets(1.0)
+	check(arena.run.kills == 6, "Consumed shots must not award duplicate kills")
+	# Death freezes remaining entities; restarting clears active and pending threats.
+	arena._spawn_enemy()
+	arena.enemies.items.append({"position": arena.player.player_position, "health": 2, "flash": 0.0})
+	arena.projectiles.fire(Vector2(100, 200), Vector2.RIGHT)
+	arena.hostile_projectiles.fire(arena.player.player_position, Vector2.LEFT, 100.0)
+	arena.run.health = 1
+	arena._check_contact()
+	var dead_enemies: Array = arena.enemies.items.duplicate(true)
+	var dead_shots: Array = arena.projectiles.items.duplicate(true)
+	var dead_hostile: Array = arena.hostile_projectiles.items.duplicate(true)
+	arena._physics_process(1.0)
+	check(arena.run.health == 0 and arena.enemies.items == dead_enemies and arena.projectiles.items == dead_shots and arena.hostile_projectiles.items == dead_hostile, "Death must freeze active and pending enemies and both projectile types")
+	arena._reset_run()
+	check(arena.enemies.items.is_empty() and arena.projectiles.items.is_empty() and arena.hostile_projectiles.items.is_empty() and arena.particles.is_empty(), "Restart after death must clear all threats and effects")
 	print("Combat checks complete: %d failures" % failures)
 	arena.free()
 	quit(0 if failures == 0 else 1)

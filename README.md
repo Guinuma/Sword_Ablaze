@@ -128,7 +128,7 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Equilibrar a composição de encontros em playtests.
 - [ ] Criar primeiro elite com comportamento reconhecível.
 - [ ] Criar primeiro boss com ataques anunciados, fases e recompensa.
-- [ ] Testar dano simultâneo, eliminações em cadeia e limpeza de inimigos no fim da run.
+- [x] Testar dano simultâneo de contacto/projéteis, eliminações em cadeia, congelamento na morte e limpeza de inimigos/projéteis ao reiniciar.
 
 ### 4. Ondas e modo Arena
 
