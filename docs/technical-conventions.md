@@ -97,3 +97,8 @@ Right-click/E triggers a forward melee swing through `PlayerState.melee` and `Me
 Keen Edge is a temporary blessing with three ranks, each adding ten percentage points of critical chance to bullets and melee. Base chance is zero; critical multiplier is two. Each bullet rolls once at creation, while a melee swing rolls once per eligible target. `HitRules` applies the critical multiplier before guardian frontal reduction/flank vulnerability. A short X cue and audio accent identify a landed critical. No ammo/reload/status-effect system is added.
 
 Hand and sleeve primitives connect shoulders to both weapon grips, with the same smoothed base pivot used by the physical muzzle. Upward weapon occlusion remains behind the body. Recoil/bob/melee rotation affect presentation only. `tools/capture_aim.gd` renders eight directions at enlarged engine scale; unit checks sample grip continuity over 360 angles. Dedicated final pixel-art poses remain Section 5 work.
+
+
+## Native Exile presentation (section 5)
+
+The active SVG atlas is imported at scale 1 and sampled nearest. Each 24 × 32 cell draws at (-12, -20) without scaling. Front/back/right rows share the ground baseline; left mirrors the right row about the same origin. ExileVisual.sprite_frame selects idle, four walk poses, two dash poses or two hurt poses; the fourth row supplies defeat. Cape spans, shadow and grip endpoints round to logical pixels. Weapon aim remains continuous, with presentation-only recoil/bob/melee offsets; simulation muzzle placement still uses PlayerState.weapon_grip. See docs/art/README.md for palette, layout and original-art licensing.

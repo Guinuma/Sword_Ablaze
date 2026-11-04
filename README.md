@@ -8,7 +8,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. XP global é atribuído uma vez por vitória/derrota, com nível e resumo guardados; o Sanctuary liga modos, progressão, loadout e configurações.
 
-- Exilado com caminhada de quatro frames, pernas alternadas, vistas de frente/costas/lateral e arma com mira independente.
+- Exilado com sprites nativos de 24 × 32 pixels, caminhada de quatro frames, vistas de frente/costas/lateral, dash, dano e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
 - Ondas crescentes, avisos de spawn, recuperação de vida entre rondas, dash, ataque corpo a corpo e sete melhorias temporárias.
 - HUD com barra de vida e valor numérico, ronda, inimigos restantes, relógio, eliminações e barra de recarga do dash.
@@ -16,7 +16,7 @@ Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um e
 - Preferências de redução de flashes/movimento e recordes locais com validação e backup.
 - Importação, regressões de combate, arranque e simulação prolongada automatizados no GitHub Actions.
 
-A arte gerada já está integrada em texturas e atlas de animação. É uma base visual do protótipo; limpeza à resolução nativa, poses dedicadas e refinamento das mãos/capa/arma continuam pendentes.
+O Exilado usa agora sprites originais de 24 × 32 pixels, paleta fixa, vistas direcionais e poses dedicadas de dash, dano e derrota; capa e arma partilham o estilo pixel. A arena e os inimigos mantêm arte gerada de protótipo, com refinamento pendente nas secções seguintes.
 
 ![Arena e HUD no motor](docs/art/celestial-courtyard-gameplay-01.png)
 
@@ -166,17 +166,17 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Adicionar movimento procedural, recuo visual de disparo e indicação de dano/dash.
 - [x] Corrigir espelhamento para manter corpo, capa, arma e sombra no mesmo centro.
 - [x] Guardar referências, prompt de geração e capturas do jogo em `docs/art/`.
-- [ ] Fixar grelha, paleta e tamanho final do sprite à escala real do jogo.
-- [ ] Simplificar o corpo atual num sprite de baixa resolução com pixels consistentes.
+- [x] Fixar grelha, paleta e tamanho final do sprite à escala real do jogo.
+- [x] Simplificar o corpo atual num sprite de baixa resolução com pixels consistentes.
 - [x] Integrar vistas de frente, costas e lateral do Exilado, verificadas no motor.
 - [x] Integrar ciclo de caminhada de quatro frames com pernas alternadas e idle separado.
-- [ ] Completar idle e movimento com vistas direcionais coerentes.
+- [x] Completar idle e movimento com vistas direcionais coerentes.
 - [x] Animar derrota com quatro poses e mostrar resultados após a queda.
-- [ ] Criar animações dedicadas de dash e dano não fatal.
-- [ ] Finalizar capa e arma com estilo consistente com o corpo.
-- [ ] Ajustar mãos, pivôs, pés, sombra e ponto de saída dos tiros por direção.
-- [ ] Verificar leitura contra pisos claros/escuros e com muitos efeitos em simultâneo.
-- [ ] Verificar todos os ângulos da mira, movimento diagonal, dash e overlays.
+- [x] Criar animações dedicadas de dash e dano não fatal.
+- [x] Finalizar capa e arma com estilo consistente com o corpo.
+- [x] Ajustar mãos, pivôs, pés, sombra e ponto de saída dos tiros por direção.
+- [x] Verificar leitura contra pisos claros/escuros e com muitos efeitos em simultâneo.
+- [x] Verificar todos os ângulos da mira, movimento diagonal, dash e overlays.
 
 ### 6. Arena, inimigos e linguagem visual
 

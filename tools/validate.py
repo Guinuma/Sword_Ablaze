@@ -33,6 +33,7 @@ def main():
         ("Event integration", ["--script", "tests/event_integration_smoke.gd"], "Event integration checks complete: 0 failures"),
         ("Melee/critical", ["--script", "tests/melee_critical_smoke.gd"], "Melee/critical checks complete: 0 failures"),
         ("Melee flow", ["--script", "tests/melee_flow_smoke.gd"], "Melee flow checks complete: 0 failures"),
+        ("Player art", ["--script", "tests/player_art_smoke.gd"], "Player art checks complete: 0 failures"),
         ("Startup", ["--quit-after", "120"], None),
         ("Long session", ["--script", "tests/run_soak.gd"], "Run soak complete: 0 failures"),
     ]

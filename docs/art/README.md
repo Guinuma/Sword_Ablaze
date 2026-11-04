@@ -2,6 +2,27 @@
 
 Selected protagonist: **The Exile** (concept C in art-direction-01.png).
 
+## Current player art — section 5 (2026-11-04)
+
+The active player uses original, code-authored pixel artwork in `assets/art/player/exile-native.svg`, built reproducibly by `tools/build_exile_sprite.py`. This is an SVG of integer-aligned colored rectangles, imported at scale 1, not a resampled generated image. The earlier generated sheets remain concept/history references and are no longer loaded by ExileVisual. The new artwork and builder are covered by the repository MIT license; this does not change the rights status of older generated assets.
+
+- Grid: 24 × 32 logical pixels per cell, drawn 1:1 with nearest filtering at the 640 × 360 viewport. Feet meet the shadow around local y = 6–8; all views share origin (12, 20) within the cell.
+- Atlas: 216 × 128; rows front, back, right side (mirrored for left), then defeat. First three rows use columns idle, four walking poses, two dash poses and two nonfatal hurt poses. The defeat row uses four nonlooping poses.
+- Palette: outline #101b29, dark #263747, steel #496072, ivory #eee5cb, hood shade #bcb99e, light #fff3da, teal #23858d, deep teal #176578, cyan #53b8b4, gold #b88d4d, ember #ed874b and eye #f4c875. Body, cape and weapon use this shared set; the ground shadow uses translucent dark ink.
+- Read: stepped ivory hood, pale mask, small warm eyes, dark fitted body, turquoise mantle and light ember blade. Front/back and side use the same head, shoulder and leg proportions. Cape is drawn as whole-pixel spans; shadow has stepped edges. Weapon and sleeve colors match the body; rounded mounts and grips preserve continuous aim.
+- Animation: walk remains four frames at eight frames/s with reverse playback for backpedaling and upgrade-adjusted rate. Dash selects launch then trail at 0.07 s; hurt selects recoil then recovery at 0.09 s, returning to locomotion after 0.18 s while damage protection continues. Defeat still takes 0.64 s before results. Reset clears pose clocks. Reduced effects preserve readable poses without full-body flashing.
+- Attachment: PlayerState.weapon_grip remains the common attachment used for projectile origin and muzzle flash. Animation bob, recoil and melee swing are presentation offsets; aiming and collision behavior retain their existing timing and geometry. The weapon draws behind the torso for upward aim.
+
+![Directional and state review](exile-native-review.png)
+
+![Crowded combat review](exile-native-gameplay.png)
+
+`tools/capture_player_art.gd` renders eight aim directions over light/dark panels, diagonal travel, dash, hurt, melee and defeat, then crowded arena combat and a pause-overlay capture. `tools/validate_player_visual.gd` rendered 1,024 facing/travel/state combinations without errors. `tests/player_art_smoke.gd` covers native dimensions, cardinal views, pose progression, reduced effects, defeat timing and reset; existing combat checks preserve pause, pivots and shot origins. This completes the player-art prototype scope, not external art approval or later-section enemy/environment art.
+
+## Earlier reference and integration history
+
+The following describes the generated references used before the native-grid replacement. Paths are retained for provenance; references to active player sheets below are historical.
+
 ## Visual identity
 
 - Agile silhouette; short turquoise cape, ivory hood and pale mask.

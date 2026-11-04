@@ -83,3 +83,21 @@ Reviewed 2026-11-04 at prototype scope. The user confirmed complete runs with bo
 | Opening, middle and advanced playtesting | User reported full runs with both weapons; Warden feedback implemented; exact timing not supplied |
 
 No later-section art or interior obstacles were introduced. Existing project.godot serialization, .vscode and unrelated image imports stay outside this commit.
+
+
+## Section 5 — The Exile art
+
+Completed 2026-11-04 at the native-grid prototype scope. All 17 checklist items are implemented or retained with updated native artwork. The active player no longer scales down generated body/walk/defeat sheets. Existing concept references and their provenance remain available.
+
+| Scope | Evidence |
+| --- | --- |
+| Direction, concept boards and references | Original art-direction boards and prompts retained in docs/art |
+| Fixed grid, palette and consistent pixels | exile-native.svg: 24 × 32 cells at 1:1, integer rectangles, twelve-color palette; reproducible builder; art notes |
+| Transparent body, shadow, cape and free-aim weapon | ExileVisual native atlas, stepped shadow/cape, shared body/weapon palette |
+| Mirrored center and directional idle/walk | Shared cell anchor, front/back/right with left mirror; four walk poses per view and separate idle |
+| Dash, nonfatal hurt and defeat | Two dash/two hurt poses per view; four native defeat poses; player_art_smoke checks timing and reset |
+| Hands, feet, shadow and muzzle | Native baseline, rounded grips; shared PlayerState.weapon_grip; existing combat and 360-degree continuity checks |
+| Light/dark and dense-effects readability | exile-native-review.png and exile-native-gameplay.png, reviewed from actual Godot renders |
+| Aim, diagonal movement, dash and overlays | Eight-direction state board, 1,024-combination graphical sweep, crowded combat/pause capture and full regression suite |
+
+The previous generated player assets remain historical references. No section 6 enemy/environment art changes are included. This is a completed project art pass; external visual approval and broad hardware review are not implied. Existing unrelated local files remain outside the commit.

@@ -1,19 +1,16 @@
 extends Node2D
-## Layered prototype: generated body, responsive cape and independently aimed weapon.
+## Native-grid Exile sprites, pixel cape and independently aimed ember blade.
 signal defeat_finished
-const DEFEAT = preload("res://assets/art/player/exile-defeat-01-frames.tres")
+const NATIVE = preload("res://assets/art/player/exile-native.svg")
+const WALK = preload("res://assets/art/player/exile-native-walk.tres")
 const DEFEAT_DURATION: float = 0.64
-const DEFEAT_Y_OFFSETS = [0.0, 0.26, 4.59, 5.87]
 var defeated: bool = false
 var defeat_done: bool = false
 var defeat_time: float = 0.0
-
 const PlayerState = preload("res://scripts/player/player_state.gd")
 var melee_time: float = 0.0
-const BODY = preload("res://assets/art/player/exile-body-01.png")
-const WALK = preload("res://assets/art/player/exile-walk-01-frames.tres")
-const WALK_FRONT = preload("res://assets/art/player/exile-front-walk-01-frames.tres")
-const WALK_BACK = preload("res://assets/art/player/exile-back-walk-01-frames.tres")
+var dash_clock: float = 0.0
+var hurt_clock: float = 0.0
 var body_direction: StringName = &"side"
 var walk_clock: float = 0.0
 var walk_frame: int = 0
@@ -65,6 +62,8 @@ func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash
 	elif absf(aim.x) > absf(aim.y) * 1.05:
 		body_direction = &"side"
 	travel = movement
+	dash_clock = dash_clock + delta if dash and dashing else 0.0
+	hurt_clock = hurt_clock + delta if damaged and hurt else 0.0
 	dashing = dash
 	hurt = damaged
 	firing = shot
@@ -85,6 +84,11 @@ func present(point: Vector2, aim: Vector2, movement: Vector2, delta: float, dash
 
 func reset_pose() -> void:
 	melee_time = 0.0
+	dash_clock = 0.0
+	hurt_clock = 0.0
+	dashing = false
+	hurt = false
+	firing = false
 	defeated = false
 	defeat_done = false
 	defeat_time = 0.0
@@ -102,27 +106,42 @@ func _draw() -> void:
 		_draw_defeat()
 		return
 	draw_ellipse_shadow()
-	var bob := roundf(sin(clock * 16.0)) if travel.length_squared() > 0.01 and not reduced_motion else 0.0
+	var bob := -1.0 if travel.length_squared() > 0.01 and walk_frame in [1, 3] and not reduced_motion else 0.0
 	var neck := Vector2(0, -9 + bob)
-	var tip := cape_tip.round()
-	draw_colored_polygon(cape_polygon(neck, tip), Color("176578"))
-	draw_line(neck, tip + Vector2(0, 2), Color("2ca6ad"), 3.0)
-	var tint := Color("fff0b0") if (hurt or dashing) and not reduced_flashes else Color.WHITE
-	var body_rect := Rect2(Vector2(-18, -23 + bob), Vector2(36, 36))
+	_draw_pixel_cape(neck, cape_tip.round())
 	if facing.y < -0.6:
 		_draw_weapon(bob)
-	# Mirror around the shared origin; negative Rect2 sizes shift the image.
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if body_direction == &"side" and facing.x < 0.0 else 1.0, 1.0))
-	var frames = WALK_FRONT if body_direction == &"front" else WALK_BACK if body_direction == &"back" else WALK
-	if travel.length_squared() > 0.01 and not dashing:
-		draw_texture_rect(frames.get_frame_texture(&"walk", walk_frame), Rect2(-12, -24 + bob, 24, 35), false, tint)
-	elif body_direction != &"side":
-		draw_texture_rect(frames.get_frame_texture(&"walk", 0), Rect2(-12, -24 + bob, 24, 35), false, tint)
-	else:
-		draw_texture_rect(BODY, body_rect, false, tint)
+	var row := 0 if body_direction == &"front" else 1 if body_direction == &"back" else 2
+	draw_texture_rect_region(NATIVE, Rect2(-12, -20, 24, 32), Rect2(sprite_frame() * 24, row * 32, 24, 32))
 	draw_set_transform(Vector2.ZERO)
 	if facing.y >= -0.6:
 		_draw_weapon(bob)
+
+
+func sprite_frame() -> int:
+	if dashing:
+		return 5 + mini(1, int(dash_clock / 0.07))
+	if hurt and hurt_clock < 0.18:
+		return 7 + mini(1, int(hurt_clock / 0.09))
+	return 1 + walk_frame if travel.length_squared() > 0.01 else 0
+
+
+func _draw_pixel_cape(neck: Vector2, tip: Vector2) -> void:
+	var polygon := cape_polygon(neck, tip)
+	var bounds := Rect2(polygon[0], Vector2.ZERO)
+	for point in polygon:
+		bounds = bounds.expand(point)
+	for y in range(int(floor(bounds.position.y)), int(ceil(bounds.end.y)) + 1):
+		var start := 100
+		var end := -100
+		for x in range(int(floor(bounds.position.x)), int(ceil(bounds.end.x)) + 1):
+			if Geometry2D.is_point_in_polygon(Vector2(x + 0.5, y + 0.5), polygon):
+				start = mini(start, x)
+				end = maxi(end, x)
+		if end >= start:
+			draw_rect(Rect2(start, y, end - start + 1, 1), Color("176578"))
+			draw_rect(Rect2(start, y, mini(2, end - start + 1), 1), Color("23858d"))
 
 
 func _draw_weapon(bob: float) -> void:
@@ -132,32 +151,32 @@ func _draw_weapon(bob: float) -> void:
 	var angle := facing.angle()
 	if melee_time > 0.0 and not reduced_motion:
 		angle += lerpf(-0.65, 0.65, 1.0 - melee_time / 0.16)
-	var mount := grip + facing * recoil
+	var mount := (grip + facing * recoil).round()
 	var side := -1.0 if facing.x < 0.0 else 1.0
-	var trigger_hand := mount + Vector2(5, 2).rotated(angle)
-	var support_hand := mount + Vector2(10, 1).rotated(angle)
+	var trigger_hand := (mount + Vector2(5, 2).rotated(angle)).round()
+	var support_hand := (mount + Vector2(10, 1).rotated(angle)).round()
 	draw_line(Vector2(side * 5, -8 + bob), trigger_hand, Color("176578"), 3)
 	draw_line(Vector2(-side * 4, -7 + bob), support_hand, Color("23858d"), 2)
 	draw_set_transform(mount, angle)
-	draw_rect(Rect2(3, -2, 12, 4), Color("28313b"))
+	draw_rect(Rect2(3, -2, 12, 4), Color("263747"))
 	draw_rect(Rect2(5, -2, 7, 1), Color("b88d4d"))
-	draw_line(Vector2(13, 1), Vector2(21, 1), Color("ffe3a3"), 2.0)
-	draw_line(Vector2(15, 2), Vector2(21, 1), Color("ff7b38"), 1.0)
-	draw_rect(Rect2(4, 1, 2, 2), Color("ede3c9"))
-	draw_rect(Rect2(9, 0, 2, 2), Color("ede3c9"))
+	draw_line(Vector2(13, 1), Vector2(21, 1), Color("fff3da"), 2.0)
+	draw_line(Vector2(15, 2), Vector2(21, 1), Color("ed874b"), 1.0)
+	draw_rect(Rect2(4, 1, 2, 2), Color("eee5cb"))
+	draw_rect(Rect2(9, 0, 2, 2), Color("eee5cb"))
 	draw_set_transform(Vector2.ZERO)
 
 func draw_ellipse_shadow() -> void:
-	draw_set_transform(Vector2(0, 8), 0.0, Vector2(1.0, 0.35))
-	draw_circle(Vector2.ZERO, 10.0, Color(0.02, 0.03, 0.06, 0.45))
-	draw_set_transform(Vector2.ZERO)
+	# Stepped silhouette stays on the same one-logical-pixel grid as the boots.
+	draw_rect(Rect2(-7, 6, 14, 3), Color(0.06, 0.11, 0.16, 0.5))
+	draw_rect(Rect2(-10, 7, 20, 1), Color(0.06, 0.11, 0.16, 0.5))
 
 
 func _draw_defeat() -> void:
 	draw_ellipse_shadow()
 	var frame := mini(3, int(defeat_time * 8.0))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < 0.0 else 1.0, 1.0))
-	draw_texture_rect(DEFEAT.get_frame_texture(&"defeat", frame), Rect2(-20, -26 + DEFEAT_Y_OFFSETS[frame], 40, 40), false)
+	draw_texture_rect_region(NATIVE, Rect2(-12, -20, 24, 32), Rect2(frame * 24, 96, 24, 32))
 	draw_set_transform(Vector2.ZERO)
 
 
