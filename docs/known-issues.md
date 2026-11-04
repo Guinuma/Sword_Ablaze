@@ -18,11 +18,11 @@ Reviewed 2026-11-03 against the automated suite and graphical capture tools. Thi
 
 | Area | Remaining work | Evidence or reproduction |
 | --- | --- | --- |
-| Difficulty | Human playtesting of opening, middle and late waves; tune mixes and upgrades | Deterministic soak clears enemies automatically and does not measure difficulty. |
+| Difficulty | Follow-up review of Warden reinforcements and measured run duration | User confirmed full runs with both weapons on 2026-11-04; requested Warden reinforcements are implemented. Automated clearing does not establish balance. |
 | Audio | Listen on real speakers/headphones; refine synthesized effects; compose music and transitions | Current effects are original synthesized prototype tones; no music is included. |
 | Art | Final native-resolution sprites, hands/weapon/cape alignment, dedicated ram/guardian art | Ram and guardian are geometric placeholders; integrated character art still needs pixel cleanup. |
 | Accessibility | UI scale/fullscreen/aspect-ratio checks, controller decision, full localization plan | Current visual reviews focus on the 640 × 360 layout at 1280 × 720. Very long custom key names can crowd compact HUD labels. |
-| Game loop | Implement hub and skill purchases; playtest finite run/boss and global reward pacing | Endless Arena repeats encounters; Courtyard Run now has a boss and local victories, global XP is now saved on results, while the hub remains pending. |
+| Game loop | Implement skill purchases; playtest reinforced boss and global reward pacing | Endless Arena repeats encounters; Courtyard Run now has a boss and local victories, global XP is now saved on results, and Sanctuary supports entry, retry and return. |
 | Persistence | Migrations, skill purchases and interrupted-write recovery testing | Profile tests now cover safe writes, corruption, reward identity and failed-save retries; migration/purchase and power-loss coverage remain pending. |
 | Performance | More hardware and real-session measurements | The rendered benchmark is one Windows integrated-GPU machine under seeded load. |
 | Distribution | Platform/channel decisions, export presets, clean-machine validation and consolidated credits | No demo release is authorized or implied by a passing prototype suite. |

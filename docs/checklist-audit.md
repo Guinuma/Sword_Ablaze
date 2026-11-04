@@ -36,7 +36,7 @@ The existing uncommitted project.godot changes expand InputEvent serialization w
 
 ## Section 2 — Player and base combat
 
-Section 2 is the last authorized section in this continuation. Do not begin Section 3 after closing it. All 17 items are implemented or explicitly decided for prototype scope. Current movement/fire/dash timings were retained after the user's playtest response: “Current speed and timing feel good.” This does not claim final release balance or external playtesting.
+Section 2 was completed previously; sections 3 and 4 were authorized on 2026-11-04. All 17 items are implemented or explicitly decided for prototype scope. Current movement/fire/dash timings were retained after the user's playtest response: “Current speed and timing feel good.” This does not claim final release balance or external playtesting.
 
 | Checklist item | Evidence |
 | --- | --- |
@@ -63,3 +63,23 @@ Melee and projectiles share damage/armor ordering and impact/defeat events, so c
 The live graphical session exposed a self-intersecting cape polygon during direction changes. It was replaced with a convex strip that stays drawable even at a collapsed tip. Geometry checks cover 360 directions and five tip distances; `tools/validate_player_visual.gd` rendered 1,024 facing/travel/state combinations without errors. Final pixel cleanup, directional sprite replacement and broader difficulty testing remain in later sections and were not undertaken here.
 
 Only the new melee input action is staged from project.godot. The user's pre-existing editor serialization changes, .vscode settings and unrelated image import files remain uncommitted.
+
+
+## Sections 3 and 4 — Enemies, encounters and Arena
+
+Reviewed 2026-11-04 at prototype scope. The user confirmed complete runs with both weapons and requested Warden reinforcement pressure with about ten enemies at once. Applied as ten total including the boss and pending warnings, with a 2.5-second mixed escort cadence. Follow-up review of the changed boss and measured run duration remain pending; these checkmarks do not claim final balance.
+
+| Scope | Evidence |
+| --- | --- |
+| Pursuit, wall separation, knockback, safe spawns and caps | combat_smoke and run_soak; enemy_system.gd |
+| Ranged, charge, guardian and elite behavior | combat/charger/guardian/elite smoke checks; docs/enemies.md |
+| Encounter introductions, compositions and repetition | encounter_smoke; nine Resource recipes; user full-run feedback |
+| Two-phase Warden, reinforcements and rewards | finite_run_smoke, boss_reinforcement_smoke, profile/reward checks |
+| Navigation | Explicitly deferred until section 6 adds interior collision obstacles; the current open arena uses direct movement |
+| Simultaneous damage, chain kills, terminal freeze and reset | combat_smoke, finite_run_smoke and reinforcement checks |
+| Wave growth, cadence, healing, intervals and HUD | combat_smoke, encounter_smoke and finite_run_smoke |
+| Finite/Endless entry, records and saved XP/level | menu_smoke, hub_smoke, reward_flow_smoke and profile_smoke |
+| Victory/defeat, retry and Sanctuary return | hub_smoke uses result buttons for victory return and both-mode defeat retry/return; reinforcement check covers victory retry |
+| Opening, middle and advanced playtesting | User reported full runs with both weapons; Warden feedback implemented; exact timing not supplied |
+
+No later-section art or interior obstacles were introduced. Existing project.godot serialization, .vscode and unrelated image imports stay outside this commit.

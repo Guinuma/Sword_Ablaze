@@ -22,6 +22,11 @@ func _capture() -> void:
 	boss.shot_direction = Vector2.RIGHT
 	boss.boss_attack = "ring"
 	boss.windup = 0.8
+	for index in range(9):
+		arena._update_waves(arena.waves.settings.boss_reinforcement_interval)
+	for index in range(1, arena.enemies.items.size()):
+		arena.enemies.items[index].position = Vector2(100 + (index % 5) * 95, 110 + (index / 5) * 165)
+		arena.enemies.items[index].spawn_time = 0.0
 	var args := OS.get_cmdline_user_args()
 	var folder: String = args[0] if not args.is_empty() else "user://finite-review"
 	DirAccess.make_dir_recursive_absolute(folder)

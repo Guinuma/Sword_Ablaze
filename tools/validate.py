@@ -26,6 +26,7 @@ def main():
         ("Elite", ["--script", "tests/elite_smoke.gd"], "Elite checks complete: 0 failures"),
         ("Weapons", ["--script", "tests/weapon_smoke.gd"], "Weapon checks complete: 0 failures"),
         ("Finite run", ["--script", "tests/finite_run_smoke.gd"], "Finite run checks complete: 0 failures"),
+        ("Boss reinforcements", ["--script", "tests/boss_reinforcement_smoke.gd"], "Boss reinforcement checks complete: 0 failures"),
         ("Global profile", ["--script", "tests/profile_smoke.gd"], "Profile checks complete: 0 failures"),
         ("Reward flow", ["--script", "tests/reward_flow_smoke.gd"], "Reward flow checks complete: 0 failures"),
         ("Hub flow", ["--script", "tests/hub_smoke.gd"], "Hub checks complete: 0 failures"),

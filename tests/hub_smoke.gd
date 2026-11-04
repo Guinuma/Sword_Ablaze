@@ -38,7 +38,7 @@ func _run() -> void:
 		if arena.run.phase == arena.RunState.Phase.WON:
 			break
 	check(arena.run.phase == arena.RunState.Phase.WON and arena.reward_awarded == 300, "Hub-launched run must deliver one finite victory reward")
-	arena._return_to_menu()
+	arena.hud_view.quit_button.pressed.emit()
 	await scene_changed
 	check(current_scene.is_hub, "Victory return must reach sanctuary")
 	var profile = current_scene.GlobalProfile.for_tree(self)
@@ -62,6 +62,29 @@ func _run() -> void:
 	check(current_scene.is_hub, "Paused run must return to hub")
 	profile.load_profile()
 	check(profile.data.xp == 300, "Abandoning a live run must not grant XP")
+	for finite in [true, false]:
+		current_scene._start_game(finite)
+		await scene_changed
+		arena = current_scene
+		arena.set_physics_process(false)
+		arena.records = arena.ArenaRecords.new("user://hub_smoke_records.json")
+		arena.run.health = 1
+		arena.player.hurt_cooldown = 0.0
+		arena._take_player_damage(100)
+		arena.player_visual.advance_defeat(1.0)
+		arena._update_hud()
+		check(arena.hud_view.menu.visible, "Defeat must expose result actions in both modes")
+		arena.hud_view.restart_button.pressed.emit()
+		check(arena.run.health == 100 and arena.waves.number == 1 and arena.enemies.items.is_empty(), "Defeat retry button must start a clean run")
+		arena.run.health = 1
+		arena.player.hurt_cooldown = 0.0
+		arena._take_player_damage(100)
+		var saved_xp: int = arena.profile.data.xp
+		arena.hud_view.quit_button.pressed.emit()
+		await scene_changed
+		check(current_scene.is_hub, "Defeat return button must reach Sanctuary in both modes")
+		profile.load_profile()
+		check(profile.data.xp == saved_xp, "Returning after defeat must not duplicate XP")
 	current_scene.free()
 	await create_timer(0.35).timeout
 	for path in [String(get_meta("profile_path")), "user://hub_smoke_records.json"]:

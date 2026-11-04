@@ -23,3 +23,8 @@ extends Resource
 
 @export var encounters: Array[Resource] = []
 @export_range(1, 1000) var repeat_from_wave: int = 7
+
+# Finale pressure includes the Warden and pending spawn warnings.
+@export_range(1, 18) var boss_max_enemies: int = 10
+@export_range(0.1, 30.0) var boss_reinforcement_interval: float = 2.5
+@export var boss_reinforcements: Array[StringName] = [&"chaser", &"chaser", &"ranged", &"charger"]

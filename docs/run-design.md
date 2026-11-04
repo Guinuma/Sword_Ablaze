@@ -1,10 +1,10 @@
 # First finite run: prototype decisions
 
-Decision date: 2026-11-03. This defines the implementation target for the first complete run. Finite Courtyard Run, the Warden boss, terminal victory, separate local win records and mode selection are now implemented. Global XP is now awarded through the shared profile contract; the hub and skill purchases remain pending. Human run duration/difficulty testing is still required.
+Decision date: 2026-11-03. This defines the implementation target for the first complete run. Finite Courtyard Run, the Warden boss, terminal victory, separate local win records and mode selection are now implemented. Global XP is now awarded through the shared profile contract; the Sanctuary hub is implemented and skill purchases remain pending. User full-run feedback was received on 2026-11-04; exact run duration remains unmeasured.
 
 ## Structure and duration
 
-The finite run uses the existing nine encounter recipes in order, followed by a single boss encounter on wave ten. Wave ten has one boss, no ordinary enemy budget and no extra spawns after the boss dies. The existing elite opens wave nine. This reuses the validated introductions and gives the boss a clear final encounter instead of adding an arbitrary timer ending.
+The finite run uses the existing nine encounter recipes in order, followed by a single boss encounter on wave ten. Wave ten has one boss with recurring escorts while it is alive, no ordinary enemy budget and no extra spawns after the boss dies. The existing elite opens wave nine. This reuses the validated introductions and gives the boss a clear final encounter instead of adding an arbitrary timer ending.
 
 Target duration is 10–15 minutes for a successful early playtest, including upgrade selection and the boss. This is a tuning target, not a timeout, minimum duration or measured result. Faster wins are valid. A run never ends merely because time passes. Current automated timings and spawn budgets do not prove this duration; tune it through human runs after the complete flow exists.
 
@@ -14,7 +14,7 @@ Ordinary waves retain the existing three-second intermission and up-to-20-HP rec
 
 ## Terminal outcomes
 
-Victory requires the final boss to be defeated while the player is alive and the run is in active combat. All enemies and pending spawns for that encounter must be resolved, and no hostile projectile may remain able to damage the player after victory. Victory is a dedicated terminal state: stop simulation, clear combat projectiles, show a clear result heading and summary, and allow Retry or Return. It must not reuse the defeat animation or record a victory as a death.
+Victory requires the final boss to be defeated while the player is alive and the run is in active combat. Remaining escorts and pending warnings are dismissed when the Warden dies, and no hostile projectile may remain able to damage the player after victory. Victory is a dedicated terminal state: stop simulation, clear combat projectiles, show a clear result heading and summary, and allow Retry or Return. It must not reuse the defeat animation or record a victory as a death.
 
 Defeat occurs at zero HP, including the boss encounter. Keep the existing fall animation and defeat summary. Contact and projectile damage share the existing gate. If player death has already transitioned the run to defeat, a later same-step boss-death callback must not overwrite it with victory. A terminal outcome may be recorded or rewarded only once.
 
@@ -47,3 +47,10 @@ The Warden has 120 HP, a 22 px projectile hit radius, a 25 px contact radius and
 The result includes the local victory count, “Crown broken” summary and saved global XP under [the shared progression contract](progression.md). Permanent combat upgrades still await skill-tree implementation. Finite outcomes save to `user://finite_records.json`, separately from endless records. Successful completion increments optional version-1 `wins`; defeats increment runs without wins. Old records without `wins` load with zero. The menu mode selector shows finite victories. The result is delivered once; no projectile or contact can damage a won run. Death already registered before the final-clear event takes precedence.
 
 Boss art is an original code-drawn armored crown/halo placeholder under the MIT license. Final boss art remains pending. `tests/finite_run_smoke.gd` checks both attack phases, matching telegraph/projectile directions, complete automated runs with both weapons, three blessing choices, pause, victory persistence/deduplication, retry and death precedence. Menu tests check finite entry and return. `tools/capture_finite.gd` captures both phases and victory. These tests do not measure the 10–15-minute target or establish fair difficulty.
+
+
+## Warden reinforcements (2026-11-04)
+
+The user confirmed full runs with both weapons and requested additional enemies during the boss, with about ten at once. The cap is ten total, including the Warden and pending warnings. One escort spawns every 2.5 seconds after boss activation, cycling chaser, chaser, ranged, charger. At capacity, the next spawn waits for a slot without banking a burst. Existing perimeter placement, warning and player-distance safety apply. Pause and terminal states freeze spawning; retry resets it. Both boss phases use the same cadence. Warden defeat dismisses escorts and clears hostile fire before victory, so no cleanup wave is required.
+
+WaveSettings exposes boss_max_enemies, boss_reinforcement_interval and boss_reinforcements. The reinforcement regression verifies delay, warnings, pause, mixed types, cap/refill, projectile boss defeat with surviving escorts, victory cleanup and retry. Follow-up human review of this new pacing is pending; the 10–15-minute target is still unmeasured.

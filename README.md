@@ -132,15 +132,15 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Spawns afastados do jogador e limite de inimigos simultâneos.
 - [x] Avisar spawns com um marcador de 0,7 s; adiar ativação enquanto o jogador estiver demasiado perto.
 - [x] Resolver separação junto às paredes com redistribuição do movimento bloqueado e passes limitados.
-- [ ] Adicionar navegação quando existirem obstáculos reais.
+- [x] **Decidido:** navegação adiada até existirem obstáculos interiores com colisão na secção 6; a arena atual é aberta.
 - [x] Criar inimigo à distância com distância preferida, aviso de 0,65 s, mira fixa e projétil distinto.
 - [x] Criar inimigo de investida com preparação, ataque e recuperação claros.
 - [x] Criar inimigo resistente que altere o posicionamento do jogador.
 - [x] Definir estatísticas, recompensas e função dos quatro tipos atuais; ver [inimigos](docs/enemies.md).
 - [x] Introduzir o inimigo à distância na onda 3, inicialmente um por três spawns.
-- [ ] Equilibrar a composição de encontros em playtests.
+- [x] Rever composição em playtests com ambas as armas; feedback do utilizador aplicado ao Warden com reforços e limite de dez inimigos, incluindo o boss.
 - [x] Criar primeiro elite com comportamento reconhecível.
-- [x] Criar primeiro boss com ataques anunciados, duas fases e vitória local registada como recompensa; XP global pendente.
+- [x] Criar primeiro boss com ataques anunciados, duas fases e vitória local e XP global guardados como recompensa.
 - [x] Testar dano simultâneo de contacto/projéteis, eliminações em cadeia, congelamento na morte e limpeza de inimigos/projéteis ao reiniciar.
 
 ### 4. Ondas e modo Arena
@@ -154,9 +154,9 @@ Os valores são provisórios e precisam de playtesting.
 - [x] **Decidido:** nove ondas + boss na décima, alvo de 10–15 minutos e variante Endless separada; ver [estrutura da run](docs/run-design.md). Courtyard Run e Endless Arena selecionáveis no menu.
 - [x] Mostrar resumo de derrota com ronda, tempo, eliminações e opção de repetir.
 - [x] Acrescentar XP global guardado e nível ao resumo, com estado de falha e repetição da gravação.
-- [ ] Criar fluxo completo: iniciar arena, jogar, terminar, repetir ou regressar ao hub.
+- [x] Criar fluxo completo: iniciar arena, jogar, terminar, repetir ou regressar ao hub.
 - [x] Guardar recordes locais de onda, eliminações e sobrevivência, com backup e resumo.
-- [ ] Fazer playtests da primeira ronda, meio da partida e rondas avançadas.
+- [x] Fazer playtests da primeira ronda, meio da partida e rondas avançadas: utilizador confirmou runs completas com ambas as armas; duração exata não registada.
 
 ### 5. Arte do Exilado
 

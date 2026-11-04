@@ -21,6 +21,8 @@ var reward_received: bool = false
 var reward_awarded: int = 0
 var finite_mode: bool = false
 var run_recorded: bool = false
+var boss_reinforcement_time: float = 2.5
+var boss_reinforcement_count: int = 0
 const UpgradeSystem = preload("res://scripts/run/upgrade_system.gd")
 var upgrades = UpgradeSystem.new()
 
@@ -193,6 +195,22 @@ func _try_dash(movement: Vector2) -> void:
 
 
 func _update_waves(delta: float) -> void:
+	if finite_mode and waves.number == waves.final_wave and waves.remaining == 0 and not waves.finished:
+		var boss: Dictionary = {}
+		for enemy in enemies.items:
+			if enemy.profile.kind == "boss":
+				boss = enemy
+				break
+		if boss.is_empty():
+			# The Warden is the objective; surviving escorts cannot delay victory.
+			enemies.clear()
+		elif boss.spawn_time <= 0.0:
+			boss_reinforcement_time = maxf(0.0, boss_reinforcement_time - delta)
+			var pattern = waves.settings.boss_reinforcements
+			if boss_reinforcement_time == 0.0 and enemies.items.size() < mini(waves.settings.max_enemies, waves.settings.boss_max_enemies) and not pattern.is_empty():
+				_spawn_enemy(pattern[boss_reinforcement_count % pattern.size()])
+				boss_reinforcement_count += 1
+				boss_reinforcement_time = waves.settings.boss_reinforcement_interval
 	waves.advance(delta, enemies.items.size())
 
 
@@ -213,6 +231,8 @@ func _on_wave_cleared() -> void:
 func _spawn_enemy(kind: StringName = &"chaser") -> void:
 	enemies.spawn(player.player_position, ARENA, random, kind)
 	if kind == &"boss":
+		boss_reinforcement_time = waves.settings.boss_reinforcement_interval
+		boss_reinforcement_count = 0
 		enemies.items.back()["position"] = ARENA.get_center() + Vector2(0, -85)
 
 
@@ -335,6 +355,8 @@ func _reset_run() -> void:
 	particles.clear()
 	feedback.clear()
 	waves.reset()
+	boss_reinforcement_time = waves.settings.boss_reinforcement_interval
+	boss_reinforcement_count = 0
 	player_visual.reset_pose()
 	player.fire_requires_release = true
 	player.melee_requires_release = true
@@ -371,7 +393,7 @@ func _update_hud() -> void:
 	if finite_mode:
 		for enemy in enemies.items:
 			if enemy.get("profile") != null and enemy.profile.kind == "boss" and run.is_active():
-				hud_view.wave_status.text = "WARDEN %d / %d  PHASE %d" % [enemy.health, enemy.profile.health, enemy.get("boss_phase", 1)]
+				hud_view.wave_status.text = "WARDEN %d / %d  PHASE %d  /  ESCORTS %d" % [enemy.health, enemy.profile.health, enemy.get("boss_phase", 1), enemies.items.size() - 1]
 		hud_view.wave_heading.text = "BOSS" if waves.number == 10 else "WAVE %02d / 09" % waves.number
 		hud_view.record_label.text = "FINITE RUNS: %d  /  WINS: %d" % [records.data["runs"], records.data["wins"]]
 		hud_view.record_label.text += "\nCould not save records" if records.last_error != OK else ""
