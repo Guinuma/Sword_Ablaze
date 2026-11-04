@@ -8,7 +8,7 @@ Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate 
 
 Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. XP global é atribuído uma vez por vitória/derrota, com nível e resumo guardados; o Sanctuary liga modos, progressão, loadout e configurações.
 
-- Exilado com sprites nativos de 24 × 32 pixels, caminhada de quatro frames, vistas de frente/costas/lateral, dash, dano e arma com mira independente.
+- Exilado com capuz e máscara refinados, caminhada de quatro frames, vistas de frente/costas/lateral, dash, dano e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
 - Ondas crescentes, avisos de spawn, recuperação de vida entre rondas, dash, ataque corpo a corpo e sete melhorias temporárias.
 - HUD com barra de vida e valor numérico, ronda, inimigos restantes, relógio, eliminações e barra de recarga do dash.
@@ -16,7 +16,7 @@ Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um e
 - Preferências de redução de flashes/movimento e recordes locais com validação e backup.
 - Importação, regressões de combate, arranque e simulação prolongada automatizados no GitHub Actions.
 
-O Exilado usa agora sprites originais de 24 × 32 pixels, paleta fixa, vistas direcionais e poses dedicadas de dash, dano e derrota; capa e arma partilham o estilo pixel. A arena e os inimigos mantêm arte gerada de protótipo, com refinamento pendente nas secções seguintes.
+O Exilado usa sprites refinados com 32 pixels de altura lógica, capuz de tecido, máscara em sombra, vistas direcionais e poses dedicadas de dash, dano e derrota; capa e arma partilham o estilo pixel. A arena combina o pátio ilustrado com tiles modulares e ruínas sólidas; ram, guardian, elite e Warden têm agora sprites próprios. Especificação e créditos em [secção 6](docs/art/section6-spec.md) e [CREDITS.md](CREDITS.md).
 
 ![Arena e HUD no motor](docs/art/celestial-courtyard-gameplay-01.png)
 
@@ -49,8 +49,8 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 
 - Jogador: 100 PV iniciais; contacto causa 15 PV de dano, com 0,85 s de proteção entre impactos.
 - Inimigo à distância: introduzido na onda 3, com composição definida por encontro; mantém cerca de 150 px, avisa durante 0,65 s e dispara na direção fixada. Projéteis dos snipers causam 50 PV de dano e respeitam dash/proteção de contacto.
-- Inimigo de investida: 4 HP; introduzido na onda 5, com composição definida por encontro. Fixa a direção durante 0,85 s, investe a 300 px/s até 0,45 s e recupera imóvel durante 0,8 s. Visual geométrico provisório; contacto usa segmento para evitar atravessar o jogador entre frames.
-- Guardião: 8 HP; introduzido na onda 7, com composição definida por encontro. Escudo frontal de 120°, rotação limitada a 1,1 rad/s e apenas 20% do recuo normal. Tiros frontais causam metade do dano, arredondado para cima (mínimo 1); flancos/costas recebem dano duplo. Visual geométrico provisório.
+- Inimigo de investida: 4 HP; introduzido na onda 5, com composição definida por encontro. Fixa a direção durante 0,85 s, investe a 300 px/s até 0,45 s e recupera imóvel durante 0,8 s. Sprite Ruin Ram com poses de preparação, investida e recuperação; contacto usa segmento para evitar atravessar o jogador entre frames.
+- Guardião: 8 HP; introduzido na onda 7, com composição definida por encontro. Escudo frontal de 120°, rotação limitada a 1,1 rad/s e apenas 20% do recuo normal. Tiros frontais causam metade do dano, arredondado para cima (mínimo 1); flancos/costas recebem dano duplo. Sprites direcionais Bastion Guardian e indicador do escudo.
 - Elite coroado: 10 HP; abre o encontro Siege na onda 9 e nas repetições. Avisa oito direções fixas durante 1,05 s e dispara uma salva radial a 110 px/s, com 20 PV de dano por projétil e 3 s entre ataques.
 - Inimigo básico: 2 HP; persegue o jogador e sofre recuo ao receber tiros.
 - Ondas: nove encontros configuráveis, com variação de composição, orçamento e ritmo; depois repetem os três últimos. Orçamento base de 5 + 2 por ronda, ajustado pelo encontro e limitado a 40; máximo de 18 em simultâneo.
@@ -132,7 +132,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Spawns afastados do jogador e limite de inimigos simultâneos.
 - [x] Avisar spawns com um marcador de 0,7 s; adiar ativação enquanto o jogador estiver demasiado perto.
 - [x] Resolver separação junto às paredes com redistribuição do movimento bloqueado e passes limitados.
-- [x] **Decidido:** navegação adiada até existirem obstáculos interiores com colisão na secção 6; a arena atual é aberta.
+- [x] Navegação por grafo de visibilidade e colisão contínua com os pilares/ruínas interiores da secção 6.
 - [x] Criar inimigo à distância com distância preferida, aviso de 0,65 s, mira fixa e projétil distinto.
 - [x] Criar inimigo de investida com preparação, ataque e recuperação claros.
 - [x] Criar inimigo resistente que altere o posicionamento do jogador.
@@ -181,23 +181,23 @@ Os valores são provisórios e precisam de playtesting.
 ### 6. Arena, inimigos e linguagem visual
 
 - [x] Criar primeira prancha com mármore partido, ouro antigo e corrupção vermelha/violeta.
-- [ ] Definir especificação visual: tamanho dos tiles, perspetiva, luz e orçamento de cores.
-- [ ] Criar tiles de chão com variação moderada e boa leitura dos projéteis.
-- [ ] Criar paredes, limites do abismo, cantos e transições sem falhas de encaixe.
-- [ ] Criar pilares e ruínas com colisões alinhadas à arte.
-- [x] Integrar uma primeira arena ilustrada com mármore partido, ouro antigo e abismo, mantendo o interior aberto.
+- [x] Definir especificação visual: tamanho dos tiles, perspetiva, luz e orçamento de cores.
+- [x] Criar tiles de chão com variação moderada e boa leitura dos projéteis.
+- [x] Criar paredes, limites do abismo, cantos e transições sem falhas de encaixe.
+- [x] Criar pilares e ruínas com colisões alinhadas à arte.
+- [x] Integrar uma primeira arena ilustrada com mármore partido, ouro antigo e abismo, com interior inicialmente aberto; pilares e ruínas sólidos acrescentados nesta secção.
 - [x] Substituir formas geométricas por sprites do wisp corrompido e sentinela fraturado.
 - [x] Animar passos com quatro frames de pernas no Exilado e sentinela; wisp com flutuação.
 - [x] Integrar vistas de caminhada de frente/costas e selecionar vistas pela mira, com histerese nas diagonais.
 - [x] Integrar visuais do wisp corrompido e sentinela fraturado.
-- [ ] Desenvolver o conceito da aberração.
-- [ ] Criar arte de elites e boss após validar os respetivos comportamentos.
+- [x] Desenvolver o conceito da aberração.
+- [x] Criar arte de elites e boss após validar os respetivos comportamentos.
 - [x] Distinguir projéteis do jogador (quadrados dourados) e inimigos (losangos magenta).
 - [x] Criar seis ícones de melhorias no HUD, com rank e descrição do efeito acumulado.
-- [ ] Criar os restantes ícones de armas, recursos e habilidades.
-- [ ] Rever escala e contraste de todos os assets no jogo, não apenas nas pranchas.
+- [x] Criar os restantes ícones de armas, recursos e habilidades.
+- [x] Rever escala e contraste de todos os assets no jogo, não apenas nas pranchas.
 - [x] Registar origem, ferramenta, prompts e hashes da arte integrada; incluir licença da fonte.
-- [ ] Consolidar créditos e condições de distribuição de toda a arte antes de publicar.
+- [x] Consolidar créditos e condições de distribuição de toda a arte antes de publicar.
 
 ### 7. Feedback e áudio
 

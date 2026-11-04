@@ -99,6 +99,18 @@ Keen Edge is a temporary blessing with three ranks, each adding ten percentage p
 Hand and sleeve primitives connect shoulders to both weapon grips, with the same smoothed base pivot used by the physical muzzle. Upward weapon occlusion remains behind the body. Recoil/bob/melee rotation affect presentation only. `tools/capture_aim.gd` renders eight directions at enlarged engine scale; unit checks sample grip continuity over 360 angles. Dedicated final pixel-art poses remain Section 5 work.
 
 
-## Native Exile presentation (section 5)
+## Native Exile presentation (section 5, historical)
 
-The active SVG atlas is imported at scale 1 and sampled nearest. Each 24 × 32 cell draws at (-12, -20) without scaling. Front/back/right rows share the ground baseline; left mirrors the right row about the same origin. ExileVisual.sprite_frame selects idle, four walk poses, two dash poses or two hurt poses; the fourth row supplies defeat. Cape spans, shadow and grip endpoints round to logical pixels. Weapon aim remains continuous, with presentation-only recoil/bob/melee offsets; simulation muzzle placement still uses PlayerState.weapon_grip. See docs/art/README.md for palette, layout and original-art licensing.
+The former SVG atlas was imported at scale 1 and sampled nearest. Each 24 × 32 cell draws at (-12, -20) without scaling. Front/back/right rows share the ground baseline; left mirrors the right row about the same origin. ExileVisual.sprite_frame selects idle, four walk poses, two dash poses or two hurt poses; the fourth row supplies defeat. Cape spans, shadow and grip endpoints round to logical pixels. Weapon aim remains continuous, with presentation-only recoil/bob/melee offsets; simulation muzzle placement still uses PlayerState.weapon_grip. See docs/art/README.md for palette, layout and original-art licensing.
+
+
+## Section 6: shared mathematical world geometry
+
+ArenaGeometry now owns four authored solid footprints. PlayerState, EnemySystem, ProjectileSystem, HostileProjectiles, MeleeSystem and HealingDrops receive the same instance in main._ready. Actor movement sweeps against radius-expanded rectangles and slides along faces; separation also resolves against the solids. Visibility-graph corner routes are cached by actor radius for the fixed authored layout. Ranged actors seek clear lines of sight; charges only begin on clear lanes. World intersections compete with enemy/player segment hits by nearest fraction, and main checks the player-to-muzzle segment before spawning a shot. Melee and pickups require unobstructed segments. The existing physics-layer table remains a reservation; no duplicate physics-body collision system is active.
+
+ArenaEnvironment draws low-contrast floor repair tiles and boundary trim; RuinVisual instances share actor Y sorting. The collision base is independent of the upper sprite silhouette. Dedicated enemy sprite regions replace the earlier geometric ram/guardian/boss bodies; behavior warnings and armor arcs remain simulation-driven. See docs/art/section6-spec.md for coordinates, scale and pose mapping; earlier placeholder descriptions above are historical.
+
+
+### Refined Exile revision 3
+
+The current player uses generated front/back/side 3 × 3 pose atlases and a 2 × 2 defeat atlas, with alpha-measured regions. ExileVisual scales all poses against each sheet's standing-pose height to BODY_HEIGHT = 32 logical pixels, samples nearest, grounds feet at y=8 and mirrors side art at the same origin. sprite_frame still maps 0 idle, 1–4 walk, 5–6 dash and 7–8 hurt. This supersedes the historical 24 × 32 SVG cell format above; the native SVG remains an inactive reference. Pose progression and PlayerState.weapon_grip are unchanged.

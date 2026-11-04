@@ -3,6 +3,7 @@ signal impacted(point: Vector2)
 signal defeated(point: Vector2)
 signal critical_hit(point: Vector2)
 const HitRules = preload("res://scripts/combat/hit_rules.gd")
+var geometry: RefCounted
 var settings = load("res://resources/default_melee.tres")
 var weapon = load("res://resources/default_weapon.tres")
 var fallback_profile = load("res://resources/default_enemy.tres")
@@ -15,6 +16,8 @@ func swing(origin: Vector2, direction: Vector2, enemies: Array[Dictionary]) -> v
 		if enemy.get("spawn_time", 0.0) > 0.0:
 			continue
 		var profile = enemy.get("profile", fallback_profile)
+		if geometry != null and not is_inf(geometry.segment_hit(origin, enemy.position)):
+			continue
 		var offset: Vector2 = enemy.position - origin
 		if offset.length() > settings.reach + profile.hit_radius:
 			continue

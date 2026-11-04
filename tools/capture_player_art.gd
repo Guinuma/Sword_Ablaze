@@ -37,7 +37,7 @@ func _run() -> void:
 				visual.advance_defeat(col * 0.09)
 				visual.set_process(false)
 			label_at(board, rows[row], Vector2(2 + col * 80, 19 + row * 55))
-	label_at(board, "THE EXILE / NATIVE PIXEL REVIEW / 8 AIM DIRECTIONS", Vector2(8, 1))
+	label_at(board, "THE EXILE / REFINED ART REVIEW / 8 AIM DIRECTIONS", Vector2(8, 1))
 	await save_frame("res://docs/art/exile-native-review.png")
 	board.free()
 	var arena = load("res://scenes/main/main.tscn").instantiate()

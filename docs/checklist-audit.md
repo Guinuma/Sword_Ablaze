@@ -85,7 +85,7 @@ Reviewed 2026-11-04 at prototype scope. The user confirmed complete runs with bo
 No later-section art or interior obstacles were introduced. Existing project.godot serialization, .vscode and unrelated image imports stay outside this commit.
 
 
-## Section 5 — The Exile art
+## Section 5 — The Exile art (initial pass; player revision superseded in section 6)
 
 Completed 2026-11-04 at the native-grid prototype scope. All 17 checklist items are implemented or retained with updated native artwork. The active player no longer scales down generated body/walk/defeat sheets. Existing concept references and their provenance remain available.
 
@@ -101,3 +101,29 @@ Completed 2026-11-04 at the native-grid prototype scope. All 17 checklist items 
 | Aim, diagonal movement, dash and overlays | Eight-direction state board, 1,024-combination graphical sweep, crowded combat/pause capture and full regression suite |
 
 The previous generated player assets remain historical references. No section 6 enemy/environment art changes are included. This is a completed project art pass; external visual approval and broad hardware review are not implied. Existing unrelated local files remain outside the commit.
+
+
+## Section 6 — Arena, enemies and visual language
+
+Completed 2026-11-04, including the user-requested Exile hood correction. All 18 section-6 items have implementation/reference evidence. This is project prototype completion; it does not imply a published build or final difficulty approval.
+
+| Checklist scope | Evidence |
+| --- | --- |
+| Art direction, grid, camera, light and color budget | Existing boards retained; docs/art/section6-spec.md defines 32px masonry, 16px icons, grounded 3/4 art and material colors |
+| Floor tiles, walls, abyss/corners/transitions | Four low-contrast tile variants blend over courtyard repairs; repeating trim closes exact bounds; original illustrated abyss retained |
+| Collidable pillars and ruins | Four textured props, shared base rectangles, swept actor/world collision and visibility-graph navigation |
+| Integrated original arena, wisp and sentinel | Prior sprite/atlas implementations retained and reviewed beside new assets |
+| Player/sentinel walk and directional views | Existing animation retained; Exile rebuilt from its original hooded concept with 31 generated directional/state/fall poses; player regression and 1,024-combination sweep |
+| Aberration concept | Ruin Ram: low horned four-legged corrupted cathedral beast, four behavior poses, integrated as charger |
+| Dedicated guardian, elite and boss art | Guardian cardinal views; Crowned Sentinel idle/walk/cast; Warden phase-specific idle/cast and broken halo |
+| Player/hostile projectile distinction | Gold squares versus magenta diamonds retained, checked in dense gameplay |
+| Blessing and remaining icons | Existing ranked blessing badges retained; seven new native icons in HUD, loadout, progression and pickups |
+| In-game scale/contrast review | section6-arena.png, section6-warden-phase2.png, corrected player review, crowded gameplay and collision-overlay review |
+| Provenance and consolidated conditions | Every PNG/SVG under assets/art is covered by updated SHA-256 inventory; new prompts persisted; CREDITS.md distinguishes original MIT, generated art records and font OFL notices |
+
+Validation: full regression suite, new obstacle and asset-region checks, 512 enemy visual combinations, 1,024 player combinations and a fresh rendered dense benchmark. Interior obstacles also resolve section 3's previously conditional navigation item. Obstacles block player/hostile fire, muzzle paths, melee and pickup-through-wall interactions; ranged enemies route to line of sight rather than waiting behind cover. New arena props and images use the existing simulation coordinate system and preserve the Warden escort rules.
+
+Generated PNGs were created with the built-in image-generation tool, copied into the repository unmodified and selected with AtlasTexture regions. Native SVG icons/tile accents extend the code-authored assets. Existing editor serialization, .vscode and unrelated image import files remain outside the commit.
+
+
+Player-art correction after the section-6 review: the earlier block sprite was replaced by refined generated front/back/side nine-pose atlases and a four-pose defeat atlas, matching the original Exile concept and enemy material detail. Standing height is 32 logical pixels, nearest-sampled; animation timing and the shared weapon pivot are unchanged. The former native SVG and builder remain inactive history. Atlas alpha bounds are metadata only; source PNGs remain unmodified. Current art notes supersede the section-5 source-format and palette claims for the active player.

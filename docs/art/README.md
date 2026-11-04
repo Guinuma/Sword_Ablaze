@@ -1,23 +1,28 @@
 # Art direction — The Exile
 
-Selected protagonist: **The Exile** (concept C in art-direction-01.png).
+Selected protagonist: **The Exile**, a hooded masked wanderer in a ruined celestial world.
 
-## Current player art — section 5 (2026-11-04)
+## Current player — refined revision 3 (2026-11-04)
 
-The active player uses original, code-authored pixel artwork in `assets/art/player/exile-native.svg`, built reproducibly by `tools/build_exile_sprite.py`. This is an SVG of integer-aligned colored rectangles, imported at scale 1, not a resampled generated image. The earlier generated sheets remain concept/history references and are no longer loaded by ExileVisual. The new artwork and builder are covered by the repository MIT license; this does not change the rights status of older generated assets.
+User screenshots showed that the section-5 block sprite looked like an astronaut. It has been replaced by original project-generated cloth-hood artwork guided by the original Exile character board: pointed folded ivory cowl, deeply recessed face and small pale mask, turquoise shoulder mantle, slim dark clothes, asymmetric ivory tabard and restrained gold fittings. The earlier native SVG is retained as an inactive reference, not silently presented as the final active artwork.
 
-- Grid: 24 × 32 logical pixels per cell, drawn 1:1 with nearest filtering at the 640 × 360 viewport. Feet meet the shadow around local y = 6–8; all views share origin (12, 20) within the cell.
-- Atlas: 216 × 128; rows front, back, right side (mirrored for left), then defeat. First three rows use columns idle, four walking poses, two dash poses and two nonfatal hurt poses. The defeat row uses four nonlooping poses.
-- Palette: outline #101b29, dark #263747, steel #496072, ivory #eee5cb, hood shade #bcb99e, light #fff3da, teal #23858d, deep teal #176578, cyan #53b8b4, gold #b88d4d, ember #ed874b and eye #f4c875. Body, cape and weapon use this shared set; the ground shadow uses translucent dark ink.
-- Read: stepped ivory hood, pale mask, small warm eyes, dark fitted body, turquoise mantle and light ember blade. Front/back and side use the same head, shoulder and leg proportions. Cape is drawn as whole-pixel spans; shadow has stepped edges. Weapon and sleeve colors match the body; rounded mounts and grips preserve continuous aim.
-- Animation: walk remains four frames at eight frames/s with reverse playback for backpedaling and upgrade-adjusted rate. Dash selects launch then trail at 0.07 s; hurt selects recoil then recovery at 0.09 s, returning to locomotion after 0.18 s while damage protection continues. Defeat still takes 0.64 s before results. Reset clears pose clocks. Reduced effects preserve readable poses without full-body flashing.
-- Attachment: PlayerState.weapon_grip remains the common attachment used for projectile origin and muzzle flash. Animation bob, recoil and melee swing are presentation offsets; aiming and collision behavior retain their existing timing and geometry. The weapon draws behind the torso for upward aim.
+The active sheets are exile-front-03.png, exile-back-03.png and exile-side-03.png. Each is a transparent 3 × 3 atlas with nine poses: idle, four walk poses, two dash poses and two nonfatal hurt poses. Left mirrors the side sheet. exile-defeat-03.png supplies four grounded fall poses. These generated source bitmaps are not described as hand-authored native-resolution files: Godot selects alpha-measured AtlasTexture regions and samples them nearest at a 32-logical-pixel standing height. Each pose uses its sheet's standing scale, preserving the lower crouch/fall shape instead of stretching every pose upright.
 
-![Directional and state review](exile-native-review.png)
+Weapon, sleeves, hands, pixel cape and shadow remain independent presentation layers. PlayerState.weapon_grip continues to align shots and muzzle flash. Walk plays at eight frames/s with reverse backpedal and upgrade-adjusted rate; dash poses switch at 0.07 s, hurt at 0.09 s and return to locomotion after 0.18 s; defeat retains the 0.64 s result delay. Reduced effects keep the poses without full-body flashes. Combat values and invulnerability rules are unchanged.
 
-![Crowded combat review](exile-native-gameplay.png)
+![Directional and animation review](exile-native-review.png)
 
-`tools/capture_player_art.gd` renders eight aim directions over light/dark panels, diagonal travel, dash, hurt, melee and defeat, then crowded arena combat and a pause-overlay capture. `tools/validate_player_visual.gd` rendered 1,024 facing/travel/state combinations without errors. `tests/player_art_smoke.gd` covers native dimensions, cardinal views, pose progression, reduced effects, defeat timing and reset; existing combat checks preserve pause, pivots and shot origins. This completes the player-art prototype scope, not external art approval or later-section enemy/environment art.
+The review filenames retain their earlier names, but these are refreshed engine captures of the active revision-3 art. tools/capture_player_art.gd also captures dense combat and pause. tools/validate_player_visual.gd covers 1,024 facing/travel/state combinations. The atlas metadata can be reproduced with tools/build_sprite_regions.py without rewriting any generated PNG.
+
+## Section 6 — arena, enemies and visual language
+
+Ruin Ram charger, Bastion Guardian, Crowned Sentinel elite and Warden use dedicated transparent sprite atlases. The Warden has intact/broken-halo idle/cast poses. Matching ruined pillars/walls use shared solid base footprints, sweep collision and enemy navigation. Low-contrast 32px floor variations blend into the courtyard; modular trim closes all bounds/corners. Seven 16px icons cover weapons, XP, healing and abilities.
+
+[Full visual/collision specification](section6-spec.md), [consolidated credits and conditions](../../CREDITS.md), [prompts and asset hashes](asset-provenance-01.json).
+
+![Arena roster and masonry](section6-arena.png)
+
+![Warden second phase](section6-warden-phase2.png)
 
 ## Earlier reference and integration history
 

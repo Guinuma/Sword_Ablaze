@@ -34,6 +34,8 @@ def main():
         ("Melee/critical", ["--script", "tests/melee_critical_smoke.gd"], "Melee/critical checks complete: 0 failures"),
         ("Melee flow", ["--script", "tests/melee_flow_smoke.gd"], "Melee flow checks complete: 0 failures"),
         ("Player art", ["--script", "tests/player_art_smoke.gd"], "Player art checks complete: 0 failures"),
+        ("Obstacles", ["--script", "tests/obstacle_smoke.gd"], "Obstacle checks complete: 0 failures"),
+        ("Section 6 art", ["--script", "tests/section6_art_smoke.gd"], "Section 6 art checks complete: 0 failures"),
         ("Startup", ["--quit-after", "120"], None),
         ("Long session", ["--script", "tests/run_soak.gd"], "Run soak complete: 0 failures"),
     ]

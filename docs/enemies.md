@@ -18,7 +18,7 @@ These values define the current Arena prototype, not final balance. Source of tr
 - The guardian turns its shield at no more than 1.1 rad/s. Front means a 120-degree arc facing the incoming shot. Front damage is ceil(base damage / 2), minimum one; all other angles take double damage. It receives 20% of normal knockback. Other enemies receive full knockback.
 - Wisp, sentinel and ram use a 10 px shot-hit radius, 15 px contact radius, 18 px separation distance and 8 px wall margin. Guardian uses 13 / 18 / 28 / 14 px respectively. Presentation silhouettes do not define collision.
 
-The crowned sentinel uses the ranged spacing behavior, but announces eight radial directions for 1.05 s before firing eight 20-damage shots at 110 px/s. Its cooldown is 3 s and its knockback is 50% of normal. A crown and gold ground halo distinguish it from the regular sentinel; dedicated elite art is still pending. It shares the normal hit/contact radii and rewards.
+The crowned sentinel uses the ranged spacing behavior, but announces eight radial directions for 1.05 s before firing eight 20-damage shots at 110 px/s. Its cooldown is 3 s and its knockback is 50% of normal. A crown and gold ground halo distinguish it from the regular sentinel; dedicated idle/walk/cast art is integrated. It shares the normal hit/contact radii and rewards.
 
 ## Introduction and encounter budget
 
@@ -30,10 +30,12 @@ The first nine waves use authored [encounter recipes](encounters.md); the last t
 
 Every defeated enemy currently gives exactly one run kill and the same exclusive healing-drop roll: 1% wings (+100 HP), 15% feather (+10 HP), 84% no drop. Tougher types do not grant extra kills or increased drop chances. Drops are optional recovery, not guaranteed compensation for a dangerous enemy. The shared drop system caps the field at 64 items; items expire after 30 simulation seconds. Full health preserves a pickup until useful or expired.
 
-No enemy grants global XP, currency, permanent unlocks or skill points yet. These are deliberately absent from the implemented reward contract until the global profile and reward rules are defined. Temporary upgrades come from clearing each third wave, not individual enemy kills. Victory/boss rewards are still pending.
+Kills and cleared waves contribute to the saved end-of-run global XP reward under docs/progression.md; XP is not awarded separately per enemy. Temporary upgrades still come from clearing each third wave. Warden victory is recorded and settled once. There is no per-kill currency or permanent-item drop.
 
 ## Validation and art status
 
 Combat regressions cover shared damage/protection, spawn safety, separation, ranged attacks, kill/drop behavior and reset. Charger and guardian regressions cover their specialized behavior and introduction cadence. These are logic checks; they do not establish difficulty balance.
 
-Wisp and sentinel use the integrated sprite art. Ram and guardian use original code-drawn silhouettes under the repository MIT license, with dedicated sprite art still pending. Visual checks must include crowded combat, all directions and accessibility settings before finalizing the roster.
+Wisp and sentinel retain their integrated sprites. Ram, guardian, elite and Warden use dedicated transparent four-pose atlases; see docs/art/section6-spec.md for concepts, scale and state selection. Crowded scene captures and 512 facing/state/reduced-effects renders were reviewed. Pillars and ruins now block movement/shots; enemies use radius-aware visibility-graph waypoints, and ranged enemies seek unobstructed aim.
+
+The Warden has 120 HP and a 22px hit/25px contact radius; phase behavior and capped escorts are described in run-design.md.

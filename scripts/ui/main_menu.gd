@@ -1,4 +1,5 @@
 extends Control
+const GameIcons = preload("res://scripts/ui/game_icons.gd")
 ## Title and sanctuary presentation; combat is instantiated only after mode selection.
 @export var is_hub: bool = false
 const ControlNames = preload("res://scripts/ui/combat_tutorial.gd")
@@ -329,6 +330,8 @@ func _show_loadout() -> void:
 	for entry in [[&"blade", "BLADE RIFLE", "Precise single shots. Fast fire; reliable at range."], [&"scatter", "EMBER FAN", "Five-shot spread. Slow fire; strongest up close."]]:
 		var id: StringName = entry[0]
 		var button := _button(detail_body, ("SELECTED: " if preferences.selected_weapon == id else "EQUIP: ") + entry[1], _equip_weapon.bind(id))
+		button.icon = GameIcons.get_icon(id)
+		button.add_theme_constant_override("icon_max_width", 16)
 		button.custom_minimum_size = Vector2(392, 30)
 		_label(detail_body, entry[2], Vector2.ZERO, 12, MUTED, false)
 	_label(detail_body, "Choose before entering. Blessings reset each run.", Vector2.ZERO, 12, MUTED, false)
@@ -400,7 +403,13 @@ func _show_progression() -> void:
 	detail_body.add_theme_constant_override("separation", 9)
 	var profile = GlobalProfile.for_tree(get_tree())
 	profile.load_profile()
-	_label(detail_body, "LEVEL %d   /   GLOBAL XP %d" % [GlobalProfile.level(profile.data.xp), profile.data.xp], Vector2.ZERO, 12, GOLD)
+	var level_label := _label(detail_body, "LEVEL %d   /   GLOBAL XP %d" % [GlobalProfile.level(profile.data.xp), profile.data.xp], Vector2.ZERO, 12, GOLD)
+	var xp_icon := TextureRect.new()
+	xp_icon.texture = GameIcons.get_icon(&"xp")
+	xp_icon.position = Vector2(370, 0)
+	xp_icon.size = Vector2(16, 16)
+	xp_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	level_label.add_child(xp_icon)
 	var bar := ProgressBar.new()
 	bar.custom_minimum_size = Vector2(392, 20)
 	bar.max_value = 100

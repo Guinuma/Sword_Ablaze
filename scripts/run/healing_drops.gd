@@ -3,6 +3,7 @@ extends RefCounted
 const MAX_ITEMS: int = 64
 var feather_chance: float = 0.15
 var wings_chance: float = 0.01
+var geometry: RefCounted
 var items: Array[Dictionary] = []
 
 
@@ -27,7 +28,7 @@ func advance(delta: float, point: Vector2, run: RefCounted) -> void:
 		item["life"] -= delta
 		if item["life"] <= 0.0:
 			items.remove_at(index)
-		elif point.distance_to(item["position"]) <= 16.0 and run.heal(item["amount"]) > 0:
+		elif point.distance_to(item["position"]) <= 16.0 and (geometry == null or is_inf(geometry.segment_hit(point, item["position"]))) and run.heal(item["amount"]) > 0:
 			items.remove_at(index)
 
 

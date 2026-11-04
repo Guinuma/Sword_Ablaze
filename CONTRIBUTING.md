@@ -11,3 +11,5 @@ Usar Godot 4.5.1 Standard e GDScript. Manter alterações pequenas, com um objet
 - Na descrição da contribuição, indicar o comportamento alterado e como foi verificado.
 
 Convenções de coordenadas, colisão, grupos, desenho e pivôs: [referência técnica](docs/technical-conventions.md). Consultar antes de acrescentar entidades, obstáculos ou substituir sprites.
+
+A ferramenta opcional tools/build_sprite_regions.py usa Python e Pillow para medir o canal alfa e gerar Resources de atlas, sem regravar os PNG. Os atlas prontos estão versionados; não é necessário executar a ferramenta para jogar. Especificação e créditos de arte: docs/art/section6-spec.md e CREDITS.md.

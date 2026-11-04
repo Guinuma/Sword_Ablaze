@@ -7,6 +7,7 @@ signal impacted(point: Vector2)
 signal defeated(point: Vector2)
 
 const WeaponSettings = preload("res://scripts/data/weapon_settings.gd")
+var geometry: RefCounted
 var weapon: WeaponSettings = load("res://resources/default_weapon.tres")
 const EnemySettings = preload("res://scripts/data/enemy_settings.gd")
 var enemy_settings: EnemySettings = load("res://resources/default_enemy.tres")
@@ -35,7 +36,7 @@ func advance(delta: float, enemies: Array[Dictionary], bounds: Rect2) -> void:
 		items[index]["life"] = maxf(0.0, items[index].get("life", 5.0) - delta)
 		# Segment collision prevents fast bullets from skipping through enemies.
 		var target: int = -1
-		var nearest: float = INF
+		var nearest: float = geometry.segment_hit(start, end) if geometry != null else INF
 		for enemy_index in range(enemies.size()):
 			if enemies[enemy_index].get("spawn_time", 0.0) > 0.0:
 				continue
@@ -61,6 +62,9 @@ func advance(delta: float, enemies: Array[Dictionary], bounds: Rect2) -> void:
 			if enemies[target]["health"] <= 0:
 				enemies.remove_at(target)
 				defeated.emit(impact)
+			items.remove_at(index)
+		elif not is_inf(nearest):
+			impacted.emit(start.lerp(end, nearest))
 			items.remove_at(index)
 		elif items[index]["life"] <= 0.0 or not bounds.has_point(end):
 			items.remove_at(index)

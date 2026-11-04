@@ -1,6 +1,10 @@
 extends Node2D
 ## Coordinates use logical pixels; simulation and art presentation are separate.
 
+const ArenaEnvironment = preload("res://scripts/run/arena_environment.gd")
+const ArenaGeometry = preload("res://scripts/combat/arena_geometry.gd")
+var geometry = ArenaGeometry.new()
+
 const RunState = preload("res://scripts/run/run_state.gd")
 var run = RunState.new()
 const HealingDrops = preload("res://scripts/run/healing_drops.gd")
@@ -57,6 +61,12 @@ var random := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
+	player.geometry = geometry
+	enemies.geometry = geometry
+	projectiles.geometry = geometry
+	hostile_projectiles.geometry = geometry
+	melee.geometry = geometry
+	healing_drops.geometry = geometry
 	finite_mode = bool(get_tree().get_meta("finite_run", false))
 	waves.final_wave = 10 if finite_mode else 0
 	if finite_mode and records.path == "user://arena_records.json":
@@ -75,7 +85,7 @@ func _ready() -> void:
 	run.phase_changed.connect(_on_run_phase_changed)
 	enemies.shot.connect(hostile_projectiles.fire)
 	hostile_projectiles.hit_player.connect(_take_player_damage)
-	player.shot.connect(projectiles.fire)
+	player.shot.connect(_fire_player_projectile)
 	player.melee.connect(_swing_melee)
 	melee.impacted.connect(_on_projectile_impact)
 	melee.defeated.connect(_on_projectile_defeat)
@@ -103,6 +113,7 @@ func _ready() -> void:
 	world.y_sort_enabled = true
 	world.z_index = 1
 	add_child(world)
+	ArenaEnvironment.populate(world, geometry.obstacles)
 	player_visual = ExileVisual.new()
 	player_visual.defeat_finished.connect(_update_hud)
 	player_visual.reduced_flashes = preferences.reduced_flashes
@@ -401,6 +412,8 @@ func _update_hud() -> void:
 	hud_view.present_reward(run.phase in [RunState.Phase.WON, RunState.Phase.DEAD], reward_pending, reward_received, reward_awarded, GlobalProfile.level(profile.data.xp), active_run_id == 0)
 	hud_view.control_hint.text = tutorial.hint() if active_run_id > 0 else "GLOBAL XP UNAVAILABLE THIS RUN"
 	hud_view.control_hint.visible = run.is_active() and (tutorial.step < 5 or active_run_id == 0)
+	hud_view.weapon_icon.texture = hud_view.GameIcons.get_icon(preferences.selected_weapon)
+	hud_view.weapon_icon.tooltip_text = "Ember Fan" if preferences.selected_weapon == &"scatter" else "Blade Rifle"
 	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")
 	hud_view.menu_hint.text = "ESC RESUME    %s RESTART" % CombatTutorial.key_name(&"reset_sandbox")
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
@@ -409,6 +422,7 @@ func _update_hud() -> void:
 
 func _draw() -> void:
 	draw_texture_rect(COURTYARD, Rect2(0, 38, 640, 332), false)
+	ArenaEnvironment.draw_floor(self, ARENA, geometry.obstacles)
 	draw_rect(Rect2(0, 0, 640, 62), Color("080d16"))
 	draw_line(Vector2(24, 61), Vector2(616, 61), Color("756247"), 1.0)
 	if player.dash_time > 0.0 and not preferences.reduced_motion:
@@ -447,14 +461,8 @@ func _return_to_menu() -> void:
 
 func _draw_healing_drop(item: Dictionary) -> void:
 	var point: Vector2 = Vector2(item["position"]).round()
-	var wings: bool = item["amount"] == 100
-	draw_circle(point, 12.0 if wings else 8.0, Color(0.04, 0.1, 0.15, 0.85))
-	for side in ([-1, 1] if wings else [1]):
-		var feather := PackedVector2Array([point + Vector2(-2 * side, 5), point + Vector2(2 * side, -3), point + Vector2(9 * side, -8), point + Vector2(7 * side, 1), point + Vector2(2 * side, 6)])
-		draw_colored_polygon(feather, Color("ede3c9"))
-		draw_polyline(PackedVector2Array([point + Vector2(-1 * side, 5), point + Vector2(7 * side, -6)]), Color("c5a46c"), 1.0)
-		for offset in [0, 3]:
-			draw_line(point + Vector2((2 + offset) * side, 1 - offset), point + Vector2((5 + offset) * side, 2 - offset), Color("7c9da7"), 1.0)
+	var icon: Texture2D = hud_view.GameIcons.get_icon(&"wings" if item["amount"] == 100 else &"feather")
+	draw_texture(icon, point - Vector2(8, 8))
 
 
 func _begin_progression() -> void:
@@ -491,3 +499,8 @@ func _swing_melee(origin: Vector2, direction: Vector2) -> void:
 func _on_critical_hit(point: Vector2) -> void:
 	feedback.add(&"critical", point)
 	sounds.play(&"critical")
+
+
+func _fire_player_projectile(origin: Vector2, direction: Vector2) -> void:
+	if is_inf(geometry.segment_hit(player.player_position, origin)):
+		projectiles.fire(origin, direction)

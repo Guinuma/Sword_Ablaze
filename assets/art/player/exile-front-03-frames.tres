@@ -1,0 +1,31 @@
+[gd_resource type="SpriteFrames" load_steps=11 format=3]
+[ext_resource type="Texture2D" path="res://assets/art/player/exile-front-03.png" id="1"]
+[sub_resource type="AtlasTexture" id="Frame_0"]
+atlas = ExtResource("1")
+region = Rect2(128, 22, 169, 376)
+[sub_resource type="AtlasTexture" id="Frame_1"]
+atlas = ExtResource("1")
+region = Rect2(544, 22, 167, 379)
+[sub_resource type="AtlasTexture" id="Frame_2"]
+atlas = ExtResource("1")
+region = Rect2(965, 22, 159, 376)
+[sub_resource type="AtlasTexture" id="Frame_3"]
+atlas = ExtResource("1")
+region = Rect2(129, 440, 168, 379)
+[sub_resource type="AtlasTexture" id="Frame_4"]
+atlas = ExtResource("1")
+region = Rect2(545, 441, 162, 373)
+[sub_resource type="AtlasTexture" id="Frame_5"]
+atlas = ExtResource("1")
+region = Rect2(917, 515, 259, 304)
+[sub_resource type="AtlasTexture" id="Frame_6"]
+atlas = ExtResource("1")
+region = Rect2(78, 935, 288, 294)
+[sub_resource type="AtlasTexture" id="Frame_7"]
+atlas = ExtResource("1")
+region = Rect2(506, 873, 241, 362)
+[sub_resource type="AtlasTexture" id="Frame_8"]
+atlas = ExtResource("1")
+region = Rect2(941, 885, 210, 349)
+[resource]
+animations = [{"frames": [{"duration": 1.0, "texture": SubResource("Frame_0")}, {"duration": 1.0, "texture": SubResource("Frame_1")}, {"duration": 1.0, "texture": SubResource("Frame_2")}, {"duration": 1.0, "texture": SubResource("Frame_3")}, {"duration": 1.0, "texture": SubResource("Frame_4")}, {"duration": 1.0, "texture": SubResource("Frame_5")}, {"duration": 1.0, "texture": SubResource("Frame_6")}, {"duration": 1.0, "texture": SubResource("Frame_7")}, {"duration": 1.0, "texture": SubResource("Frame_8")}], "loop": false, "name": &"poses", "speed": 8.0}, {"frames": [{"duration": 1.0, "texture": SubResource("Frame_1")}, {"duration": 1.0, "texture": SubResource("Frame_2")}, {"duration": 1.0, "texture": SubResource("Frame_3")}, {"duration": 1.0, "texture": SubResource("Frame_4")}], "loop": true, "name": &"walk", "speed": 8.0}]

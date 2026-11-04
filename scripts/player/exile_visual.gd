@@ -1,8 +1,12 @@
 extends Node2D
-## Native-grid Exile sprites, pixel cape and independently aimed ember blade.
+## Refined hooded Exile sprites, pixel cape and independently aimed ember blade.
 signal defeat_finished
-const NATIVE = preload("res://assets/art/player/exile-native.svg")
-const WALK = preload("res://assets/art/player/exile-native-walk.tres")
+const FRONT = preload("res://assets/art/player/exile-front-03-frames.tres")
+const BACK = preload("res://assets/art/player/exile-back-03-frames.tres")
+const SIDE = preload("res://assets/art/player/exile-side-03-frames.tres")
+const DEFEAT = preload("res://assets/art/player/exile-defeat-03-frames.tres")
+const WALK = SIDE
+const BODY_HEIGHT: float = 32.0
 const DEFEAT_DURATION: float = 0.64
 var defeated: bool = false
 var defeat_done: bool = false
@@ -112,8 +116,8 @@ func _draw() -> void:
 	if facing.y < -0.6:
 		_draw_weapon(bob)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if body_direction == &"side" and facing.x < 0.0 else 1.0, 1.0))
-	var row := 0 if body_direction == &"front" else 1 if body_direction == &"back" else 2
-	draw_texture_rect_region(NATIVE, Rect2(-12, -20, 24, 32), Rect2(sprite_frame() * 24, row * 32, 24, 32))
+	var frames = FRONT if body_direction == &"front" else BACK if body_direction == &"back" else SIDE
+	_draw_pose(frames, sprite_frame())
 	draw_set_transform(Vector2.ZERO)
 	if facing.y >= -0.6:
 		_draw_weapon(bob)
@@ -176,7 +180,7 @@ func _draw_defeat() -> void:
 	draw_ellipse_shadow()
 	var frame := mini(3, int(defeat_time * 8.0))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0 if facing.x < 0.0 else 1.0, 1.0))
-	draw_texture_rect_region(NATIVE, Rect2(-12, -20, 24, 32), Rect2(frame * 24, 96, 24, 32))
+	_draw_pose(DEFEAT, frame)
 	draw_set_transform(Vector2.ZERO)
 
 
@@ -186,3 +190,11 @@ static func cape_polygon(neck: Vector2, tip: Vector2) -> PackedVector2Array:
 		tip = neck + Vector2(0, 3)
 	var side := neck.direction_to(tip).orthogonal()
 	return PackedVector2Array([neck + side * 4, neck - side * 4, tip - side * 3, tip + side * 3])
+
+
+func _draw_pose(frames: SpriteFrames, index: int) -> void:
+	# Scale every pose against the idle/standing height, preserving crouch/fall shape.
+	var ratio := BODY_HEIGHT / frames.get_frame_texture(&"poses", 0).get_height()
+	var texture := frames.get_frame_texture(&"poses", index)
+	var dimensions := (texture.get_size() * ratio).round()
+	draw_texture_rect(texture, Rect2(Vector2(-floor(dimensions.x / 2), 8 - dimensions.y), dimensions), false)

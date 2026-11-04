@@ -5,6 +5,10 @@ const WISP = preload("res://assets/art/enemies/corrupted-wisp-01-atlas.tres")
 const SENTINEL = preload("res://assets/art/enemies/fractured-sentinel-01-atlas.tres")
 const WALK = preload("res://assets/art/enemies/fractured-sentinel-walk-01-frames.tres")
 const CAST = preload("res://assets/art/enemies/fractured-sentinel-cast-01-frames.tres")
+const CHARGER = preload("res://assets/art/enemies/charger-02-frames.tres")
+const GUARDIAN = preload("res://assets/art/enemies/guardian-02-frames.tres")
+const WARDEN = preload("res://assets/art/enemies/warden-02-frames.tres")
+const ELITE = preload("res://assets/art/enemies/elite-02-frames.tres")
 var walk_clock: float = 0.0
 var walk_frame: int = 0
 var last_point := Vector2.ZERO
@@ -84,7 +88,10 @@ func _draw() -> void:
 		if ranged and (not moving or windup > 0.0):
 			bob = 0.0
 	var tint := Color(1.8, 1.5, 1.2) if state["flash"] > 0.0 and not reduced_flashes else Color.WHITE
-	if ranged:
+	if profile != null and profile.kind == "elite":
+		var pose := 3 if windup > 0.0 else (1 + walk_frame % 2 if moving else 0)
+		_draw_pose(ELITE, pose, 44.0)
+	elif ranged:
 		if windup > 0.0:
 			var frame: int = clampi(int((1.0 - windup / profile.attack_warning) * 4.0), 0, 3)
 			draw_texture_rect(CAST.get_frame_texture(&"cast", frame), Rect2(-18, -29, 36, 39), false, tint)
@@ -95,8 +102,7 @@ func _draw() -> void:
 		draw_texture_rect(WISP, Rect2(-10, -25 + bob, 20, 35), false, tint)
 	if profile != null and profile.kind == "elite":
 		draw_arc(Vector2.ZERO, 14, 0, TAU, 24, Color("c5a46c"), 2)
-		var crown := PackedVector2Array([Vector2(-9, -34), Vector2(-9, -42), Vector2(-4, -38), Vector2(0, -45), Vector2(4, -38), Vector2(9, -42), Vector2(9, -34)])
-		draw_colored_polygon(crown, Color("c5a46c"))
+
 	var health: int = state["health"]
 	var max_health: int = profile.health if profile != null else 2
 	if health < max_health:
@@ -115,15 +121,9 @@ func _draw_charger(profile: Resource) -> void:
 		draw_line(-side, end - side, Color("ffb454"), 1.0)
 		draw_line(end + side, end, Color("ffe0a3"), 2.0)
 		draw_line(end - side, end, Color("ffe0a3"), 2.0)
-	var color := Color("ffb454") if phase == "warning" else Color("a96d55")
-	if phase == "recovery":
-		color = Color("666b86")
-	if state["flash"] > 0.0 and not reduced_flashes:
-		color = Color("ffe0a3")
-	draw_circle(Vector2(0, 7), 10, Color(0.02, 0.03, 0.06, 0.6))
-	# Angular armored ram silhouette is a code-native prototype visual.
-	draw_colored_polygon(PackedVector2Array([Vector2(-12, 2), Vector2(-9, -17), Vector2(-4, -12), Vector2(0, -25), Vector2(4, -12), Vector2(9, -17), Vector2(12, 2), Vector2(0, 8)]), color)
-	draw_line(Vector2(-6, -6), Vector2(6, -6), Color("f7ddb0"), 2.0)
+	draw_circle(Vector2(0, 7), 11, Color(0.02, 0.03, 0.06, 0.6))
+	var pose: int = {"approach": 0, "warning": 1, "charge": 2, "recovery": 3}.get(phase, 0)
+	_draw_pose(CHARGER, pose, 28.0, direction.x < 0.0 if phase != "approach" else state.get("facing", Vector2.RIGHT).x < 0.0, 40.0)
 	if phase == "charge":
 		draw_line(-direction * 10, -direction * 23, Color("ffb454"), 3.0)
 	if phase == "recovery":
@@ -135,17 +135,11 @@ func _draw_charger(profile: Resource) -> void:
 
 func _draw_guardian(profile: Resource) -> void:
 	var facing: Vector2 = state.get("facing", Vector2.DOWN)
-	var tint := Color("728c9c")
-	if state["flash"] > 0.0 and not reduced_flashes:
-		tint = Color("ffe0a3")
 	draw_set_transform(Vector2(0, 7), 0.0, Vector2(1, 0.4))
 	draw_circle(Vector2.ZERO, 15, Color(0.02, 0.03, 0.06, 0.6))
 	draw_set_transform(Vector2.ZERO)
-	# Broad stone armor and a directional shield, distinct from the pointed charger.
-	draw_rect(Rect2(-13, -23, 26, 27), Color("293847"))
-	draw_rect(Rect2(-11, -21, 22, 23), tint)
-	draw_rect(Rect2(-6, -30, 12, 12), tint)
-	draw_line(Vector2(-4, -25), Vector2(4, -25), Color("ffe0a3"), 2)
+	var pose := 0 if facing.y > 0.5 else 2 if facing.y < -0.5 else 1 if facing.x > 0.0 else 3
+	_draw_pose(GUARDIAN, pose, 42.0)
 	draw_arc(Vector2.ZERO, 17, facing.angle() - PI / 3, facing.angle() + PI / 3, 12, Color("101d2b"), 6)
 	draw_arc(Vector2.ZERO, 17, facing.angle() - PI / 3, facing.angle() + PI / 3, 12, Color("c5a46c"), 3)
 	# Rear crack marks the weak side without relying on color alone.
@@ -166,15 +160,22 @@ func _draw_boss(profile: Resource) -> void:
 	draw_set_transform(Vector2(0, 12), 0.0, Vector2(1, 0.4))
 	draw_circle(Vector2.ZERO, 25, Color(0.02, 0.03, 0.06, 0.65))
 	draw_set_transform(Vector2.ZERO)
-	var body := Color("304858")
-	if state.flash > 0.0 and not reduced_flashes:
-		body = Color("e0cc9d")
-	draw_colored_polygon(PackedVector2Array([Vector2(-22, 7), Vector2(-24, -25), Vector2(-15, -39), Vector2(0, -46), Vector2(15, -39), Vector2(24, -25), Vector2(22, 7), Vector2(0, 17)]), body)
-	draw_arc(Vector2(0, -17), 29, -PI * 0.9, -PI * 0.1, 24, gold, 3)
-	if second:
-		draw_arc(Vector2(0, -17), 33, PI * 0.1, PI * 0.9, 24, gold, 2)
-	draw_colored_polygon(PackedVector2Array([Vector2(-15, -39), Vector2(-18, -52), Vector2(-7, -46), Vector2(0, -57), Vector2(7, -46), Vector2(18, -52), Vector2(15, -39)]), gold)
-	draw_line(Vector2(-10, -23), Vector2(10, -23), gold, 3)
-	draw_polyline(PackedVector2Array([Vector2(-2, -14), Vector2(4, -4), Vector2(-4, 4), Vector2(2, 13)]), gold, 2)
+	var pose := (2 if second else 0) + (1 if state.get("windup", 0.0) > 0.0 else 0)
+	_draw_pose(WARDEN, pose, 65.0)
 	draw_rect(Rect2(-25, -65, 50, 4), Color("101421"))
 	draw_rect(Rect2(-25, -65, 50.0 * state.health / profile.health, 4), gold)
+
+
+func _draw_pose(frames: SpriteFrames, index: int, height: float, mirror: bool = false, max_width: float = 100.0) -> void:
+	var maximum := Vector2.ZERO
+	for frame in range(frames.get_frame_count(&"poses")):
+		var dimensions := frames.get_frame_texture(&"poses", frame).get_size()
+		maximum.x = maxf(maximum.x, dimensions.x)
+		maximum.y = maxf(maximum.y, dimensions.y)
+	var ratio := minf(height / maximum.y, max_width / maximum.x)
+	var texture := frames.get_frame_texture(&"poses", index)
+	var dimensions := (texture.get_size() * ratio).round()
+	var tint := Color(1.5, 1.3, 1.1) if state.get("flash", 0.0) > 0.0 and not reduced_flashes else Color.WHITE
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1, 1) if mirror else Vector2.ONE)
+	draw_texture_rect(texture, Rect2(Vector2(-floor(dimensions.x / 2), 8 - dimensions.y), dimensions), false, tint)
+	draw_set_transform(Vector2.ZERO)

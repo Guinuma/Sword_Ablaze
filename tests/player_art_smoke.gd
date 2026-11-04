@@ -9,7 +9,10 @@ func check(value: bool, message: String) -> void:
 func _run() -> void:
 	var visual = load("res://scripts/player/exile_visual.gd").new()
 	root.add_child(visual)
-	check(visual.NATIVE.get_size() == Vector2(216, 128), "Native atlas must preserve 24x32 cells at 1:1")
+	check(visual.BODY_HEIGHT == 32.0, "Refined Exile must retain the 32px gameplay height")
+	for frames in [visual.FRONT, visual.BACK, visual.SIDE]:
+		check(frames.get_frame_count(&"poses") == 9 and frames.get_frame_count(&"walk") == 4, "Each direction must include idle, four walk, two dash and two hurt poses")
+	check(visual.DEFEAT.get_frame_count(&"poses") == 4, "Refined defeat must retain four distinct poses")
 	for pair in [[Vector2.DOWN, &"front"], [Vector2.UP, &"back"], [Vector2.LEFT, &"side"], [Vector2.RIGHT, &"side"]]:
 		visual.present(Vector2(100.4, 120.7), pair[0], Vector2.ZERO, 0.0, false, false, false)
 		check(visual.body_direction == pair[1] and visual.sprite_frame() == 0 and visual.position == Vector2(100, 121), "Cardinal idle must keep shared grid and direction")

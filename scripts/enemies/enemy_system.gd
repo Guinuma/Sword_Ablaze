@@ -10,6 +10,7 @@ var charger_settings: EnemySettings = load("res://resources/default_charger.tres
 var guardian_settings: EnemySettings = load("res://resources/default_guardian.tres")
 var elite_settings: EnemySettings = load("res://resources/default_elite.tres")
 var boss_settings: EnemySettings = load("res://resources/default_boss.tres")
+var geometry: RefCounted
 var items: Array[Dictionary] = []
 
 
@@ -28,6 +29,8 @@ func spawn(target: Vector2, bounds: Rect2, random: RandomNumberGenerator, kind: 
 		point = Vector2(random.randf_range(bounds.position.x + 10.0, bounds.end.x - 10.0), y)
 	var profiles := {&"chaser": settings, &"ranged": ranged_settings, &"charger": charger_settings, &"guardian": guardian_settings, &"elite": elite_settings, &"boss": boss_settings}
 	var profile: EnemySettings = profiles.get(kind, settings)
+	if geometry != null:
+		point = geometry.clear_point(point, profile.body_margin)
 	items.append({"position": point, "health": profile.health, "flash": 0.0, "spawn_time": profile.spawn_warning, "profile": profile, "attack_cooldown": profile.attack_cooldown, "windup": 0.0, "facing": point.direction_to(target)})
 
 
@@ -45,6 +48,8 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 			if enemy["spawn_time"] == 0.0:
 				activated.emit(point)
 			continue
+		var navigation_target: Vector2 = geometry.waypoint(point, target, profile.body_margin) if geometry != null else target
+		enemy["navigation_target"] = navigation_target
 		var speed: float = minf(profile.speed + (wave - 1) * profile.speed_per_wave, profile.max_speed)
 		if profile.kind == "boss":
 			_advance_boss(enemy, target, delta, profile)
@@ -52,15 +57,20 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 			var facing: Vector2 = enemy.get("facing", Vector2.DOWN)
 			var angle := facing.angle_to(point.direction_to(target))
 			enemy["facing"] = facing.rotated(clampf(angle, -profile.turn_speed * delta, profile.turn_speed * delta))
-			enemy["position"] = point.move_toward(target, speed * delta)
+			enemy["position"] = point.move_toward(navigation_target, speed * delta)
 		elif profile.kind == "charger":
 			_advance_charger(enemy, target, delta, speed, profile, bounds)
 		elif profile.kind in ["ranged", "elite"]:
 			_advance_ranged(enemy, target, delta, speed, profile)
 		else:
-			enemy["position"] = point.move_toward(target, speed * delta)
+			enemy["position"] = point.move_toward(navigation_target, speed * delta)
 		var knockback: Vector2 = enemy.get("knockback", Vector2.ZERO)
 		enemy["position"] += knockback * delta
+		if geometry != null:
+			enemy["position"] = geometry.move_actor(point, enemy["position"], profile.body_margin, not enemy["charge_moved"])
+			if enemy["charge_moved"] and Vector2(enemy["position"]).distance_squared_to(point) < 0.001:
+				enemy["charge_phase"] = "recovery"
+				enemy["charge_timer"] = profile.charge_recovery
 		enemy["knockback"] = knockback.move_toward(Vector2.ZERO, 600.0 * delta)
 		enemy["flash"] = maxf(0.0, enemy["flash"] - delta)
 	for enemy in items:
@@ -74,7 +84,8 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 func _clamp_enemy(enemy: Dictionary, point: Vector2, bounds: Rect2) -> Vector2:
 	var profile: EnemySettings = enemy.get("profile", settings)
 	var margin := Vector2.ONE * profile.body_margin
-	return point.clamp(bounds.position + margin, bounds.end - margin)
+	var clamped := point.clamp(bounds.position + margin, bounds.end - margin)
+	return geometry.clear_point(clamped, profile.body_margin) if geometry != null else clamped
 
 
 func _resolve_separation(bounds: Rect2) -> float:
@@ -130,18 +141,20 @@ func _advance_ranged(enemy: Dictionary, target: Vector2, delta: float, speed: fl
 			if profile.kind == "elite":
 				for index in range(8):
 					var spoke := direction.rotated(index * TAU / 8)
-					shot.emit(point + spoke * 14.0, spoke, profile.projectile_speed, profile.projectile_damage)
+					_emit_shot(point, spoke, 14.0, profile.projectile_speed, profile.projectile_damage)
 			else:
-				shot.emit(point + direction * 14.0, direction, profile.projectile_speed, profile.projectile_damage)
+				_emit_shot(point, direction, 14.0, profile.projectile_speed, profile.projectile_damage)
 			enemy["attack_cooldown"] = profile.attack_cooldown
 		return
 	var distance := point.distance_to(target)
-	if distance > profile.preferred_distance + 15.0:
-		enemy["position"] = point.move_toward(target, speed * delta)
+	if geometry != null and not is_inf(geometry.segment_hit(point, target)):
+		enemy["position"] = point.move_toward(enemy.get("navigation_target", target), speed * delta)
+	elif distance > profile.preferred_distance + 15.0:
+		enemy["position"] = point.move_toward(enemy.get("navigation_target", target), speed * delta)
 	elif distance < profile.preferred_distance - 15.0:
 		enemy["position"] = point + (point - target).normalized() * speed * delta
 	enemy["attack_cooldown"] = maxf(0.0, enemy.get("attack_cooldown", profile.attack_cooldown) - delta)
-	if enemy["attack_cooldown"] == 0.0 and distance <= profile.attack_range:
+	if enemy["attack_cooldown"] == 0.0 and distance <= profile.attack_range and (geometry == null or is_inf(geometry.segment_hit(point, target))):
 		enemy["shot_direction"] = point.direction_to(target)
 		enemy["windup"] = profile.attack_warning
 
@@ -149,9 +162,9 @@ func _advance_ranged(enemy: Dictionary, target: Vector2, delta: float, speed: fl
 func _advance_charger(enemy: Dictionary, target: Vector2, delta: float, speed: float, profile: EnemySettings, bounds: Rect2) -> void:
 	var phase: String = enemy.get("charge_phase", "approach")
 	if phase == "approach":
-		enemy["position"] = enemy["position"].move_toward(target, speed * delta)
+		enemy["position"] = enemy["position"].move_toward(enemy.get("navigation_target", target), speed * delta)
 		enemy["attack_cooldown"] = maxf(0.0, enemy["attack_cooldown"] - delta)
-		if enemy["attack_cooldown"] == 0.0 and enemy["position"].distance_to(target) <= profile.attack_range:
+		if enemy["attack_cooldown"] == 0.0 and enemy["position"].distance_to(target) <= profile.attack_range and (geometry == null or is_inf(geometry.segment_hit(enemy["position"], target, profile.body_margin))):
 			enemy["charge_direction"] = enemy["position"].direction_to(target)
 			enemy["charge_phase"] = "warning"
 			enemy["charge_timer"] = profile.attack_warning
@@ -190,7 +203,7 @@ func _advance_boss(enemy: Dictionary, target: Vector2, delta: float, profile: En
 		enemy.windup = maxf(0.0, enemy.windup - delta)
 		if enemy.windup == 0.0:
 			for direction in boss_directions(enemy):
-				shot.emit(enemy.position + direction * 27, direction, profile.projectile_speed * (1.2 if enemy.boss_phase == 2 else 1.0), profile.projectile_damage)
+				_emit_shot(enemy.position, direction, 27.0, profile.projectile_speed * (1.2 if enemy.boss_phase == 2 else 1.0), profile.projectile_damage)
 			enemy.attack_cooldown = 1.6 if enemy.boss_phase == 2 else profile.attack_cooldown
 			enemy["attack_index"] = int(enemy.get("attack_index", 0)) + 1
 		return
@@ -214,3 +227,9 @@ static func boss_directions(enemy: Dictionary) -> Array[Vector2]:
 		for index in range(count):
 			result.append(direction.rotated((index - (count - 1) * 0.5) * 0.18))
 	return result
+
+
+func _emit_shot(point: Vector2, direction: Vector2, offset: float, speed: float, damage: int) -> void:
+	var origin := point + direction * offset
+	if geometry == null or is_inf(geometry.segment_hit(point, origin)):
+		shot.emit(origin, direction, speed, damage)

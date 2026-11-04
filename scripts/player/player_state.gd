@@ -5,6 +5,7 @@ signal dashed()
 signal melee(origin: Vector2, direction: Vector2)
 
 const SPEED: float = 120.0
+var geometry: RefCounted
 var move_speed: float = SPEED
 const WeaponSettings = preload("res://scripts/data/weapon_settings.gd")
 var weapon: WeaponSettings = load("res://resources/default_weapon.tres")
@@ -31,6 +32,7 @@ var melee_requires_release: bool = false
 
 
 func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pressed: bool, fire_pressed: bool, bounds: Rect2, melee_pressed: bool = false) -> void:
+	var start := player_position
 	dashed_this_step = false
 	melee_time = maxf(0.0, melee_time - delta)
 	melee_cooldown = maxf(0.0, melee_cooldown - delta)
@@ -49,6 +51,8 @@ func advance(delta: float, movement: Vector2, mouse_position: Vector2, dash_pres
 		dash_time = maxf(0.0, dash_time - delta)
 	else:
 		player_position += movement * move_speed * delta
+	if geometry != null:
+		player_position = geometry.move_actor(start, player_position, 8.0)
 	player_position = player_position.clamp(bounds.position + Vector2(8, 8), bounds.end - Vector2(8, 8))
 	var mouse_direction := mouse_position - player_position
 	if mouse_direction.length_squared() > 1.0:

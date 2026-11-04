@@ -1,0 +1,14 @@
+# Sword Ablaze credits and asset conditions
+
+Project and original character/art direction: Guinuma / Sword Ablaze. Source code and original code-authored pixel/vector art use the repository [MIT license](LICENSE); retain its notice when redistributing those files.
+
+| Material | Source and attribution | Distribution record |
+| --- | --- | --- |
+| Historical native Exile SVG, masonry tiles/trim, weapon/resource/ability icons, procedural effects and synthesized audio | Original project assets; SVG/source files are editable in the repository | Repository MIT license and notice |
+| Courtyard illustration, wisp, sentinel, older Exile reference sheets and refined revision-3 Exile animation sheets, Ruin Ram, Bastion Guardian, Crowned Sentinel, Warden and ruined masonry props | Created using the built-in OpenAI image-generation tool for this project; no external asset pack imported | Exact generation prompts, references, dates and SHA-256 hashes are recorded in docs/art/asset-provenance-01.json and adjacent prompt files. Generated imagery is documented separately from the code license; this inventory does not assert exclusive copyright or assign a new standalone artwork license. No third-party pack license was supplied for these internally generated images |
+| Silkscreen Regular | The Silkscreen Project Authors; retrieved from Google Fonts | SIL Open Font License 1.1; include assets/fonts/Silkscreen-OFL.txt unmodified with the font; see assets/fonts/README.md |
+| Engine screenshots and review boards | Captured from the project with Godot; they include the project assets listed above | Preserve the underlying asset notices; screenshots are evidence, not a new asset-license grant |
+
+The asset manifest covers every PNG/SVG under assets/art, including inactive earlier player sheets. Earlier character sheets and concept boards are retained as references rather than silently relabeled as native pixel art. New enemy/prop sheets are stored unmodified, including their alpha channel; AtlasTexture regions select poses without rewriting the generated bitmap.
+
+This file consolidates the existing source/rights conditions. It does not change the license of any generated file, claim that the code license automatically covers generated imagery, or publish/export a game build. Tool-generated material remains identified as such in the distribution record. No music or external sound pack is included.

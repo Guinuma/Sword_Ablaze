@@ -36,3 +36,8 @@ Godot 4.5.1, Windows, Ryzen 7 5825U, integrated AMD Radeon graphics, Compatibili
 Peak draw calls: 162. Peak engine static memory: 33.0 MiB. Raw results: `rendered-dense.json`. Visual evidence: `rendered-dense.png`.
 
 Frame intervals include setup/refill, simulation, rendering and scheduling. The last row measures CPU-side progress through rendering completion; it is not isolated GPU timing and must not be added to the simulation row as a precise GPU/CPU breakdown. Editor, power settings, other applications and drivers affect these results. No minimum hardware requirement is inferred from one machine. The script refuses headless mode and checks that all 18 enemy visuals exist and combat remains active before accepting measurements.
+
+
+## Section 6 arena/geometry sample (2026-11-04)
+
+A fresh rendered dense run with the refined player, new props, collision/navigation and art completed 600 measured frames after 120 warmup frames. Frame interval mean 4.83 ms, p95 5.88 ms, maximum 9.62 ms; simulation mean 3.19 ms and p95 3.83 ms. Peak draw calls 165; peak static memory about 34.0 MiB. Same Windows Ryzen 7 5825U / AMD Radeon machine and Godot 4.5.1 Compatibility, vsync off. Raw report and screenshot: section6-rendered.json / section6-rendered.png. The scripted refill scenario remains hardware-specific and does not certify human gameplay difficulty or other machines.

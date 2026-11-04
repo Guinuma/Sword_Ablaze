@@ -87,5 +87,167 @@
     "date": "2026-11-04",
     "reference": "Project Exile visual identity: ivory hood and mask, turquoise cape, ember blade; no external asset pack or source raster edited",
     "rights_note": "Original project artwork and generator distributed under the repository MIT license."
+  },
+  {
+    "asset": "assets/art/arena/courtyard-edge-02.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "fddb1e0af1b30e38bed816ecc7e08033a15b1096b67f3b4e062871db3676710e"
+  },
+  {
+    "asset": "assets/art/arena/courtyard-floor-02.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "4f1721b8c9c53b63f130ac9cae78d85bef87725c7e286d38c035cdbc822bfd72"
+  },
+  {
+    "asset": "assets/art/arena/courtyard-props-02.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Generated project artwork; source and prompts recorded separately from the code license. See CREDITS.md. No external asset pack imported.",
+    "prompt": "docs/art/courtyard-props-02-prompt.txt",
+    "sha256": "3c94d35dfa00439afe60f6b1e68b054ce24fc7ab260abf3ee6dbf67ec1053119"
+  },
+  {
+    "asset": "assets/art/enemies/charger-02.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Generated project artwork; source and prompts recorded separately from the code license. See CREDITS.md. No external asset pack imported.",
+    "prompt": "docs/art/charger-02-prompt.txt",
+    "sha256": "2eaf171d18db3e3c875d8e8c4bc073d25f7a34eb981cd94881012813ecfeaca4"
+  },
+  {
+    "asset": "assets/art/enemies/elite-02.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Generated project artwork; source and prompts recorded separately from the code license. See CREDITS.md. No external asset pack imported.",
+    "prompt": "docs/art/elite-02-prompt.txt",
+    "sha256": "49a764f01ead283c96cc6e130f7db5664fc01e1e2a258934dd016e83ac5e9c24"
+  },
+  {
+    "asset": "assets/art/enemies/guardian-02.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Generated project artwork; source and prompts recorded separately from the code license. See CREDITS.md. No external asset pack imported.",
+    "prompt": "docs/art/guardian-02-prompt.txt",
+    "sha256": "1babdf5c1086ffbeb678a783c76a37a3cbc06f6a5de9dfd9434d2a33599ac50e"
+  },
+  {
+    "asset": "assets/art/enemies/warden-02.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Generated project artwork; source and prompts recorded separately from the code license. See CREDITS.md. No external asset pack imported.",
+    "prompt": "docs/art/warden-02-prompt.txt",
+    "sha256": "17fd176b7181c8e47a47d46c260b5a19714bcd9dc92a37ce3b69352d27a2952e"
+  },
+  {
+    "asset": "assets/art/icons/blade.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "37c0b66854adea81599a0116939cc7b49d817358fcee7563a043d9ff847a1c8b"
+  },
+  {
+    "asset": "assets/art/icons/dash.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "aa4ae6a99c71aade91d0d18aa454483a60045d573c8586637bdbd967100d15b0"
+  },
+  {
+    "asset": "assets/art/icons/feather.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "ff876917dcce2271896632bddcc821f05b2c4725a474f44bf577e7429fb09239"
+  },
+  {
+    "asset": "assets/art/icons/melee.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "0a4fad1b0f0f01488f5cca49c700f7e5d4949ccd9e995687d44cf60235911a39"
+  },
+  {
+    "asset": "assets/art/icons/scatter.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "7076e564f94daf38913f4de4d26236df77d5cffc9fc984197a199e80b5e0f6f8"
+  },
+  {
+    "asset": "assets/art/icons/wings.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "f24b1b50404005ad15f6b89f5fb073862c426cde910e5a0a08b6addde95b6c27"
+  },
+  {
+    "asset": "assets/art/icons/xp.svg",
+    "source": "Original project SVG artwork",
+    "date": "2026-11-04",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Repository MIT license; preserve LICENSE notice.",
+    "sha256": "cd59a08188586956c3b17730c477c635944a4f5e25f6d22cf34c2c5792c8581a"
+  },
+  {
+    "asset": "assets/art/player/exile-body-01.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-02",
+    "reference": "Original project Exile/celestial art direction; no external asset pack",
+    "rights_note": "Generated project artwork; source and prompts recorded separately from the code license. See CREDITS.md. No external asset pack imported.",
+    "prompt": "docs/art/exile-body-01-prompt.txt",
+    "sha256": "0af4fbd73368da8143e2517ad0eefe1cfea6182b9ae4ca0e53d35ff847c5ece4"
+  },
+  {
+    "asset": "assets/art/player/exile-back-03.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original Exile character concept and sentinel pixel-art style; same project identity, no external asset pack",
+    "prompt": "docs/art/exile-back-03-prompt.txt",
+    "rights_note": "Generated project artwork; source/conditions documented separately from code license in CREDITS.md.",
+    "sha256": "8a4e32225ee956cb68b445196f8c43fb545884acb676ed3757ad3813e8dac6b9"
+  },
+  {
+    "asset": "assets/art/player/exile-defeat-03.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original Exile character concept and sentinel pixel-art style; same project identity, no external asset pack",
+    "prompt": "docs/art/exile-defeat-03-prompt.txt",
+    "rights_note": "Generated project artwork; source/conditions documented separately from code license in CREDITS.md.",
+    "sha256": "0f8ee806203f63759ef5c912e3216645af8871d2b381a8234176ceffbe24a49e"
+  },
+  {
+    "asset": "assets/art/player/exile-front-03.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original Exile character concept and sentinel pixel-art style; same project identity, no external asset pack",
+    "prompt": "docs/art/exile-front-03-prompt.txt",
+    "rights_note": "Generated project artwork; source/conditions documented separately from code license in CREDITS.md.",
+    "sha256": "c7f934d7fc48d8dee34a1e920d7727451c9ef2e4aac20cc5d79b78bf9378c96b"
+  },
+  {
+    "asset": "assets/art/player/exile-side-03.png",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-04",
+    "reference": "Original Exile character concept and sentinel pixel-art style; same project identity, no external asset pack",
+    "prompt": "docs/art/exile-side-03-prompt.txt",
+    "rights_note": "Generated project artwork; source/conditions documented separately from code license in CREDITS.md.",
+    "sha256": "3b21569b7510c3d6fde358e6e308ac8127f52b579dd7af9b1954dba551806b4d"
   }
 ]

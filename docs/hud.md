@@ -19,3 +19,6 @@ Health starts at 100 HP. The teal bar uses current / maximum HP and turns warm a
 Enemy kills roll one exclusive drop: 15% feather (+10 HP), 1% paired angel wings (+100 HP), otherwise nothing. These are code-drawn ivory/gold pickups, collected within 16 logical pixels when health is missing. Healing clamps to the upgraded maximum. Full-health players leave pickups on the floor. Drops expire after 30 seconds of active simulation, freeze in pause/death, and clear on restart. At most 64 may exist.
 
 ![Health bar and healing pickups](art/hud-health-bar-01.png)
+
+
+Section 6 adds shared 16px weapon/resource/ability icons: selected weapon and melee in the HUD, dash beside its recharge, weapon icons in loadout, XP in progression, and feather/wings on world pickups. Existing ranked blessing badges are retained. Source and palette: docs/art/section6-spec.md.

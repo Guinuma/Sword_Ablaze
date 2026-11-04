@@ -9,6 +9,8 @@ signal restart_requested
 signal main_menu_requested
 signal quit_requested
 
+const GameIcons = preload("res://scripts/ui/game_icons.gd")
+var weapon_icon: TextureRect
 const FocusNavigation = preload("res://scripts/ui/focus_navigation.gd")
 const BlessingBadge = preload("res://scripts/ui/blessing_badge.gd")
 const PIXEL_FONT = preload("res://assets/fonts/Silkscreen-Regular.ttf")
@@ -78,6 +80,18 @@ func _build_status_bar() -> void:
 	health_bar.draw.connect(_draw_health)
 	add_child(health_bar)
 	stats = _label(Vector2(120, 28), Vector2(86, 18), 8, true)
+	weapon_icon = TextureRect.new()
+	weapon_icon.position = Vector2(208, 34)
+	weapon_icon.size = Vector2(16, 16)
+	weapon_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	weapon_icon.texture = GameIcons.get_icon(&"blade")
+	add_child(weapon_icon)
+	var melee_icon := TextureRect.new()
+	melee_icon.position = Vector2(426, 34)
+	melee_icon.size = Vector2(16, 16)
+	melee_icon.texture = GameIcons.get_icon(&"melee")
+	melee_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(melee_icon)
 	var location := _label(Vector2(210, 8), Vector2(220, 14), 8, true, GOLD)
 	location.text = "CELESTIAL COURTYARD"
 	location.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -99,6 +113,12 @@ func _build_status_bar() -> void:
 	dash_panel = _panel(Rect2(14, 330, 144, 23), Color(0.04, 0.07, 0.11, 0.95), Color("6b573a"))
 	dash_key = _label(Vector2(20, 336), Vector2(36, 12), 8, true, GOLD)
 	dash_key.text = "SHIFT"
+	var dash_icon := TextureRect.new()
+	dash_icon.position = Vector2(45, 334)
+	dash_icon.size = Vector2(16, 16)
+	dash_icon.texture = GameIcons.get_icon(&"dash")
+	dash_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(dash_icon)
 	dash_label = _label(Vector2(63, 332), Vector2(89, 13), 8, true)
 	dash_meter = ProgressBar.new()
 	dash_meter.position = Vector2(63, 346)
