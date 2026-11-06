@@ -11,3 +11,8 @@ Every new arena run shows a short action-driven HUD tutorial: move, aim with the
 Menu navigation uses closed focus paths: Tab moves forward, Shift+Tab moves backward, arrows move between controls in reading order, and Enter activates buttons. Audio sliders consume left/right for volume adjustment. Focus borders remain visible. Home, detail pages, pause, results and blessing choices each restrict navigation to their visible controls. Pausing a blessing choice and resuming restores choice focus. `tests/navigation_smoke.gd` sends Tab input through complete cycles across these screens and checks visible focus styles; it also checks pause/choice focus restoration.
 
 Melee uses right-click or E by default and can be remapped alongside the other gameplay keys. Holding repeats only after the 0.45 s cooldown. Release after pause, restart or a blessing choice before attacking again. The swing blocks gunfire for its 0.16 s animation. Keen Edge can grant critical hits to both attacks; it is an ordinary temporary blessing and resets with the run.
+
+
+## Sanctuary home
+
+Sanctuary walking uses the same saved movement actions and normalized speed as combat. Enter/Space or the on-screen contextual button interacts with a nearby, unobstructed station: Gabriel (knowledge/progression), the arsenal (loadout), or the door (modes/title). Firing, melee and dash inputs never perform combat actions in the house. Escape/Menu opens the hub menu; losing application focus also opens it. Open dialogue/options/departure panels suspend movement. Back/Escape restores the parent panel, or returns control to walking after the final panel closes. The movement legend reflects remapped keys and clips long names to fit the footer.

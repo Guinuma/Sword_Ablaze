@@ -127,3 +127,42 @@ Generated PNGs were created with the built-in image-generation tool, copied into
 
 
 Player-art correction after the section-6 review: the earlier block sprite was replaced by refined generated front/back/side nine-pose atlases and a four-pose defeat atlas, matching the original Exile concept and enemy material detail. Standing height is 32 logical pixels, nearest-sampled; animation timing and the shared weapon pivot are unchanged. The former native SVG and builder remain inactive history. Atlas alpha bounds are metadata only; source PNGs remain unmodified. Current art notes supersede the section-5 source-format and palette claims for the active player.
+
+
+## Section 7 — Feedback and audio
+
+Completed 2026-11-06 at prototype scope. The user chose subtle hit-stop and screen shake with disable options. All nine items now have implementation evidence.
+
+| Scope | Evidence |
+| --- | --- |
+| Bounded impact/death/damage particles and flashes | Existing event connections retained; particles shortened to 0.22 s, velocity reduced, 3 px translucent muzzle flash and softer enemy hit tint |
+| Effect intensity, duration and layer tuning | Per-kind short cue timings/opacity; projectiles now draw above actors, below cues/modal dimming/HUD; section7-dense/reduced engine captures |
+| Spawn, dash, upgrade, heal and wave effects | feedback_smoke verifies successful events, expiry, freeze, capacity and reset |
+| Shot, impact, elimination, damage, dash and menu sounds | Existing original synthesis, event_integration_smoke and audio_smoke retained |
+| Combat music, Sanctuary ambience and transitions | Original eight-bar D-minor WAV loops and reproducible NumPy builder; persistent two-voice Music-bus playback, 1.25 s crossfade and smooth modal ducking |
+| Independent saved volumes and bounded sound output | Existing four buses, safe preference writes, reserved UI voices and cue throttle retained; music gain/voice count also bounded |
+| Hit-stop and shake decision/accessibility | 35 ms hold, 140 ms decaying shake up to 1.5 px per axis, 180 ms retrigger cooldown; separate saved options; Reduce visual motion disables both |
+
+Verification: complete automated suite including five-rate impact timing, actual damage/critical feedback, saved options, scene handoff/crossfade, loop/routing/ducking, navigation and clean startup/shutdown. Graphical review covers dense combat, reduced settings and both options panels. Startup now boots the real main scene and exits through the same graceful audio shutdown used by Quit/window close; no warnings are suppressed. The long simulation remains a logic check, not human balancing. Speaker/headphone mix and subjective impact feel still need human playtesting.
+
+Pre-existing project.godot serialization, .vscode and unrelated image imports remain outside this section's changes. No export or release is implied.
+
+
+## Current priority 1 — Menus and work-in-progress entries
+
+Completed 2026-11-06 following the user's new README priority order. Title now has exactly PLAY, OPTIONS, QUIT. Play contains SANCTUARY, ARENAS, ROGUELITE, CAMPAIGN, SOUNDTRACK, QUIT, with a separate Back button. The three unfinished entries show WORK IN PROGRESS and return to Play without starting combat or changing modes. Sanctuary retains its existing menu prototype pending priority 2.
+
+Options preserves how-to-play, loadout, feedback, audio and keyboard settings in a compact layout. Back/Escape restores the immediate parent page and originating focus, including after re-equipping a weapon. Direct Arenas retain title return, while Sanctuary-launched runs retain hub return and existing records/XP settlement.
+
+Evidence: full validation suite, including menu_routes_smoke actual button activation, persistent loadout and nested focus checks, navigation_smoke focus rings, existing both-mode/hub/reward flows, clean Quit from both title and Play, and the long simulation (wave 48, 19 upgrade choices, zero failures). Engine captures priority1-title/play/wip/options/options-error were visually reviewed for layout and readable save errors. No priority 2 house, Gabriel, skill purchases or new weapons were implemented in this change.
+
+
+## Current priority 2 — Walkable Sanctuary home
+
+Completed 2026-11-06 at prototype scope. The hub scene now opens the Exile's home: existing directional player art/movement, bounded marble room, solid bed/desk/books/hearth/arsenal/Gabriel, and a sheltered departure threshold. Original code-authored furnishings reuse the existing masonry palette; Gabriel has a new transparent generated sprite with preserved PNG, final prompt, hash and source record.
+
+Interaction is proximity- and line-of-sight-gated. Enter/Space or the contextual button opens Gabriel, arsenal or departure. Gabriel provides dialogue, global progression and a read-only skill-tree introduction centered on Michael/the flaming sword, explicitly marked WORK IN PROGRESS. This completes the mentor/entry point for this priority without claiming priority 3 purchases or priority 4 weapons. The arsenal preserves both existing loadouts; the door preserves Arenas and future-mode WIP routes. Escape/menu/focus loss suspend home movement; nested Back restores focus, and final close restores walking at the same position.
+
+Evidence: sanctuary_smoke checks input, speed/diagonals, long-step swept collision/bounds, paths to all stations, range/LOS rejection, Enter/Escape, modal freeze, mentor/preview nesting, persistent equipment, door routes, focus loss, reduced visuals and zero exploration XP/run allocation. Hub smoke now launches through actual door/Arenas/mode buttons and retains complete victory, both-mode defeat/retry, abandonment and reward deduplication coverage. Full import, startup, menu/navigation, combat/reward/audio suite and long simulation pass; the soak reached wave 48 with 19 choices and zero failures.
+
+Engine screenshots under docs/art/priority2 cover home, Gabriel, knowledge introduction, progression, arsenal, departure and options. Visual review corrected the menu button width and separated station plaques from furniture. The house remains a prototype art pass; human usability and art feedback are still useful. Priority 3 remains open in the README. Existing editor serialization and unrelated local files remain untouched by this priority.

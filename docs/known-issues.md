@@ -19,7 +19,7 @@ Reviewed 2026-11-03 against the automated suite and graphical capture tools. Thi
 | Area | Remaining work | Evidence or reproduction |
 | --- | --- | --- |
 | Difficulty | Follow-up review of Warden reinforcements and measured run duration | User confirmed full runs with both weapons on 2026-11-04; requested Warden reinforcements are implemented. Automated clearing does not establish balance. |
-| Audio | Listen on real speakers/headphones; refine synthesized effects; compose music and transitions | Current effects are original synthesized prototype tones; no music is included. |
+| Audio | Listen on real speakers/headphones and refine mix/subjective feel | Section 7 adds original hub/combat loops, crossfades and configurable impact accents. Forced --quit-after bypasses the graceful audio shutdown and can report pending playback in Godot 4.5.1; startup_smoke uses the actual clean exit path. |
 | Art | Further visual polish and broader scene/monitor review | Section 6 adds dedicated charger/guardian/elite/Warden sprites, textured solid ruins, icons and a complete refined hooded Exile animation set. Generated atlas pose detail is sampled at gameplay size; broader external visual feedback remains useful. |
 | Accessibility | UI scale/fullscreen/aspect-ratio checks, controller decision, full localization plan | Current visual reviews focus on the 640 × 360 layout at 1280 × 720. Very long custom key names can crowd compact HUD labels. |
 | Game loop | Implement skill purchases; playtest reinforced boss and global reward pacing | Endless Arena repeats encounters; Courtyard Run now has a boss and local victories, global XP is now saved on results, and Sanctuary supports entry, retry and return. |

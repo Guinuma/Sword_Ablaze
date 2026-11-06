@@ -249,5 +249,14 @@
     "prompt": "docs/art/exile-side-03-prompt.txt",
     "rights_note": "Generated project artwork; source/conditions documented separately from code license in CREDITS.md.",
     "sha256": "3b21569b7510c3d6fde358e6e308ac8127f52b579dd7af9b1954dba551806b4d"
+  },
+  {
+    "asset": "assets/art/hub/gabriel-01.png",
+    "sha256": "34e71fc7b4631b389fabce22cea726ae01565c3e0217aa50fa125e30bcb4979a",
+    "source": "Built-in image generation tool",
+    "date": "2026-11-06",
+    "prompt": "docs/art/gabriel-01-prompt.txt",
+    "reference": "Original project art direction: ivory, antique gold, turquoise, refined celestial pixel-art mentor. No external reference image or asset pack.",
+    "rights_note": "Generated project artwork; preserved source PNG including alpha. The code MIT license does not automatically apply to these images."
   }
 ]

@@ -14,6 +14,7 @@ const IVORY = Color("ede3c9")
 const MUTED = Color("9aabb8")
 const SoundEffects = preload("res://scripts/audio/sound_effects.gd")
 var sounds = SoundEffects.new()
+const Music = preload("res://scripts/audio/music.gd")
 var preferences = Preferences.new()
 var records = ArenaRecords.new()
 var home: Control
@@ -30,10 +31,16 @@ var binding_button: Button
 var binding_status: Label
 var starting: bool = false
 var pixel_font: Font
+var detail_title := ""
+var detail_history: Array[Dictionary] = []
+var restoring_page := false
 
 func _ready() -> void:
 	preferences.load_preferences()
 	add_child(sounds)
+	var music = Music.for_tree(get_tree())
+	music.ducked = false
+	music.bind_scene(self, &"sanctuary")
 	records.load_records()
 	pixel_font = FONT.duplicate()
 	pixel_font.antialiasing = 0
@@ -48,16 +55,15 @@ func _ready() -> void:
 	actions.custom_minimum_size.x = 224
 	actions.add_theme_constant_override("separation", 4)
 	home.add_child(actions)
-	play_button = _button(actions, "CHOOSE ARENA" if is_hub else "ENTER SANCTUARY", _show_modes if is_hub else _enter_hub, true)
-	var controls := _button(actions, "PROGRESSION" if is_hub else "HOW TO PLAY", _show_progression if is_hub else _show_controls)
-	var options := _button(actions, "OPTIONS", _show_options)
-	loadout_button = _button(actions, "WEAPON LOADOUT", _show_loadout)
-	loadout_button.pressed.connect(func(): return_focus = loadout_button)
-	_button(actions, "TITLE SCREEN" if is_hub else "QUIT", _return_to_title if is_hub else func(): get_tree().quit())
+	play_button = _button(actions, "CHOOSE ARENA" if is_hub else "PLAY", _show_modes if is_hub else _show_play, true)
+	if is_hub:
+		_button(actions, "PROGRESSION", _show_progression)
+	_button(actions, "OPTIONS", _show_options)
+	if is_hub:
+		loadout_button = _button(actions, "WEAPON LOADOUT", _show_loadout)
+	_button(actions, "TITLE SCREEN" if is_hub else "QUIT", _return_to_title if is_hub else func(): Music.for_tree(get_tree()).quit_game())
 	for button in actions.get_children():
 		button.custom_minimum_size.y = 26
-	controls.pressed.connect(func(): return_focus = controls)
-	options.pressed.connect(func(): return_focus = options)
 	var data: Dictionary = records.data
 	_label(home, "PERSONAL BEST", Vector2(358, 281), 8, GOLD)
 	_label(home, "WAVE %02d   /   %d KILLS" % [data["best_wave"], data["best_kills"]], Vector2(358, 299), 8, IVORY)
@@ -125,6 +131,15 @@ func _start_game(finite: bool = false) -> void:
 		push_error("Could not open arena: %s" % error_string(error))
 
 func _open_detail(title: String) -> void:
+	if not restoring_page:
+		if detail.visible and title != detail_title:
+			var controls: Array[Control] = []
+			FocusNavigation.collect(detail, controls)
+			detail_history.append({"title": detail_title, "focus": controls.find(get_viewport().gui_get_focus_owner())})
+		elif home.visible:
+			detail_history.clear()
+			return_focus = get_viewport().gui_get_focus_owner() as Button
+	detail_title = title
 	detail_body.add_theme_constant_override("separation", 12)
 	for child in detail_body.get_children():
 		detail_body.remove_child(child)
@@ -145,7 +160,7 @@ func _show_controls() -> void:
 
 func _show_options() -> void:
 	_open_detail("OPTIONS")
-	detail_body.add_theme_constant_override("separation", 6)
+	detail_body.add_theme_constant_override("separation", 4)
 	for entry in [["Reduce flashes", preferences.reduced_flashes], ["Reduce visual motion", preferences.reduced_motion]]:
 		var toggle := CheckButton.new()
 		toggle.text = entry[0]
@@ -158,9 +173,16 @@ func _show_options() -> void:
 			toggle.toggled.connect(func(value): preferences.reduced_flashes = value; _save_preferences())
 		else:
 			toggle.toggled.connect(func(value): preferences.reduced_motion = value; _save_preferences(); queue_redraw())
-	_button(detail_body, "AUDIO VOLUMES", _show_audio)
-	_button(detail_body, "KEYBOARD BINDINGS", _show_bindings)
-	_label(detail_body, "Applies to the menu and arena. Saved automatically.", Vector2.ZERO, 12, MUTED, false)
+	var shortcuts := GridContainer.new()
+	shortcuts.columns = 2
+	shortcuts.add_theme_constant_override("h_separation", 8)
+	shortcuts.add_theme_constant_override("v_separation", 4)
+	detail_body.add_child(shortcuts)
+	for entry in [["COMBAT FEEDBACK", _show_feedback_options], ["AUDIO VOLUMES", _show_audio], ["KEYBOARD BINDINGS", _show_bindings], ["HOW TO PLAY", _show_controls], ["WEAPON LOADOUT", _show_loadout]]:
+		var shortcut := _button(shortcuts, entry[0], entry[1])
+		shortcut.custom_minimum_size = Vector2(192, 24)
+		if entry[0] == "WEAPON LOADOUT":
+			loadout_button = shortcut
 	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
 	_refresh_focus()
 	detail_body.get_child(1).grab_focus()
@@ -171,6 +193,17 @@ func _save_preferences() -> void:
 
 func _back() -> void:
 	binding_action = &""
+	if not detail_history.is_empty():
+		var previous: Dictionary = detail_history.pop_back()
+		restoring_page = true
+		_restore_detail(previous.title)
+		restoring_page = false
+		var controls: Array[Control] = []
+		FocusNavigation.collect(detail, controls)
+		if previous.focus >= 0 and previous.focus < controls.size():
+			controls[previous.focus].grab_focus()
+		return
+	detail_title = ""
 	detail.hide()
 	home.show()
 	_refresh_focus()
@@ -349,7 +382,6 @@ func _equip_weapon(id: StringName) -> void:
 
 
 func _show_modes() -> void:
-	return_focus = play_button
 	_open_detail("CHOOSE ARENA")
 	detail_body.add_theme_constant_override("separation", 8)
 	var finite := _button(detail_body, "COURTYARD RUN", _start_game.bind(true))
@@ -427,3 +459,49 @@ func _show_progression() -> void:
 		_label(detail_body, "Profile cannot be saved. XP is unavailable.", Vector2.ZERO, 12, Color("ed8c82"), false)
 	_refresh_focus()
 	back_button.grab_focus()
+
+func _show_feedback_options() -> void:
+	_open_detail("COMBAT FEEDBACK")
+	for entry in [["Hit-stop", "hit_stop"], ["Screen shake", "screen_shake"]]:
+		var toggle := CheckButton.new()
+		var key: String = entry[1]
+		toggle.text = entry[0]
+		toggle.button_pressed = preferences.get(key)
+		toggle.custom_minimum_size.y = 34
+		toggle.add_theme_stylebox_override("focus", _style(Color.TRANSPARENT, GOLD))
+		detail_body.add_child(toggle)
+		toggle.toggled.connect(func(value): preferences.set(key, value); _save_preferences())
+	_label(detail_body, "Reduce visual motion also disables both effects.", Vector2.ZERO, 12, MUTED, false)
+	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
+	_refresh_focus()
+	detail_body.get_child(1).grab_focus()
+
+func _show_play() -> void:
+	_open_detail("PLAY")
+	detail_body.add_theme_constant_override("separation", 4)
+	for entry in [["SANCTUARY", _enter_hub], ["ARENAS", _show_modes], ["ROGUELITE", _show_work_in_progress.bind("ROGUELITE")], ["CAMPAIGN", _show_work_in_progress.bind("CAMPAIGN")], ["SOUNDTRACK", _show_work_in_progress.bind("SOUNDTRACK")], ["QUIT", func(): Music.for_tree(get_tree()).quit_game()]]:
+		var button := _button(detail_body, entry[0], entry[1])
+		button.custom_minimum_size = Vector2(392, 24)
+	_refresh_focus()
+	detail_body.get_child(1).grab_focus()
+
+func _show_work_in_progress(feature: String) -> void:
+	_open_detail(feature)
+	_label(detail_body, "WORK IN PROGRESS", Vector2.ZERO, 16, GOLD)
+	var caption := _label(detail_body, "This feature is still in development.\nReturn to Play to visit Sanctuary or enter an Arena.", Vector2.ZERO, 12, MUTED, false)
+	caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_refresh_focus()
+	back_button.grab_focus()
+
+func _restore_detail(title: String) -> void:
+	var pages := {
+		"PLAY": _show_play, "CHOOSE ARENA": _show_modes,
+		"OPTIONS": _show_options, "HOW TO PLAY": _show_controls,
+		"AUDIO": _show_audio, "KEYBOARD": _show_bindings,
+		"WEAPON LOADOUT": _show_loadout, "GLOBAL PROGRESSION": _show_progression,
+		"COMBAT FEEDBACK": _show_feedback_options,
+	}
+	if pages.has(title):
+		pages[title].call()
+	else:
+		_show_work_in_progress(title)

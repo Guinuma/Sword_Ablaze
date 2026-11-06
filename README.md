@@ -2,11 +2,11 @@
 
 Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate rápido, arenas e progressão roguelite são o foco inicial. O protagonista escolhido é **The Exile**: capuz e máscara claros, capa turquesa, equipamento leve e arma com lâmina.
 
-**Arena Shooter + Roguelite primeiro. Campaign mais tarde.** O XP será transversal aos modos; o hub roguelite concentrará a progressão persistente e as skill trees. Melhorias temporárias de uma run serão separadas da progressão global.
+**Arena Shooter + Roguelite primeiro. Campaign mais tarde.** O XP é transversal às Arenas atuais; o Sanctuary concentra a consulta de progressão e receberá as skill trees funcionais. Melhorias temporárias de uma run serão separadas da progressão global.
 
 ## Estado atual
 
-Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; ainda não existe música. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. XP global é atribuído uma vez por vitória/derrota, com nível e resumo guardados; o Sanctuary liga modos, progressão, loadout e configurações.
+Arena jogável com um pátio celestial ilustrado, quatro tipos de inimigo e um elite, melhorias temporárias, HUD próprio, pausa, derrota animada e recordes locais. Menu principal com entrada na arena, controlos, opções visuais e recordes locais. Efeitos sonoros sintetizados de combate e menus usam os canais e volumes configuráveis; música original sintetizada acompanha o Sanctuary e o combate, com transições suaves. Courtyard Run termina com um boss de duas fases na décima onda e conta vitórias locais; Endless Arena mantém a sobrevivência sem fim. XP global é atribuído uma vez por vitória/derrota, com nível e resumo guardados; o Sanctuary é agora a casa jogável do Exile, com Gabriel, arsenal e porta para os modos.
 
 - Exilado com capuz e máscara refinados, caminhada de quatro frames, vistas de frente/costas/lateral, dash, dano e arma com mira independente.
 - Wisp corrompido com flutuação e sentinela fraturado com caminhada, preparação visual e disparos à distância.
@@ -28,7 +28,7 @@ HUD e menus: [notas de apresentação](docs/hud.md). Arte, prompts e limitaçõe
 
 1. Instalar **Godot 4.5.1 Standard** (sem .NET), versão de referência.
 2. Clonar o repositório e importar `project.godot`.
-3. Carregar **F5** para abrir o menu principal e escolher **PLAY ARENA**.
+3. Carregar **F5** para abrir o menu principal e escolher **PLAY → ARENAS**, seguido de Courtyard Run ou Endless Arena. **PLAY → SANCTUARY** abre a casa jogável do Exile.
 
 Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável no PATH.
 
@@ -42,8 +42,10 @@ Pelo terminal: `godot --editor --path .` ou `godot --path .`, com o executável 
 | Escape / botão II no HUD | Pausar; Escape ou Resume para retomar |
 | R | Reiniciar, incluindo durante pausa ou após morrer |
 | Tab / setas / Enter | Navegar e ativar os botões dos menus |
-| Escape nos controlos/opções | Voltar ao menu principal |
+| Escape / Back nos menus | Voltar ao ecrã anterior, mantendo o foco no botão usado |
 | Rato sobre os ícones inferiores | Consultar rank e efeito acumulado das melhorias |
+| Enter / Espaço, perto de Gabriel, arsenal ou porta no Sanctuary | Interagir; também disponível no botão contextual |
+| Escape no Sanctuary | Abrir o menu da casa; diálogos e menus suspendem o movimento |
 
 ### Regras do protótipo
 
@@ -79,6 +81,8 @@ Os valores são provisórios e precisam de playtesting.
 ## Checklist de desenvolvimento
 
 `[x]` significa implementado no protótipo; não significa equilibrado ou pronto para lançamento. `[ ]` significa trabalho pendente. Itens marcados **Decidir** são propostas que precisam de definição antes de implementação. A ordem das fases indica prioridade, sem datas comprometidas. Esta lista é um plano vivo, não uma promessa de incluir todas as propostas no lançamento.
+
+A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a próxima ordem de trabalho e tem precedência sobre a numeração das secções. As secções abaixo mantêm o histórico e o detalhe técnico.
 
 ### 1. Fundação técnica
 
@@ -203,13 +207,13 @@ Os valores são provisórios e precisam de playtesting.
 
 - [x] Partículas de impacto, morte e dano recebido, com limite e expiração.
 - [x] Flash de disparo e flash de dano nos inimigos.
-- [ ] Afinar intensidade, duração e ordem das camadas dos efeitos.
+- [x] Afinar intensidade, duração e ordem das camadas dos efeitos; projéteis acima dos atores, flashes suaves e cues curtos.
 - [x] Criar efeitos para spawn, dash, melhoria, recuperação de vida e fim de onda.
 - [x] Criar sons de tiro, impacto, eliminação, dano, dash e interação de menus.
-- [ ] Criar música de combate e ambiente do hub com transições.
+- [x] Criar música original de combate e ambiente do hub com loops, crossfade e volume reduzido durante pausa/resultados.
 - [x] Configurar buses Master, Music, SFX e UI, com volumes independentes guardados em Options → Audio Volumes.
 - [x] Limitar sons simultâneos e evitar volume excessivo em combate denso.
-- [ ] **Decidir:** incluir hit-stop e screen shake; se usados, oferecer redução/desativação.
+- [x] **Decidido e implementado:** hit-stop subtil (35 ms) e screen shake (até 1,5 px por eixo) em críticos/dano recebido, com opções independentes; Reduce visual motion desativa ambos.
 
 ### 8. Primeira run roguelite
 
@@ -233,7 +237,7 @@ Os valores são provisórios e precisam de playtesting.
 - [x] Distinguir GLOBAL XP persistente de melhorias temporárias da run, no perfil, regras e apresentação.
 - [x] Garantir regras globais partilhadas entre Courtyard Run e Endless Arena, com bónus explícito de vitória.
 - [x] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves, com identidade persistente e transação única.
-- [x] Criar Sanctuary com acesso aos modos, progressão, loadout e configurações.
+- [x] Criar Sanctuary jogável como casa do Exile, com movimento, colisões, Gabriel, arsenal, saída para os modos e menus de configurações; compras da skill tree continuam pendentes.
 - [ ] Desenhar skill trees com custos, requisitos e efeitos compreensíveis.
 - [ ] Implementar compra e aplicação dos nós desbloqueados.
 - [ ] **Decidir:** respec, limites de poder e desbloqueios de conteúdo versus bónus diretos.
@@ -259,7 +263,7 @@ Os valores são provisórios e precisam de playtesting.
 
 - [x] HUD funcional e mensagens de morte/pausa.
 - [x] Integrar ecrã de derrota com resultados, recordes e reinício.
-- [x] Criar menu principal com entrada na arena, controlos, opções e recordes locais.
+- [x] Criar menu principal PLAY / OPTIONS / QUIT, com menu Play, seleção de Arenas e acesso a controlos/loadout em Options.
 - [x] Criar seleção entre Courtyard Run finita e Endless Arena, com recordes separados.
 - [x] Criar botões de pausa para retomar, reiniciar e sair, com foco por teclado.
 - [x] Partilhar preferências visuais entre menu principal e pausa.
@@ -320,15 +324,58 @@ Os valores são provisórios e precisam de playtesting.
 - [ ] Guardar progresso narrativo no save versionado.
 - [ ] Validar uma missão completa antes de planear a produção da campanha inteira.
 
-### Próxima sequência recomendada
+### Checklist de prioridades atuais
 
-1. Recolher feedback sobre o HUD e fazer playtesting real de legibilidade, controlos e dificuldade.
-2. Afinar animações, mãos, arma, capa e leitura em combate denso; preparar sprites limpos à resolução nativa.
-3. Equilibrar os dois inimigos, composição das ondas e combinações de melhorias.
-4. Acrescentar primeiros efeitos sonoros ao menu principal e ao fluxo de entrada/saída da arena já implementados.
-5. Definir estrutura, duração e condição de vitória da primeira run antes de acrescentar boss e recompensas.
-6. Desenhar o perfil persistente, XP global, hub mínimo e pequena skill tree.
-7. Validar e exportar uma vertical slice antes de expandir conteúdo ou Campaign.
+Direção definida pelo utilizador em 2026-11-06. Executar pela ordem abaixo, terminando e validando cada prioridade antes de avançar. Os itens só são assinalados após implementação e validação; as funcionalidades futuras permanecem pendentes. As Arenas existentes continuam disponíveis enquanto Roguelite e Campaign são desenvolvidos.
+
+#### Prioridade 1 — Menus e entradas em desenvolvimento (concluída)
+
+- [x] Simplificar o menu inicial para **PLAY**, **OPTIONS** e **QUIT**, por esta ordem.
+- [x] Fazer **PLAY** abrir um menu próprio com **SANCTUARY**, **ARENAS**, **ROGUELITE**, **CAMPAIGN**, **SOUNDTRACK** e **QUIT**, por esta ordem.
+- [x] Ligar **ARENAS** à seleção existente de Courtyard Run e Endless Arena, preservando os recordes e recompensas.
+- [x] Manter **ROGUELITE** e **CAMPAIGN** como botões visíveis que abrem um ecrã **WORK IN PROGRESS**, com opção de voltar, enquanto os respetivos modos não existirem.
+- [x] Fazer **SOUNDTRACK** abrir também **WORK IN PROGRESS**. Esta entrada é distinta da música de fundo e dos controlos de volume já implementados.
+- [x] Ligar **SANCTUARY** ao hub existente até a versão jogável da prioridade 2 o substituir; não apresentar o hub atual de menus como uma casa já jogável.
+- [x] Preservar acesso aos controlos, opções e loadout na nova navegação; verificar Voltar/Escape, foco por teclado, entrada/saída das Arenas e Quit.
+
+#### Prioridade 2 — Sanctuary: a casa jogável do Exile (concluída)
+
+- [x] Transformar o Sanctuary num espaço jogável que representa a casa do **Exile**, o protagonista.
+- [x] Criar o espaço da casa, limites, colisões e apresentação coerente com a arte atual.
+- [x] Permitir andar pela casa com os controlos de movimento existentes, sem iniciar combate.
+- [x] Colocar o **arcanjo Gabriel** na casa, com uma interação clara para transmitir conhecimento e abrir a apresentação da skill tree; compras e desbloqueios permanecem na prioridade 3.
+- [x] Dar acesso ao arsenal/loadout e à saída para os modos, com indicações de interação legíveis.
+- [x] Garantir o fluxo menu Play → Sanctuary → Arena → resultados/recompensa → Sanctuary, sem duplicar XP ou perder preferências.
+- [x] Validar movimento, colisões, interações, abertura/fecho de menus e regresso ao hub após vitória, derrota ou abandono.
+
+#### Prioridade 3 — Gabriel e estrutura das skill trees
+
+- [ ] Definir Gabriel como o mentor que transmite conhecimento ao Exile através das skill trees.
+- [ ] Fazer do **arcanjo Michael** o ramo principal, centrado na **espada flamejante** que dá identidade a **Sword Ablaze**.
+- [ ] Definir os restantes ramos e o arcanjo ou santo associado a cada um, mantendo uma identidade e função próprias.
+- [ ] Definir custos, pré-requisitos e ligações entre nós; distinguir estados bloqueado, disponível e adquirido.
+- [ ] Rever os limites atuais de nível/pontos face à dimensão das árvores antes de fixar os custos; decidir também respec e limites de poder.
+- [ ] Implementar compras e desbloqueios persistentes com validação de pontos, pré-requisitos, compras repetidas e falhas de gravação.
+- [ ] Integrar a consulta e compra dos nós na interação com Gabriel, preservando a separação entre progressão permanente e melhorias temporárias das runs.
+
+#### Prioridade 4 — Catálogo alargado de armas por ramo
+
+- [ ] Criar uma lista extensa de armas desbloqueáveis nas skill trees, incluindo **armas de distância e armas de corpo a corpo**.
+- [ ] Associar cada arma ao arcanjo ou santo do respetivo ramo, com nome, tema, função em combate e nó de desbloqueio definidos.
+- [ ] Dar destaque à espada flamejante de Michael como arma central da identidade do jogo.
+- [ ] Definir uma sequência de desbloqueios por ramo e distinguir as armas iniciais das obtidas por progressão.
+- [ ] Implementar e validar primeiro o conjunto inicial do ramo de Michael; acrescentar os restantes ramos gradualmente, seguindo o catálogo.
+- [ ] Integrar seleção/equipamento das armas desbloqueadas no arsenal e aplicar os respetivos atributos e comportamentos no combate.
+- [ ] Criar os visuais, animações, ícones e feedback necessários para distinguir as armas; identificar claramente as entradas ainda em desenvolvimento.
+- [ ] Testar persistência dos desbloqueios, restrições de equipamento, interação com melhorias temporárias e equilíbrio entre distância e corpo a corpo.
+
+#### Prioridade 5 — Modos futuros e validação da experiência
+
+- [ ] Desenvolver o modo **Roguelite** como entrada própria, apoiado no Sanctuary e na progressão definidos acima; detalhar o trabalho na secção 8.
+- [ ] Desenvolver **Campaign** depois do núcleo Arena/Roguelite, seguindo a secção 14.
+- [ ] Definir e implementar a experiência da entrada **Soundtrack** antes de retirar o aviso de desenvolvimento.
+- [ ] Substituir **WORK IN PROGRESS** apenas quando a funcionalidade correspondente estiver implementada e validada.
+- [ ] Fazer playtests do fluxo completo, da progressão e da legibilidade dos menus antes de preparar a vertical slice e distribuição da secção 13.
 
 ## Organização
 
@@ -348,7 +395,7 @@ Referência visual e limitações atuais: [direção de arte](docs/art/README.md
 
 ```sh
 godot --headless --editor --path . --quit
-godot --headless --path . --quit-after 120
+godot --headless --path . --script tests/startup_smoke.gd
 godot --headless --path . --script tests/combat_smoke.gd
 godot --headless --path . --script tests/run_soak.gd
 ```
@@ -363,4 +410,4 @@ Os testes verificam a lógica do protótipo. Não substituem playtesting nem rev
 
 Consultar [CONTRIBUTING.md](CONTRIBUTING.md). Código distribuído sob a [licença MIT](LICENSE). A fonte Silkscreen inclui a sua [licença própria](assets/fonts/Silkscreen-OFL.txt). Registar origem e licença dos assets adicionados; não presumir que referências visuais têm automaticamente a mesma licença do código.
 
-O botão **MAIN MENU** na pausa e nos resultados regressa ao menu principal. Sair de uma partida em curso abandona-a; apenas derrotas atualizam os recordes. As opções visuais são guardadas automaticamente e também afetam a animação decorativa do menu.
+Na pausa e nos resultados, **MAIN MENU** regressa ao menu principal nas Arenas abertas diretamente por Play; **SANCTUARY** regressa ao hub quando a partida começou lá. Sair de uma partida em curso abandona-a; vitórias e derrotas guardam os resultados. As opções visuais são guardadas automaticamente e também afetam a animação decorativa do menu.

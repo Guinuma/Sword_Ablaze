@@ -15,6 +15,9 @@ func _run() -> void:
 	arena.preferences = arena.Preferences.new("user://melee_flow_preferences.json")
 	root.add_child(arena)
 	arena.set_physics_process(false)
+	# Exercise input/release timing independently of the optional real-time accents.
+	arena.preferences.hit_stop = false
+	arena.preferences.screen_shake = false
 	arena.run.start_intermission()
 	arena.run.start_upgrade()
 	arena.upgrades.offered.clear()

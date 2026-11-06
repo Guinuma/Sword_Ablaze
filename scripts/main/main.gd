@@ -56,6 +56,10 @@ var enemies = EnemySystem.new()
 var particles: Array[Dictionary] = []
 const CombatFeedback = preload("res://scripts/ui/combat_feedback.gd")
 var feedback = CombatFeedback.new()
+const ImpactFeedback = preload("res://scripts/ui/impact_feedback.gd")
+var impact_feedback = ImpactFeedback.new()
+const Music = preload("res://scripts/audio/music.gd")
+var music
 var hud_view: CanvasLayer
 var random := RandomNumberGenerator.new()
 
@@ -75,6 +79,9 @@ func _ready() -> void:
 	_begin_progression()
 	preferences.load_preferences()
 	add_child(sounds)
+	music = Music.for_tree(get_tree())
+	music.ducked = false
+	music.bind_scene(self, &"combat")
 	player.shot.connect(func(_origin, _direction): sounds.play(&"shot"); tutorial.shot())
 	player.dashed.connect(func(): sounds.play(&"dash"); tutorial.dashed(); feedback.add(&"dash", player.player_position))
 	run.healed.connect(func(_amount): feedback.add(&"heal", player.player_position))
@@ -106,7 +113,7 @@ func _ready() -> void:
 	hud_view.resume_requested.connect(func(): _set_paused(false))
 	hud_view.restart_requested.connect(_reset_run)
 	hud_view.main_menu_requested.connect(_return_to_menu)
-	hud_view.quit_requested.connect(func(): get_tree().quit())
+	hud_view.quit_requested.connect(func(): music.quit_game())
 	add_child(hud_view)
 	sounds.watch_buttons(hud_view)
 	world = Node2D.new()
@@ -148,11 +155,17 @@ func _physics_process(delta: float) -> void:
 	if (Input.is_action_pressed("fire") or Input.is_action_pressed("melee")) and hud_view.blocks_fire():
 		player.fire_requires_release = true
 		player.melee_requires_release = true
+	delta = impact_feedback.advance(delta, preferences.hit_stop and not preferences.reduced_motion, preferences.screen_shake and not preferences.reduced_motion)
+	world.position = impact_feedback.offset
+	overlay.position = impact_feedback.offset
+	queue_redraw()
+	if delta <= 0.0:
+		return
 	_update_effects(delta)
 	run.advance(delta)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var old_aim: Vector2 = player.aim
-	player.advance(delta, movement, get_global_mouse_position(), Input.is_action_just_pressed("dash"), Input.is_action_pressed("fire"), ARENA, Input.is_action_pressed("melee"))
+	player.advance(delta, movement, get_global_mouse_position() - impact_feedback.offset, Input.is_action_just_pressed("dash"), Input.is_action_pressed("fire"), ARENA, Input.is_action_pressed("melee"))
 	tutorial.observe(delta, movement, old_aim.distance_squared_to(player.aim) > 0.0001)
 	healing_drops.advance(delta, player.player_position, run)
 	_update_waves(delta)
@@ -187,7 +200,7 @@ func _burst(point: Vector2, color: Color, count: int) -> void:
 		if particles.size() >= 160:
 			break
 		var direction := Vector2.RIGHT.rotated(random.randf_range(0.0, TAU))
-		particles.append({"position": point, "velocity": direction * random.randf_range(30.0, 85.0), "life": 0.3, "color": color})
+		particles.append({"position": point, "velocity": direction * random.randf_range(25.0, 65.0), "life": 0.22, "color": color})
 
 
 func _update_effects(delta: float) -> void:
@@ -277,6 +290,8 @@ func _take_player_damage(amount: int = RunState.HIT_DAMAGE) -> void:
 	if player.hurt_cooldown > 0.0 or player.is_dash_protected() or run.phase != RunState.Phase.COMBAT:
 		return
 	run.take_damage(amount)
+	if run.is_active():
+		_accent_impact()
 	_burst(player.player_position, Color("65dfc1"), 10)
 	player.hurt_cooldown = player.CONTACT_COOLDOWN
 
@@ -290,6 +305,7 @@ func _change_preferences(reduced_flashes: bool, reduced_motion: bool) -> void:
 	player_visual.queue_redraw()
 	if reduced_motion:
 		particles.clear()
+		_clear_impact()
 	_update_hud()
 	queue_redraw()
 
@@ -332,6 +348,9 @@ func _on_run_won() -> void:
 
 
 func _on_run_phase_changed(phase: RunState.Phase) -> void:
+	music.ducked = phase != RunState.Phase.COMBAT
+	if phase != RunState.Phase.COMBAT:
+		_clear_impact()
 	if phase in [RunState.Phase.WON, RunState.Phase.DEAD] and not reward_received:
 		_settle_reward()
 	if phase == RunState.Phase.WON and not run_recorded:
@@ -365,6 +384,8 @@ func _reset_run() -> void:
 	enemies.clear()
 	particles.clear()
 	feedback.clear()
+	_clear_impact()
+	music.ducked = false
 	waves.reset()
 	boss_reinforcement_time = waves.settings.boss_reinforcement_interval
 	boss_reinforcement_count = 0
@@ -421,6 +442,7 @@ func _update_hud() -> void:
 
 
 func _draw() -> void:
+	draw_set_transform(impact_feedback.offset)
 	draw_texture_rect(COURTYARD, Rect2(0, 38, 640, 332), false)
 	ArenaEnvironment.draw_floor(self, ARENA, geometry.obstacles)
 	draw_rect(Rect2(0, 0, 640, 62), Color("080d16"))
@@ -428,22 +450,23 @@ func _draw() -> void:
 	if player.dash_time > 0.0 and not preferences.reduced_motion:
 		draw_line(player.player_position - player.dash_direction * 26.0, player.player_position, Color("388fba"), 10.0)
 	if player.muzzle_time > 0.0 and not preferences.reduced_flashes:
-		draw_circle(player.muzzle_position().round(), 4.0, Color("fff0b0"))
+		draw_circle(player.muzzle_position().round(), 3.0, Color(1.0, 0.94, 0.69, 0.75))
 	for item in healing_drops.items:
 		_draw_healing_drop(item)
 	for particle in particles:
 		var tint: Color = particle["color"]
-		tint.a = clampf(particle["life"] / 0.3, 0.0, 1.0)
+		tint.a = clampf(particle["life"] / 0.22, 0.0, 1.0)
 		draw_rect(Rect2(Vector2(particle["position"]).round(), Vector2(2, 2)), tint)
-	for bullet in projectiles.items:
-		draw_rect(Rect2(Vector2(bullet["position"]).round() - Vector2(2, 2), Vector2(4, 4)), Color("ffb454"))
 
-	for bullet in hostile_projectiles.items:
-		var point: Vector2 = Vector2(bullet["position"]).round()
-		draw_colored_polygon(PackedVector2Array([point + Vector2(0, -4), point + Vector2(4, 0), point + Vector2(0, 4), point + Vector2(-4, 0)]), Color("ee8de8"))
 
 
 func _draw_overlay() -> void:
+	for bullet in projectiles.items:
+		overlay.draw_rect(Rect2(Vector2(bullet["position"]).round() - Vector2(2, 2), Vector2(4, 4)), Color("ffb454"))
+
+	for bullet in hostile_projectiles.items:
+		var point: Vector2 = Vector2(bullet["position"]).round()
+		overlay.draw_colored_polygon(PackedVector2Array([point + Vector2(0, -4), point + Vector2(4, 0), point + Vector2(0, 4), point + Vector2(-4, 0)]), Color("ee8de8"))
 	feedback.draw_on(overlay, preferences.reduced_motion, preferences.reduced_flashes)
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
 		return
@@ -497,6 +520,7 @@ func _swing_melee(origin: Vector2, direction: Vector2) -> void:
 	melee.swing(origin, direction, enemies.items)
 
 func _on_critical_hit(point: Vector2) -> void:
+	_accent_impact()
 	feedback.add(&"critical", point)
 	sounds.play(&"critical")
 
@@ -504,3 +528,14 @@ func _on_critical_hit(point: Vector2) -> void:
 func _fire_player_projectile(origin: Vector2, direction: Vector2) -> void:
 	if is_inf(geometry.segment_hit(player.player_position, origin)):
 		projectiles.fire(origin, direction)
+
+func _accent_impact() -> void:
+	if run.phase == RunState.Phase.COMBAT:
+		impact_feedback.trigger(preferences.hit_stop and not preferences.reduced_motion, preferences.screen_shake and not preferences.reduced_motion)
+
+func _clear_impact() -> void:
+	impact_feedback.clear()
+	if is_instance_valid(world):
+		world.position = Vector2.ZERO
+	if is_instance_valid(overlay):
+		overlay.position = Vector2.ZERO

@@ -9,6 +9,14 @@ func check(value: bool, message: String) -> void:
 	if not value:
 		failures += 1
 		push_error(message)
+func launch_from_door(hub: Node, finite: bool) -> void:
+	hub.set_physics_process(false)
+	hub.player.player_position = Vector2(320, 294)
+	hub._interact_nearest()
+	check(hub.detail_title == "LEAVE SANCTUARY", "Walkable door must open the departure menu")
+	hub.detail_body.get_child(1).pressed.emit()
+	check(hub.detail_title == "CHOOSE ARENA", "Departure Arenas button must open mode selection")
+	hub.detail_body.get_child(1 if finite else 3).pressed.emit()
 func _run() -> void:
 	change_scene_to_file("res://scenes/main/menu.tscn")
 	await scene_changed
@@ -18,8 +26,7 @@ func _run() -> void:
 	current_scene._show_progression()
 	check(current_scene.detail.visible and root.gui_get_focus_owner() == current_scene.back_button, "Progression must open with visible keyboard focus")
 	current_scene._back()
-	current_scene._show_modes()
-	current_scene._start_game(true)
+	launch_from_door(current_scene, true)
 	await scene_changed
 	var arena = current_scene
 	arena.set_physics_process(false)
@@ -51,7 +58,7 @@ func _run() -> void:
 	check(not current_scene.is_hub, "Hub must return to title")
 	current_scene._enter_hub()
 	await scene_changed
-	current_scene._start_game(false)
+	launch_from_door(current_scene, false)
 	await scene_changed
 	arena = current_scene
 	arena.set_physics_process(false)
@@ -63,7 +70,7 @@ func _run() -> void:
 	profile.load_profile()
 	check(profile.data.xp == 300, "Abandoning a live run must not grant XP")
 	for finite in [true, false]:
-		current_scene._start_game(finite)
+		launch_from_door(current_scene, finite)
 		await scene_changed
 		arena = current_scene
 		arena.set_physics_process(false)

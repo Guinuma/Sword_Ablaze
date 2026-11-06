@@ -73,3 +73,8 @@ Each arena entry/restart allocates a saved ID before combat. RunState tracks com
 A failed terminal write keeps the result pending and exposes RETRY XP SAVE. Restart/Return first retry settlement and stay on the result if it still fails, preserving its identity and counters. A successful retry returns keyboard focus to Restart. An allocation failure keeps combat playable with a visible GLOBAL XP UNAVAILABLE notice; no retrospective identity is invented. Future-version profiles remain unchanged. Closing the app with an unsaved result still abandons it under the no-resume policy.
 
 `tests/reward_flow_smoke.gd` verifies both-mode base rewards, completed-wave deduplication, failure/retry UI, persistent totals, repeated result updates, restart separation and future-version fallback. Complete finite-run tests also verify the 300-XP capped victory reward with both loadouts. All scene tests/capture/benchmark tools use isolated profile paths selected through SceneTree metadata, and normal exits remove their temporary profile files; real player XP is not used by these checks.
+
+
+## Walkable Sanctuary integration (priority 2)
+
+The home now exposes progression through Gabriel and preserves the existing profile/reward contract. Walking, dialogue, the read-only Michael skill-tree introduction and loadout menus never allocate a run, spend points or grant XP. Skill buying remains priority 3. Door-launched Arenas use the same existing allocation/settlement path and return home after results or abandonment. House position is temporary and resets to its safe entry point on scene entry; no persistent schema change is introduced. See docs/hub.md and tests/sanctuary_smoke.gd.

@@ -47,14 +47,14 @@ Reservar `player_visuals`, `enemy_visuals` e `arena_ui` para consultas de aprese
 
 | Ordem | Conteúdo | Implementação atual |
 | --- | --- | --- |
-| Mundo, Z = 0 | Pátio, faixa superior, rasto de dash, flash, partículas, tiros do jogador, tiros hostis, nessa sequência | `_draw()` da arena |
+| Mundo, Z = 0 | Pátio, faixa superior, rasto de dash, flash e partículas, nessa sequência | `_draw()` da arena |
 | Mundo, Z = 1 | Atores, ordenados pelo Y da origem arredondada | `world.y_sort_enabled = true`; todos os visuais de ator com Z local 0 |
-| Mundo, Z = 2 | Cues de spawn/dash/melhoria/cura/fim de onda, depois escurecimento de pausa/escolha/resultados | `overlay` |
+| Mundo, Z = 2 | Tiros do jogador/hostis, cues de spawn/dash/melhoria/cura/fim de onda, depois escurecimento de pausa/escolha/resultados | `overlay` |
 | Canvas, layer = 3 | HUD, botões, menus e tooltips | `ArenaHud` |
 
 Dentro do Exilado: sombra → capa → arma quando aponta para cima → corpo → arma nos restantes ângulos. Dentro do inimigo: aviso de spawn isolado; após ativação, sombra → aviso de ataque → corpo → vida.
 
-Os projéteis e partículas atuais ficam atrás dos atores. Qualquer alteração desta prioridade deve ser verificada em combate denso; aumentar Z de um ator individual quebra a ordenação partilhada por Y. Elementos de UI pertencem ao CanvasLayer e não participam na ordenação do mundo.
+As partículas ficam atrás dos atores; desde a secção 7, os projéteis ficam acima dos atores para preservar a leitura. Qualquer alteração desta prioridade deve ser verificada em combate denso; aumentar Z de um ator individual quebra a ordenação partilhada por Y. Elementos de UI pertencem ao CanvasLayer e não participam na ordenação do mundo.
 
 ## Verificação ao acrescentar arte ou entidades
 
@@ -78,7 +78,7 @@ The wave-seven encounter introduces one per seven spawns; later ratios follow th
 
 `CombatFeedback` holds at most 32 cues for up to 0.55 simulation seconds (melee 0.16 s; critical 0.3 s), replacing the oldest at capacity. Spawn activation produces a ring, successful dash produces chevrons, a selected upgrade produces six short rays, actual healing produces a plus sign, and wave clear produces paired arcs. These are original vector primitives under the repository MIT license, independent of hitboxes and combat results.
 
-Healing emits only for a positive amount actually restored, including drop collection and intermission recovery. Full-health pickup attempts do not produce a cue. Spawn activation emits only after its warning and proximity safety checks. Cues draw above actors and below modal dimming/HUD. Their timers freeze during pause, death and upgrade selection; restart clears them. Reduced motion keeps positions/radii fixed while fading, and reduced flashes lowers their opacity. They never flash the screen or shake the camera.
+Healing emits only for a positive amount actually restored, including drop collection and intermission recovery. Full-health pickup attempts do not produce a cue. Spawn activation emits only after its warning and proximity safety checks. Cues draw above actors and below modal dimming/HUD. Their timers freeze during pause, death and upgrade selection; restart clears them. Reduced motion keeps positions/radii fixed while fading, and reduced flashes lowers their opacity. They never flash the screen. Separate optional impact accents added in section 7 offset world presentation on accepted player damage and critical hits; see docs/audio.md.
 
 `tests/feedback_smoke.gd` verifies event-driven creation, failed actions, full-health healing, paused lifetime, expiry, capacity and reset. `tools/capture_feedback.gd` captures normal and reduced settings. Existing particle bursts remain separately bounded at 160.
 
@@ -114,3 +114,8 @@ ArenaEnvironment draws low-contrast floor repair tiles and boundary trim; RuinVi
 ### Refined Exile revision 3
 
 The current player uses generated front/back/side 3 × 3 pose atlases and a 2 × 2 defeat atlas, with alpha-measured regions. ExileVisual scales all poses against each sheet's standing-pose height to BODY_HEIGHT = 32 logical pixels, samples nearest, grounds feet at y=8 and mirrors side art at the same origin. sprite_frame still maps 0 idle, 1–4 walk, 5–6 dash and 7–8 hurt. This supersedes the historical 24 × 32 SVG cell format above; the native SVG remains an inactive reference. Pose progression and PlayerState.weapon_grip are unchanged.
+
+
+## Sanctuary world (priority 2)
+
+The house has an independent ArenaGeometry instance, with furniture bases from SanctuaryLayout instead of arena ruins. Walkable bounds are Rect2(60, 100, 520, 215), actor radius 8, safe entry (320, 250). Props use their base centers as Y-sort pivots; the Exile preserves its existing ground origin. The root draws floor/walls; world actors/furnishings share Y sorting; home labels/actions use Z=5, modal shade Z=8 and detail controls Z=10. Art dimensions do not define collision. Interaction checks distance ≤46 and an unobstructed segment to the station's approach point. House walking uses PlayerState with fire/melee/dash false, so no combat signals or reward allocation occur. Dialogues and focus-loss menus suspend walking without setting global time_scale or pausing the SceneTree.

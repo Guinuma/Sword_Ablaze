@@ -87,7 +87,7 @@ func _draw() -> void:
 		bob = roundf(sin(elapsed * (12.0 if ranged else 5.0) + position.x * 0.04))
 		if ranged and (not moving or windup > 0.0):
 			bob = 0.0
-	var tint := Color(1.8, 1.5, 1.2) if state["flash"] > 0.0 and not reduced_flashes else Color.WHITE
+	var tint := Color(1.3, 1.18, 1.05) if state["flash"] > 0.0 and not reduced_flashes else Color.WHITE
 	if profile != null and profile.kind == "elite":
 		var pose := 3 if windup > 0.0 else (1 + walk_frame % 2 if moving else 0)
 		_draw_pose(ELITE, pose, 44.0)
@@ -175,7 +175,7 @@ func _draw_pose(frames: SpriteFrames, index: int, height: float, mirror: bool = 
 	var ratio := minf(height / maximum.y, max_width / maximum.x)
 	var texture := frames.get_frame_texture(&"poses", index)
 	var dimensions := (texture.get_size() * ratio).round()
-	var tint := Color(1.5, 1.3, 1.1) if state.get("flash", 0.0) > 0.0 and not reduced_flashes else Color.WHITE
+	var tint := Color(1.3, 1.18, 1.05) if state.get("flash", 0.0) > 0.0 and not reduced_flashes else Color.WHITE
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1, 1) if mirror else Vector2.ONE)
 	draw_texture_rect(texture, Rect2(Vector2(-floor(dimensions.x / 2), 8 - dimensions.y), dimensions), false, tint)
 	draw_set_transform(Vector2.ZERO)

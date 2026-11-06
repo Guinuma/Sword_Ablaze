@@ -9,7 +9,7 @@ func add(kind: StringName, point: Vector2, direction: Vector2 = Vector2.RIGHT) -
 		return
 	if items.size() == MAX_CUES:
 		items.pop_front()
-	var duration := 0.16 if kind == &"melee" else 0.3 if kind == &"critical" else DURATION
+	var duration: float = {&"melee": 0.16, &"critical": 0.24, &"spawn": 0.28, &"dash": 0.2, &"heal": 0.45, &"upgrade": 0.5, &"wave": DURATION}[kind]
 	items.append({"kind": kind, "position": point, "life": duration, "duration": duration, "direction": direction})
 
 func advance(delta: float) -> void:
@@ -25,9 +25,9 @@ func draw_on(canvas: Node2D, reduced_motion: bool, reduced_flashes: bool) -> voi
 	for item in items:
 		var progress: float = 1.0 - item.life / item.duration
 		var point: Vector2 = item.position
-		var radius := 14.0 if reduced_motion else lerpf(9.0, 23.0, progress)
+		var radius := 14.0 if reduced_motion else lerpf(9.0, 19.0, progress)
 		var tint := Color("63b7b3") if item.kind in [&"heal", &"dash"] else Color("c5a46c")
-		tint.a = (1.0 - progress) * (0.45 if reduced_flashes else 0.85)
+		tint.a = (1.0 - progress) * (0.35 if reduced_flashes else 0.65)
 		match item.kind:
 			&"melee":
 				var direction: Vector2 = item.direction
