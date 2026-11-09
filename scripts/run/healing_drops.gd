@@ -4,6 +4,7 @@ const MAX_ITEMS: int = 64
 var feather_chance: float = 0.15
 var wings_chance: float = 0.01
 var geometry: RefCounted
+var on_full_health: Callable
 var items: Array[Dictionary] = []
 
 
@@ -28,8 +29,14 @@ func advance(delta: float, point: Vector2, run: RefCounted) -> void:
 		item["life"] -= delta
 		if item["life"] <= 0.0:
 			items.remove_at(index)
-		elif point.distance_to(item["position"]) <= 16.0 and (geometry == null or is_inf(geometry.segment_hit(point, item["position"]))) and run.heal(item["amount"]) > 0:
-			items.remove_at(index)
+		elif point.distance_to(item["position"]) <= 16.0 and (geometry == null or is_inf(geometry.segment_hit(point, item["position"]))):
+			var collected: bool
+			if run.health == run.max_health:
+				collected = on_full_health.is_valid() and on_full_health.call()
+			else:
+				collected = run.heal(item["amount"]) > 0
+			if collected:
+				items.remove_at(index)
 
 
 func clear() -> void:

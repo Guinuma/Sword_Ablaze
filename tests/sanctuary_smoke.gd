@@ -72,8 +72,16 @@ func _run() -> void:
 	var skill_button = hub.detail_body.get_child(3)
 	skill_button.grab_focus()
 	skill_button.pressed.emit()
-	check(hub.detail_title == "GABRIEL'S KNOWLEDGE" and hub.detail_body.get_child(1).text.contains("MICHAEL"), "Gabriel must open the explicit skill-tree preview")
-	check(hub.skill_buttons.size() == 6 and hub.skill_buttons["michael_edge"].disabled, "The small skill tree must show six nodes and prevent unaffordable purchases")
+	check(hub.detail_title == "GABRIEL'S KNOWLEDGE" and hub.detail_body.get_child(1).text.contains("STAINED GLASS"), "Gabriel must open the explicit skill-tree preview")
+	check(hub.skill_buttons.size() == 17 and hub.skill_learn.disabled, "The glass tree must show seventeen nodes and prevent unaffordable purchases")
+	hub.skill_buttons["holy_furnace"].grab_focus()
+	await process_frame
+	check(hub.skill_learn.disabled and hub.skill_requirement.text.contains("PYRE + COUNTERCHARGE"), "Locked hybrid node must show both prerequisites")
+	check(hub.skill_status.get_global_rect().end.y <= hub.back_button.get_global_rect().position.y, "Locked hybrid inspector must fit above Back")
+	hub.skill_buttons["raphael_grace"].grab_focus()
+	await process_frame
+	check(hub.skill_name.text == "GRACE" and hub.skill_learn.disabled, "Vitality must be visible with its prerequisite locked")
+	check(hub.skill_status.get_global_rect().end.y <= hub.back_button.get_global_rect().position.y, "Vitality inspector must fit above Back")
 	await input_action(&"ui_cancel")
 	check(hub.detail_title == "GABRIEL" and root.gui_get_focus_owner().text == "SKILL TREE", "Nested Back must restore Gabriel and keyboard focus")
 	await input_action(&"ui_cancel")

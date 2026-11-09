@@ -2,7 +2,8 @@ extends RefCounted
 ## Transactional local progression store; combat integration is a separate layer.
 const Skills = preload("res://scripts/data/skill_catalog.gd")
 const VERSION := 1
-const XP_CAP := 1900
+const XP_PER_LEVEL := 100
+const STORED_XP_LIMIT := 2147483647
 const SEQUENCE_LIMIT := 1000000000
 var path: String
 var data: Dictionary = defaults()
@@ -16,8 +17,22 @@ func _init(file_path: String = "user://profile.json") -> void:
 static func defaults() -> Dictionary:
 	return {"version": VERSION, "xp": 0, "next_run_id": 1, "last_settled_run_id": 0, "active_run": {"id": 0, "mode": ""}, "skills": [], "unlocks": []}
 
+@warning_ignore("integer_division")
+static func max_level(total_cost: int = Skills.total_cost()) -> int:
+	return maxi(1, total_cost * 3 / 5)
+
+
+static func xp_cap() -> int:
+	return (max_level() - 1) * XP_PER_LEVEL
+
+
+static func visible_xp(xp: int) -> int:
+	return clampi(xp, 0, xp_cap())
+
+
+@warning_ignore("integer_division")
 static func level(xp: int) -> int:
-	return 1 + clampi(xp, 0, XP_CAP) / 100
+	return 1 + visible_xp(xp) / XP_PER_LEVEL
 
 static func reward(kills: int, cleared_waves: int, victory: bool) -> int:
 	return clampi(kills, 0, 100) + 10 * clampi(cleared_waves, 0, 10) + (100 if victory else 0)
@@ -57,7 +72,7 @@ func settle(id: int, mode: StringName, outcome: StringName, kills: int, cleared_
 		last_error = ERR_INVALID_PARAMETER
 		return {"ok": false, "awarded": 0, "error": last_error}
 	var candidate := data.duplicate(true)
-	var awarded := mini(XP_CAP - int(candidate.xp), reward(kills, cleared_waves, outcome == &"victory"))
+	var awarded := mini(maxi(0, xp_cap() - int(candidate.xp)), reward(kills, cleared_waves, outcome == &"victory"))
 	candidate.xp += awarded
 	candidate.last_settled_run_id = id
 	candidate.active_run = {"id": 0, "mode": ""}
@@ -116,7 +131,7 @@ static func _integer(value: Variant, minimum: int, maximum: int) -> bool:
 	return (value is int or value is float) and is_finite(float(value)) and value >= minimum and value <= maximum and float(value) == floorf(float(value))
 
 static func _clean(parsed: Dictionary) -> Dictionary:
-	if not _integer(parsed.get("version"), VERSION, VERSION) or not _integer(parsed.get("xp"), 0, XP_CAP) or not _integer(parsed.get("next_run_id"), 1, SEQUENCE_LIMIT) or not _integer(parsed.get("last_settled_run_id"), 0, SEQUENCE_LIMIT - 1):
+	if not _integer(parsed.get("version"), VERSION, VERSION) or not _integer(parsed.get("xp"), 0, STORED_XP_LIMIT) or not _integer(parsed.get("next_run_id"), 1, SEQUENCE_LIMIT) or not _integer(parsed.get("last_settled_run_id"), 0, SEQUENCE_LIMIT - 1):
 		return {}
 	var active = parsed.get("active_run")
 	if not active is Dictionary or not _integer(active.get("id"), 0, SEQUENCE_LIMIT - 1):
@@ -134,10 +149,12 @@ static func _clean(parsed: Dictionary) -> Dictionary:
 			return {}
 		seen.append(id)
 	for id in seen:
-		var requirement: String = Skills.node(id).requires
-		if requirement != "" and requirement not in seen:
+		if not Skills.missing_requirements(Skills.node(id), seen).is_empty():
 			return {}
-	if Skills.spent(seen) > level(int(parsed.xp)) - 1:
+	# Earlier catalogues can have a higher cap. Keep earned XP and existing builds.
+	@warning_ignore("integer_division")
+	var earned_points: int = int(parsed.xp) / XP_PER_LEVEL
+	if Skills.spent(seen) > earned_points:
 		return {}
 	# Weapon IDs remain reserved until priority 4 implements the arsenal catalogue.
 	if not parsed.get("unlocks") is Array or not parsed.unlocks.is_empty():
@@ -145,7 +162,7 @@ static func _clean(parsed: Dictionary) -> Dictionary:
 	return {"version": VERSION, "xp": int(parsed.xp), "next_run_id": int(parsed.next_run_id), "last_settled_run_id": int(parsed.last_settled_run_id), "active_run": {"id": int(active.id), "mode": String(active.mode)}, "skills": seen, "unlocks": []}
 
 func skill_points() -> int:
-	return level(int(data.xp)) - 1 - Skills.spent(data.skills)
+	return maxi(0, level(int(data.xp)) - 1 - Skills.spent(data.skills))
 
 func purchase_skill(id: String) -> Error:
 	load_profile()
@@ -155,7 +172,7 @@ func purchase_skill(id: String) -> Error:
 	if definition.is_empty() or id in data.skills:
 		last_error = ERR_INVALID_PARAMETER
 		return last_error
-	if (definition.requires != "" and definition.requires not in data.skills) or skill_points() < definition.cost:
+	if not Skills.missing_requirements(definition, data.skills).is_empty() or skill_points() < definition.cost:
 		last_error = ERR_UNAVAILABLE
 		return last_error
 	var candidate := data.duplicate(true)

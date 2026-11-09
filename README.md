@@ -238,9 +238,9 @@ A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a p
 - [x] Garantir regras globais partilhadas entre Courtyard Run e Endless Arena, com bónus explícito de vitória.
 - [x] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves, com identidade persistente e transação única.
 - [x] Criar Sanctuary jogável como casa do Exile, com movimento, colisões, Gabriel, arsenal, saída para os modos e menus de configurações; Gabriel abre agora a pequena skill tree funcional.
-- [x] Criar uma pequena skill tree funcional com três ramos, seis nós, custos, pré-requisitos e efeitos; ver [skill trees](docs/skill-trees.md).
-- [x] Implementar compra persistente e aplicação dos seis nós no combate, sem acumulação indevida com melhorias temporárias.
-- [x] **Decisão provisória:** respec gratuito, bónus diretos limitados dos seis nós e armas novas apenas na prioridade 4.
+- [x] Criar a árvore Vitral Gótico com quatro ramos, dezassete nós, custos, pré-requisitos e efeitos; ver [skill trees](docs/skill-trees.md).
+- [x] Implementar compra persistente e aplicação dos dezassete nós no combate, sem acumulação indevida com melhorias temporárias.
+- [x] **Decisão provisória:** respec gratuito e bónus diretos limitados. Os nós de Michael desbloqueiam armas.
 - [x] Apresentar estados bloqueado, disponível, sem pontos e adquirido de cada nó.
 - [x] Validar pontos, pré-requisitos, compras repetidas, gravação falhada, reposição e efeitos nas runs.
 - [ ] Equilibrar progressão inicial e evitar tornar as primeiras partidas demasiado fracas.
@@ -356,7 +356,7 @@ Versão de teste: **Michael, Gabriel e Raphael**, com dois nós por ramo. [Regra
 - [x] Fazer do **arcanjo Michael** o ramo principal, centrado na **espada flamejante** que dá identidade a **Sword Ablaze**.
 - [x] Definir os restantes ramos e o arcanjo ou santo associado a cada um, mantendo uma identidade e função próprias.
 - [x] Definir custos, pré-requisitos e ligações entre nós; distinguir estados bloqueado, disponível e adquirido.
-- [x] Rever os limites atuais de nível/pontos face à dimensão das árvores antes de fixar os custos; manter nível 20/19 pontos nesta versão, com nove pontos de custo total e respec gratuito no Sanctuary.
+- [x] Calcular o nível máximo a partir de 60% do custo total dos nós, arredondado por defeito. O respec continua gratuito no Sanctuary.
 - [x] Implementar compras e desbloqueios persistentes com validação de pontos, pré-requisitos, compras repetidas e falhas de gravação.
 - [x] Integrar a consulta e compra dos nós na interação com Gabriel, preservando a separação entre progressão permanente e melhorias temporárias das runs.
 

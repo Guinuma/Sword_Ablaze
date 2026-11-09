@@ -19,7 +19,8 @@ func _run() -> void:
 	cleanup()
 	check(Profile.reward(999, 99, false) == 200 and Profile.reward(999, 99, true) == 300, "Reward caps must apply equally before finite bonus")
 	check(Profile.reward(-1, -1, false) == 0, "Negative reward inputs must never remove XP")
-	check(Profile.level(0) == 1 and Profile.level(99) == 1 and Profile.level(100) == 2 and Profile.level(9999) == 20, "Level boundaries must derive from capped XP")
+	check(Profile.level(0) == 1 and Profile.level(99) == 1 and Profile.level(100) == 2 and Profile.level(9999) == Profile.max_level(), "Level boundaries must derive from capped XP")
+	check(Profile.max_level(400) == 240 and Profile.max_level(23) == 13 and Profile.max_level(0) == 1, "Level cap must floor 60% of total node cost")
 	var profile = Profile.new(PATH)
 	profile.load_profile()
 	check(profile.load_status == &"new" and FileAccess.file_exists(PATH) and profile.data == Profile.defaults(), "Missing profile must create validated initial save")
@@ -43,15 +44,15 @@ func _run() -> void:
 	check(not loaded.settle(next, &"endless", &"victory", 100, 10).ok, "Endless must not grant victory bonus")
 	check(loaded.settle(next, &"endless", &"defeat", 150, 25).awarded == 200, "Endless defeat must use shared capped formula")
 	var capped: Dictionary = loaded.data.duplicate(true)
-	capped.xp = 1899
+	capped.xp = Profile.xp_cap() - 1
 	check(loaded._commit(capped) == OK, "Cap fixture must save")
 	var final_id: int = loaded.begin_run(&"courtyard")
-	check(loaded.settle(final_id, &"courtyard", &"victory", 115, 10).awarded == 1 and loaded.data.xp == 1900, "Award must report only remaining XP to cap")
+	check(loaded.settle(final_id, &"courtyard", &"victory", 115, 10).awarded == 1 and loaded.data.xp == Profile.xp_cap(), "Award must report only remaining XP to cap")
 	# Corrupt primary must recover a valid backup; a bad primary must not overwrite it.
 	var backup: String = FileAccess.get_file_as_string(PATH + ".bak")
 	write_json(PATH, {"version": 1, "xp": "bad"})
 	loaded.load_profile()
-	check(loaded.load_status == &"recovered" and loaded.data.xp == 1899, "Malformed/incomplete primary must recover backup")
+	check(loaded.load_status == &"recovered" and loaded.data.xp == Profile.xp_cap() - 1, "Malformed/incomplete primary must recover backup")
 	check(loaded._commit(loaded.data) == OK and FileAccess.get_file_as_string(PATH + ".bak") == backup, "Recovery must preserve valid backup when primary is corrupt")
 	var invalid: Dictionary = Profile.defaults()
 	invalid.active_run = {"id": 5, "mode": "endless"}

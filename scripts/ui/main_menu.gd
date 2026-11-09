@@ -20,6 +20,7 @@ var records = ArenaRecords.new()
 var home: Control
 var detail: Control
 var detail_body: VBoxContainer
+var detail_panel: Panel
 var play_button: Button
 var loadout_button: Button
 var back_button: Button
@@ -73,11 +74,11 @@ func _ready() -> void:
 	detail = Control.new()
 	detail.hide()
 	add_child(detail)
-	var panel := Panel.new()
-	panel.position = Vector2(100, 36)
-	panel.size = Vector2(440, 288)
-	panel.add_theme_stylebox_override("panel", _style(Color("0c1521"), GOLD))
-	detail.add_child(panel)
+	detail_panel = Panel.new()
+	detail_panel.position = Vector2(100, 36)
+	detail_panel.size = Vector2(440, 288)
+	detail_panel.add_theme_stylebox_override("panel", _style(Color("0c1521"), GOLD))
+	detail.add_child(detail_panel)
 	detail_body = VBoxContainer.new()
 	detail_body.position = Vector2(124, 54)
 	detail_body.size = Vector2(392, 216)
@@ -421,7 +422,7 @@ func _show_modes() -> void:
 	_label(detail_body, "COURTYARD VICTORIES: %d" % finite_records.data["wins"], Vector2.ZERO, 8, GOLD)
 	var profile = GlobalProfile.for_tree(get_tree())
 	profile.load_profile()
-	_label(detail_body, "GLOBAL XP %d / 1900   LEVEL %d" % [profile.data.xp, GlobalProfile.level(profile.data.xp)], Vector2.ZERO, 8, GOLD)
+	_label(detail_body, "GLOBAL XP %d / %d   LEVEL %d" % [GlobalProfile.visible_xp(profile.data.xp), GlobalProfile.xp_cap(), GlobalProfile.level(profile.data.xp)], Vector2.ZERO, 8, GOLD)
 	if profile.last_error != OK:
 		_label(detail_body, "Progression unavailable: profile cannot be saved.", Vector2.ZERO, 12, MUTED, false)
 	elif profile.load_status in [&"recovered", &"reset"]:
@@ -446,7 +447,7 @@ func _build_hub_overview() -> void:
 	home.add_child(panel)
 	_label(panel, "THE EXILE'S PATH", Vector2(16, 15), 12, GOLD)
 	_label(panel, "LEVEL %d" % GlobalProfile.level(profile.data.xp), Vector2(16, 45), 16, IVORY)
-	_label(panel, "GLOBAL XP %d / 1900" % profile.data.xp, Vector2(16, 76), 8, GOLD)
+	_label(panel, "GLOBAL XP %d / %d" % [GlobalProfile.visible_xp(profile.data.xp), GlobalProfile.xp_cap()], Vector2(16, 76), 8, GOLD)
 	_label(panel, "SKILL POINTS %d" % profile.skill_points(), Vector2(16, 96), 8, IVORY)
 	var caption := "XP endures. Blessings reset each run."
 	if profile.last_error != OK:
@@ -461,7 +462,9 @@ func _show_progression() -> void:
 	detail_body.add_theme_constant_override("separation", 9)
 	var profile = GlobalProfile.for_tree(get_tree())
 	profile.load_profile()
-	var level_label := _label(detail_body, "LEVEL %d   /   GLOBAL XP %d" % [GlobalProfile.level(profile.data.xp), profile.data.xp], Vector2.ZERO, 12, GOLD)
+	var xp: int = GlobalProfile.visible_xp(profile.data.xp)
+	var capped := xp == GlobalProfile.xp_cap()
+	var level_label := _label(detail_body, "LEVEL %d / %d   |   XP %d" % [GlobalProfile.level(xp), GlobalProfile.max_level(), xp], Vector2.ZERO, 12, GOLD)
 	var xp_icon := TextureRect.new()
 	xp_icon.texture = GameIcons.get_icon(&"xp")
 	xp_icon.position = Vector2(370, 0)
@@ -470,14 +473,14 @@ func _show_progression() -> void:
 	level_label.add_child(xp_icon)
 	var bar := ProgressBar.new()
 	bar.custom_minimum_size = Vector2(392, 20)
-	bar.max_value = 100
-	bar.value = 100 if profile.data.xp == 1900 else profile.data.xp % 100
+	bar.max_value = GlobalProfile.XP_PER_LEVEL
+	bar.value = GlobalProfile.XP_PER_LEVEL if capped else xp % GlobalProfile.XP_PER_LEVEL
 	bar.add_theme_stylebox_override("background", _style(Color("101d2b"), GOLD))
 	bar.add_theme_stylebox_override("fill", _style(Color("63b7b3"), GOLD))
 	bar.show_percentage = false
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	detail_body.add_child(bar)
-	_label(detail_body, "MAXIMUM LEVEL" if profile.data.xp == 1900 else "%d / 100 XP TO NEXT LEVEL" % (profile.data.xp % 100), Vector2.ZERO, 8, IVORY)
+	_label(detail_body, "MAXIMUM LEVEL" if capped else "%d / %d XP TO NEXT LEVEL" % [xp % GlobalProfile.XP_PER_LEVEL, GlobalProfile.XP_PER_LEVEL], Vector2.ZERO, 8, IVORY)
 	_label(detail_body, "SKILL POINTS AVAILABLE: %d" % profile.skill_points(), Vector2.ZERO, 8, GOLD)
 	_label(detail_body, "Victories and defeats earn global XP in both arenas.", Vector2.ZERO, 12, MUTED, false)
 	_label(detail_body, "Blessings last one run. Global XP lasts between runs.", Vector2.ZERO, 12, MUTED, false)

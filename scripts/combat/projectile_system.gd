@@ -5,6 +5,8 @@ const MAX_PROJECTILES: int = 128
 signal critical_hit(point: Vector2)
 signal impacted(point: Vector2)
 signal defeated(point: Vector2)
+signal enemy_defeated(enemy: Dictionary)
+signal landed(enemy: Dictionary)
 
 const WeaponSettings = preload("res://scripts/data/weapon_settings.gd")
 var geometry: RefCounted
@@ -59,8 +61,10 @@ func advance(delta: float, enemies: Array[Dictionary], bounds: Rect2) -> void:
 			impacted.emit(impact)
 			enemies[target]["health"] -= damage
 			enemies[target]["flash"] = 0.12
+			landed.emit(enemies[target])
 			if enemies[target]["health"] <= 0:
-				enemies.remove_at(target)
+				var fallen: Dictionary = enemies.pop_at(target)
+				enemy_defeated.emit(fallen)
 				defeated.emit(impact)
 			items.remove_at(index)
 		elif not is_inf(nearest):

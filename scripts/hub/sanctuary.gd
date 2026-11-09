@@ -153,7 +153,7 @@ func _back() -> void:
 func _refresh_profile() -> void:
 	var profile = GlobalProfile.for_tree(get_tree())
 	profile.load_profile()
-	profile_caption.text = "LEVEL %d   GLOBAL XP %d" % [GlobalProfile.level(profile.data.xp), profile.data.xp]
+	profile_caption.text = "LEVEL %d   GLOBAL XP %d" % [GlobalProfile.level(profile.data.xp), GlobalProfile.visible_xp(profile.data.xp)]
 	if profile.last_error != OK:
 		profile_caption.text = "GLOBAL XP UNAVAILABLE"
 	elif profile.load_status in [&"recovered", &"reset"]:
@@ -168,54 +168,147 @@ func _show_gabriel() -> void:
 	_refresh_focus()
 	detail_body.get_child(3).grab_focus()
 
+const SkillGlass = preload("res://scripts/ui/skill_glass.gd")
 var skill_buttons: Dictionary = {}
 var skill_status: Label
+var skill_selection := "michael_edge"
+var skill_name: Label
+var skill_description: Label
+var skill_requirement: Label
+var skill_learn: Button
+var skill_profile
+var skill_glass: SkillGlass
+
+
+func _open_detail(title: String) -> void:
+	super._open_detail(title)
+	var stained_glass := title == "GABRIEL'S KNOWLEDGE"
+	detail_panel.position = Vector2(36, 21) if stained_glass else Vector2(100, 36)
+	detail_panel.size = Vector2(568, 324) if stained_glass else Vector2(440, 288)
+	detail_body.position = Vector2(57, 38) if stained_glass else Vector2(124, 54)
+	detail_body.size = Vector2(526, 260) if stained_glass else Vector2(392, 216)
+	back_button.position = Vector2(57, 307) if stained_glass else Vector2(124, 280)
+	back_button.size = Vector2(526, 28) if stained_glass else Vector2(392, 28)
+
 
 func _show_skill_tree(message: String = "") -> void:
 	_open_detail("GABRIEL'S KNOWLEDGE")
-	detail_body.get_child(0).custom_minimum_size.y = 24
-	detail_body.add_theme_constant_override("separation", 4)
-	var profile = GlobalProfile.for_tree(get_tree())
-	profile.load_profile()
-	_label(detail_body, "MICHAEL / MAIN   -   POINTS: %d" % profile.skill_points(), Vector2.ZERO, 8, GOLD)
-	var columns := HBoxContainer.new()
-	columns.add_theme_constant_override("separation", 8)
-	detail_body.add_child(columns)
-	skill_buttons.clear()
+	var heading: Label = detail_body.get_child(0)
+	heading.text = "THE STAINED GLASS"
+	heading.custom_minimum_size.y = 22
+	detail_body.add_theme_constant_override("separation", 2)
+	skill_profile = GlobalProfile.for_tree(get_tree())
+	skill_profile.load_profile()
+	_label(detail_body, "STAINED GLASS   |   LEVEL %d/%d   |   %d POINTS AVAILABLE" % [
+		GlobalProfile.level(skill_profile.data.xp), GlobalProfile.max_level(), skill_profile.skill_points()], Vector2.ZERO, 8, GOLD)
+	var content := HBoxContainer.new()
+	content.add_theme_constant_override("separation", 8)
+	detail_body.add_child(content)
+	var glass := SkillGlass.new()
+	skill_glass = glass
+	var glass_frame := Control.new()
+	glass_frame.custom_minimum_size = Vector2(315, 214)
+	content.add_child(glass_frame)
+	glass.size = Vector2(242, 164)
+	glass.scale = Vector2.ONE * 1.3
+	glass.learned = skill_profile.data.skills
+	glass_frame.add_child(glass)
 	for branch in GlobalProfile.Skills.BRANCHES:
-		var column := VBoxContainer.new()
-		column.custom_minimum_size.x = 125
-		column.add_theme_constant_override("separation", 4)
-		columns.add_child(column)
-		_label(column, branch.title + "\n" + branch.theme, Vector2.ZERO, 8, GOLD)
-		for definition in GlobalProfile.Skills.NODES:
-			if definition.branch != branch.id:
-				continue
-			var learned: bool = definition.id in profile.data.skills
-			var ready: bool = definition.requires == "" or definition.requires in profile.data.skills
-			var state := "LEARNED" if learned else "LOCKED" if not ready else "LEARN: %d PT" % definition.cost
-			if not learned and ready and profile.skill_points() < definition.cost:
-				state = "NEED %d PT" % definition.cost
-			var description: String = definition.description
-			for weapon in Preferences.Weapons.WEAPONS.values():
-				if weapon.node == definition.id:
-					description += "\n" + weapon.name
-			var button := _button(column, state + "\n" + definition.name + "\n" + description, _buy_skill.bind(definition.id), branch.id == "michael")
-			button.custom_minimum_size = Vector2(125, 40)
-			button.disabled = learned or not ready or profile.skill_points() < definition.cost or profile.last_error != OK
-			button.tooltip_text = description + (". Requires " + GlobalProfile.Skills.node(definition.requires).get("name", "") if definition.requires != "" else ". Root knowledge")
-			skill_buttons[definition.id] = button
-	skill_status = _label(detail_body, message if message != "" else "Michael unlocks weapons. Gabriel and Raphael gear is in development.", Vector2.ZERO, 11, MUTED, false)
-	skill_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	if profile.last_error != OK:
+		var title := _label(glass, branch.title, branch.center + Vector2(-42, -30), 8, branch.color)
+		title.size.x = 84
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	skill_buttons.clear()
+	for definition in GlobalProfile.Skills.NODES:
+		var id: String = definition.id
+		var learned: bool = id in glass.learned
+		var ready: bool = GlobalProfile.Skills.missing_requirements(definition, glass.learned).is_empty()
+		var button := _button(glass, "+" if definition.cost == 1 else "*", _inspect_skill.bind(id))
+		var diameter := 18 if definition.cost == 1 else 22
+		button.custom_minimum_size = Vector2(diameter, diameter)
+		button.size = button.custom_minimum_size
+		button.position = SkillGlass.POSITIONS[id] - button.size / 2
+		var tint: Color = SkillGlass.patron_color(definition.branch)
+		var border := GOLD if learned else tint if ready else tint.darkened(0.48)
+		button.add_theme_color_override("font_color", IVORY if learned else tint.lightened(0.24) if ready else Color("ad9ba7"))
+		var normal := _style(tint.darkened(0.61 if learned else 0.83), border)
+		normal.set_corner_radius_all(diameter / 2)
+		var hover := _style(Color("523526"), IVORY)
+		hover.set_corner_radius_all(diameter / 2)
+		var focus := _style(Color.TRANSPARENT, IVORY)
+		focus.set_corner_radius_all(diameter / 2)
+		button.add_theme_stylebox_override("normal", normal)
+		button.add_theme_stylebox_override("hover", hover)
+		button.add_theme_stylebox_override("pressed", hover)
+		button.add_theme_stylebox_override("focus", focus)
+		button.tooltip_text = definition.name
+		button.focus_entered.connect(_select_skill.bind(id))
+		skill_buttons[id] = button
+
+	var card := PanelContainer.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var card_style := _style(Color("15151f"), Color("80654e"))
+	card_style.set_content_margin_all(10)
+	card.add_theme_stylebox_override("panel", card_style)
+	content.add_child(card)
+	var inspector := VBoxContainer.new()
+	inspector.add_theme_constant_override("separation", 6)
+	card.add_child(inspector)
+	_label(inspector, "SELECTED NODE", Vector2.ZERO, 8, MUTED)
+	skill_name = _label(inspector, "", Vector2.ZERO, 10, GOLD)
+	skill_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	skill_description = _label(inspector, "", Vector2.ZERO, 11, IVORY, false)
+	skill_description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	skill_description.custom_minimum_size.y = 32
+	skill_requirement = _label(inspector, "", Vector2.ZERO, 11, MUTED, false)
+	skill_requirement.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	skill_requirement.custom_minimum_size.y = 32
+	skill_learn = _button(inspector, "LEARN", func(): _buy_skill(skill_selection), true)
+	skill_learn.custom_minimum_size = Vector2(142, 25)
+	var reset := _button(inspector, "RESET SKILLS (FREE)", _reset_skills)
+	reset.custom_minimum_size = Vector2(142, 25)
+	reset.disabled = glass.learned.is_empty() or skill_profile.last_error != OK
+	skill_status = _label(detail_body, message if message != "" else "+ Minor node     * Major node     |     Gold paths show learned skills", Vector2.ZERO, 11, MUTED, false)
+	if skill_profile.last_error != OK:
 		skill_status.text = "Profile unavailable. Purchases are disabled."
-	var reset := _button(detail_body, "RESET SKILLS (FREE)", _reset_skills)
-	reset.custom_minimum_size.y = 24
-	reset.disabled = profile.data.skills.is_empty() or profile.last_error != OK
+	_select_skill(skill_selection)
+	skill_buttons[skill_selection].grab_focus()
+
+
+func _inspect_skill(id: String) -> void:
+	_select_skill(id)
+	if not skill_learn.disabled:
+		skill_learn.grab_focus()
+
+
+func _select_skill(id: String) -> void:
+	skill_selection = id
+	skill_glass.selected = id
+	skill_glass.queue_redraw()
+	var definition := GlobalProfile.Skills.node(id)
+	skill_name.text = definition.name
+	skill_name.add_theme_color_override("font_color", SkillGlass.patron_color(definition.branch).lightened(0.32))
+	skill_description.text = definition.description
+	for weapon in Preferences.Weapons.WEAPONS.values():
+		if weapon.node == id:
+			skill_description.text += "\nUnlocks " + weapon.name
+	var learned: bool = id in skill_profile.data.skills
+	var missing := GlobalProfile.Skills.missing_requirements(definition, skill_profile.data.skills)
+	var ready := missing.is_empty()
+	var names := PackedStringArray()
+	for requirement in missing:
+		names.append(GlobalProfile.Skills.node(requirement).name)
+	skill_requirement.text = "%d skill point%s" % [definition.cost, "s" if definition.cost != 1 else ""]
+	if not ready:
+		skill_requirement.text += "\nRequires " + " + ".join(names)
+	skill_learn.text = "LEARNED" if learned else "LOCKED" if not ready else "NEED POINTS" if skill_profile.skill_points() < definition.cost else "LEARN"
+	skill_learn.disabled = learned or not ready or skill_profile.skill_points() < definition.cost or skill_profile.last_error != OK
 	_refresh_focus()
-	var controls: Array[Control] = []
-	FocusNavigation.collect(detail, controls)
-	controls[0].grab_focus()
+	if not skill_learn.disabled:
+		var selected: Button = skill_buttons[id]
+		selected.focus_neighbor_right = selected.get_path_to(skill_learn)
+		skill_learn.focus_neighbor_left = skill_learn.get_path_to(selected)
+
 
 func _buy_skill(id: String) -> void:
 	var profile = GlobalProfile.for_tree(get_tree())

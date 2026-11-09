@@ -52,6 +52,8 @@ const ProjectileSystem = preload("res://scripts/combat/projectile_system.gd")
 var projectiles = ProjectileSystem.new()
 const MeleeSystem = preload("res://scripts/combat/melee_system.gd")
 var melee = MeleeSystem.new()
+const AttributeSystem = preload("res://scripts/combat/attribute_system.gd")
+var attributes := AttributeSystem.new()
 const HostileProjectiles = preload("res://scripts/combat/hostile_projectiles.gd")
 var hostile_projectiles = HostileProjectiles.new()
 const EnemySystem = preload("res://scripts/enemies/enemy_system.gd")
@@ -97,6 +99,15 @@ func _ready() -> void:
 	hostile_projectiles.hit_player.connect(_take_player_damage)
 	player.shot.connect(_fire_player_projectile)
 	player.melee.connect(_swing_melee)
+	player.dashed.connect(attributes.dashed)
+	melee.landed.connect(attributes.melee_hit)
+	projectiles.landed.connect(attributes.ranged_hit)
+	healing_drops.on_full_health = attributes.grant_shield
+	melee.enemy_defeated.connect(_spread_attributes)
+	projectiles.enemy_defeated.connect(_spread_attributes)
+	attributes.defeated.connect(func(enemy: Dictionary):
+		_spread_attributes(enemy)
+		_on_projectile_defeat(enemy.position))
 	melee.impacted.connect(_on_projectile_impact)
 	melee.defeated.connect(_on_projectile_defeat)
 	melee.critical_hit.connect(_on_critical_hit)
@@ -168,6 +179,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_update_effects(delta)
 	run.advance(delta)
+	attributes.advance(delta, enemies.items)
 	var movement := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var old_aim: Vector2 = player.aim
 	player.advance(delta, movement, get_global_mouse_position() - impact_feedback.offset, Input.is_action_just_pressed("dash"), Input.is_action_pressed("fire"), ARENA, Input.is_action_pressed("melee"))
@@ -273,6 +285,10 @@ func _update_bullets(delta: float) -> void:
 	projectiles.advance(delta, enemies.items, ARENA)
 
 
+func _spread_attributes(enemy: Dictionary) -> void:
+	attributes.spread(enemy, enemies.items, geometry)
+
+
 func _on_projectile_impact(point: Vector2) -> void:
 	sounds.play(&"impact")
 	_burst(point, Color("ffb454"), 5)
@@ -294,7 +310,9 @@ func _check_contact() -> void:
 func _take_player_damage(amount: int = RunState.HIT_DAMAGE) -> void:
 	if player.hurt_cooldown > 0.0 or player.is_dash_protected() or run.phase != RunState.Phase.COMBAT:
 		return
-	run.take_damage(amount)
+	var remaining := attributes.absorb(amount)
+	if remaining > 0:
+		run.take_damage(remaining)
 	if run.is_active():
 		_accent_impact()
 	_burst(player.player_position, Color("65dfc1"), 10)
@@ -319,6 +337,7 @@ func _apply_upgrades() -> void:
 	var skills: Array = profile.data.skills
 	ranged_id = Weapons.resolve(preferences.selected_weapon, &"ranged", skills)
 	melee_id = Weapons.resolve(preferences.selected_melee, &"melee", skills)
+	attributes.configure(skills, melee_id)
 	var base: Resource = Weapons.WEAPONS[ranged_id].stats
 	if is_instance_valid(player_visual):
 		player_visual.melee_id = melee_id
@@ -335,9 +354,10 @@ func _apply_upgrades() -> void:
 	var blade = Weapons.WEAPONS[melee_id].stats.duplicate()
 	blade.damage += int(GlobalProfile.Skills.bonus(skills, "melee_damage"))
 	blade.reach += GlobalProfile.Skills.bonus(skills, "melee_reach")
+	blade.knockback += GlobalProfile.Skills.bonus(skills, "melee_knockback")
 	player.melee_settings = blade
 	melee.settings = blade
-	player.move_speed = upgrades.value("move_speed", player.SPEED)
+	player.move_speed = upgrades.value("move_speed", player.SPEED * (1.0 + GlobalProfile.Skills.bonus(skills, "move_speed")))
 	run.set_max_health(int(upgrades.value("max_health", run.MAX_HEALTH + GlobalProfile.Skills.bonus(skills, "max_health"))))
 	player.dash_recharge = upgrades.value("dash_cooldown", player.DASH_COOLDOWN * (1.0 + GlobalProfile.Skills.bonus(skills, "dash_cooldown")))
 	if is_instance_valid(player_visual):
@@ -392,6 +412,7 @@ func _reset_run() -> void:
 	sounds.stop_combat()
 	run_recorded = false
 	upgrades.reset()
+	attributes.reset()
 	run.reset()
 	healing_drops.clear()
 	player.reset()
@@ -478,6 +499,23 @@ func _draw() -> void:
 
 
 func _draw_overlay() -> void:
+	if attributes.shield > 0:
+		overlay.draw_arc(player.player_position, 12, 0, TAU, 24, Color("79d9bb"), 1.5, true)
+	for enemy in enemies.items:
+		var point: Vector2 = enemy.position + Vector2(0, -22)
+		if enemy.get("light_time", 0.0) > 0.0:
+			var mark := point + Vector2(0, -7)
+			overlay.draw_colored_polygon(PackedVector2Array([mark + Vector2(0, -3), mark + Vector2(3, 0), mark + Vector2(0, 3), mark + Vector2(-3, 0)]), Color("fff2b9"))
+		var fire_level: int = enemy.get("fire_meter", 0)
+		var impact_level: int = enemy.get("impact_meter", 0)
+		if enemy.get("burn_ticks", 0) > 0:
+			overlay.draw_colored_polygon(PackedVector2Array([point + Vector2(-5, -3), point + Vector2(-2, 2), point + Vector2(-8, 2)]), Color("ff9851"))
+		elif fire_level > 0:
+			overlay.draw_rect(Rect2(point + Vector2(-8, 0), Vector2(3 * fire_level, 2)), Color("db6e43"))
+		if enemy.get("stagger_time", 0.0) > 0.0:
+			overlay.draw_arc(point + Vector2(4, 0), 4, 0, TAU, 12, Color("fff0ad"), 1)
+		elif impact_level > 0:
+			overlay.draw_rect(Rect2(point + Vector2(0, 0), Vector2(2 * impact_level, 2)), Color("dcb87c"))
 	for bullet in projectiles.items:
 		var point: Vector2 = bullet.position.round()
 		var direction: Vector2 = bullet.direction

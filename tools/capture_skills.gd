@@ -17,7 +17,7 @@ func _run() -> void:
 	hub.detail_body.get_child(3).pressed.emit()
 	for mode in ["available", "learned"]:
 		if mode == "learned":
-			hub.skill_buttons["michael_edge"].pressed.emit()
+			hub.skill_learn.pressed.emit()
 		await process_frame
 		await process_frame
 		await RenderingServer.frame_post_draw

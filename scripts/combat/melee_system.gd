@@ -1,6 +1,8 @@
 extends RefCounted
 signal impacted(point: Vector2)
 signal defeated(point: Vector2)
+signal enemy_defeated(enemy: Dictionary)
+signal landed(enemy: Dictionary, boss: bool, heavy: bool)
 signal critical_hit(point: Vector2)
 const HitRules = preload("res://scripts/combat/hit_rules.gd")
 var geometry: RefCounted
@@ -28,9 +30,11 @@ func swing(origin: Vector2, direction: Vector2, enemies: Array[Dictionary]) -> v
 		enemy.health -= HitRules.damage(enemy, profile, settings.damage, critical, weapon.critical_multiplier, hit_direction)
 		enemy["knockback"] = hit_direction * settings.knockback * profile.knockback_multiplier
 		enemy.flash = 0.12
+		landed.emit(enemy, profile.kind == "boss", settings.damage >= 3)
 		impacted.emit(enemy.position)
 		if critical:
 			critical_hit.emit(enemy.position)
 		if enemy.health <= 0:
 			enemies.remove_at(index)
+			enemy_defeated.emit(enemy)
 			defeated.emit(enemy.position)

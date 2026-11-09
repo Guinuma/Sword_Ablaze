@@ -51,7 +51,9 @@ func advance(delta: float, target: Vector2, wave: int, bounds: Rect2) -> void:
 		var navigation_target: Vector2 = geometry.waypoint(point, target, profile.body_margin) if geometry != null else target
 		enemy["navigation_target"] = navigation_target
 		var speed: float = minf(profile.speed + (wave - 1) * profile.speed_per_wave, profile.max_speed)
-		if profile.kind == "boss":
+		if enemy.get("stagger_time", 0.0) > 0.0:
+			enemy["stagger_time"] = maxf(0.0, enemy.stagger_time - delta)
+		elif profile.kind == "boss":
 			_advance_boss(enemy, target, delta, profile)
 		elif profile.kind == "guardian":
 			var facing: Vector2 = enemy.get("facing", Vector2.DOWN)
@@ -123,6 +125,8 @@ func touches(point: Vector2) -> bool:
 	for enemy in items:
 		var profile: EnemySettings = enemy.get("profile", settings)
 		if enemy.get("spawn_time", 0.0) > 0.0:
+			continue
+		if enemy.get("stagger_time", 0.0) > 0.0:
 			continue
 		var closest: Vector2 = enemy["position"]
 		if enemy.get("charge_moved", false):
