@@ -168,16 +168,66 @@ func _show_gabriel() -> void:
 	_refresh_focus()
 	detail_body.get_child(3).grab_focus()
 
-func _show_skill_tree() -> void:
+var skill_buttons: Dictionary = {}
+var skill_status: Label
+
+func _show_skill_tree(message: String = "") -> void:
 	_open_detail("GABRIEL'S KNOWLEDGE")
-	_label(detail_body, "MICHAEL - SWORD ABLAZE", Vector2.ZERO, 12, GOLD)
-	_label(detail_body, "The main path: the flaming sword.", Vector2.ZERO, 13, IVORY, false)
-	_label(detail_body, "WORK IN PROGRESS", Vector2.ZERO, 12, GOLD)
-	var note := _label(detail_body, "Gabriel will guide your skill trees here.\nSkill purchases and weapon unlocks are not available yet.", Vector2.ZERO, 12, MUTED, false)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_button(detail_body, "VIEW GLOBAL PROGRESSION", _show_progression)
+	detail_body.get_child(0).custom_minimum_size.y = 24
+	detail_body.add_theme_constant_override("separation", 4)
+	var profile = GlobalProfile.for_tree(get_tree())
+	profile.load_profile()
+	_label(detail_body, "MICHAEL / MAIN   -   POINTS: %d" % profile.skill_points(), Vector2.ZERO, 8, GOLD)
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 8)
+	detail_body.add_child(columns)
+	skill_buttons.clear()
+	for branch in GlobalProfile.Skills.BRANCHES:
+		var column := VBoxContainer.new()
+		column.custom_minimum_size.x = 125
+		column.add_theme_constant_override("separation", 4)
+		columns.add_child(column)
+		_label(column, branch.title + "\n" + branch.theme, Vector2.ZERO, 8, GOLD)
+		for definition in GlobalProfile.Skills.NODES:
+			if definition.branch != branch.id:
+				continue
+			var learned: bool = definition.id in profile.data.skills
+			var ready: bool = definition.requires == "" or definition.requires in profile.data.skills
+			var state := "LEARNED" if learned else "LOCKED" if not ready else "LEARN: %d PT" % definition.cost
+			if not learned and ready and profile.skill_points() < definition.cost:
+				state = "NEED %d PT" % definition.cost
+			var description: String = definition.description
+			for weapon in Preferences.Weapons.WEAPONS.values():
+				if weapon.node == definition.id:
+					description += "\n" + weapon.name
+			var button := _button(column, state + "\n" + definition.name + "\n" + description, _buy_skill.bind(definition.id), branch.id == "michael")
+			button.custom_minimum_size = Vector2(125, 40)
+			button.disabled = learned or not ready or profile.skill_points() < definition.cost or profile.last_error != OK
+			button.tooltip_text = description + (". Requires " + GlobalProfile.Skills.node(definition.requires).get("name", "") if definition.requires != "" else ". Root knowledge")
+			skill_buttons[definition.id] = button
+	skill_status = _label(detail_body, message if message != "" else "Michael unlocks weapons. Gabriel and Raphael gear is in development.", Vector2.ZERO, 11, MUTED, false)
+	skill_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if profile.last_error != OK:
+		skill_status.text = "Profile unavailable. Purchases are disabled."
+	var reset := _button(detail_body, "RESET SKILLS (FREE)", _reset_skills)
+	reset.custom_minimum_size.y = 24
+	reset.disabled = profile.data.skills.is_empty() or profile.last_error != OK
 	_refresh_focus()
-	detail_body.get_child(5).grab_focus()
+	var controls: Array[Control] = []
+	FocusNavigation.collect(detail, controls)
+	controls[0].grab_focus()
+
+func _buy_skill(id: String) -> void:
+	var profile = GlobalProfile.for_tree(get_tree())
+	var error: Error = profile.purchase_skill(id)
+	_show_skill_tree("Knowledge saved." if error == OK else "Could not learn/save. Points unchanged.")
+	_refresh_profile()
+
+func _reset_skills() -> void:
+	var profile = GlobalProfile.for_tree(get_tree())
+	var error: Error = profile.reset_skills()
+	_show_skill_tree("All skill points refunded. XP preserved." if error == OK else "Could not save reset. Skills unchanged.")
+	_refresh_profile()
 
 func _show_departure() -> void:
 	_open_detail("LEAVE SANCTUARY")

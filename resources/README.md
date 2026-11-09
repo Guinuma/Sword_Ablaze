@@ -1,6 +1,6 @@
 # Dados de combate
 
-Editar `default_weapon.tres`, `default_enemy.tres` e `default_wave.tres` no Inspector do Godot para ajustar o protótipo. Os scripts em `scripts/data/` definem os campos disponíveis.
+Editar `dawn_bow.tres`, `default_enemy.tres` e `default_wave.tres` no Inspector do Godot para ajustar o protótipo. Os scripts em `scripts/data/` definem os campos disponíveis.
 
 Os componentes partilham estes recursos apenas para leitura. Vida atual, temporizadores, posição e orçamento restante pertencem às instâncias de simulação. Para criar variantes durante uma partida, duplicar o Resource antes de alterar os seus campos; nunca alterar os defaults partilhados.
 

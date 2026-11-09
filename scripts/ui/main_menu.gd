@@ -357,28 +357,54 @@ func _refresh_focus() -> void:
 	FocusNavigation.ring(controls)
 
 
-func _show_loadout() -> void:
+func _show_loadout(focus_id: StringName = &"") -> void:
 	_open_detail("WEAPON LOADOUT")
-	detail_body.add_theme_constant_override("separation", 7)
-	for entry in [[&"blade", "BLADE RIFLE", "Precise single shots. Fast fire; reliable at range."], [&"scatter", "EMBER FAN", "Five-shot spread. Slow fire; strongest up close."]]:
-		var id: StringName = entry[0]
-		var button := _button(detail_body, ("SELECTED: " if preferences.selected_weapon == id else "EQUIP: ") + entry[1], _equip_weapon.bind(id))
+	detail_body.add_theme_constant_override("separation", 2)
+	var profile = GlobalProfile.for_tree(get_tree())
+	profile.load_profile()
+	var skills: Array = profile.data.skills
+	var focus: Button
+	for id in Preferences.Weapons.WEAPONS:
+		var entry: Dictionary = Preferences.Weapons.WEAPONS[id]
+		var saved: StringName = preferences.selected_melee if entry.slot == &"melee" else preferences.selected_weapon
+		var selected: bool = Preferences.Weapons.resolve(saved, entry.slot, skills) == id
+		var available := Preferences.Weapons.unlocked(id, skills)
+		var prefix := "SELECTED" if selected else ("EQUIP" if available else "LOCKED")
+		var button := _button(detail_body, "%s: %s" % [prefix, entry.name.to_upper()], _equip_weapon.bind(id))
+		button.disabled = not available
 		button.icon = GameIcons.get_icon(id)
 		button.add_theme_constant_override("icon_max_width", 16)
-		button.custom_minimum_size = Vector2(392, 30)
-		_label(detail_body, entry[2], Vector2.ZERO, 12, MUTED, false)
-	_label(detail_body, "Choose before entering. Blessings reset each run.", Vector2.ZERO, 12, MUTED, false)
-	save_error = _label(detail_body, "", Vector2.ZERO, 12, Color("ed8c82"), false)
+		button.custom_minimum_size = Vector2(392, 24)
+		var note: String = entry.role if available else "Unlock with " + Preferences.Weapons.Skills.node(entry.node).name
+		_label(detail_body, "%s / %s" % [String(entry.slot).capitalize(), note], Vector2.ZERO, 11, MUTED, false)
+		if id == focus_id or focus == null:
+			focus = button
+	_label(detail_body, "Gabriel and Raphael weapons are in development.", Vector2.ZERO, 11, MUTED, false)
+	save_error = _label(detail_body, "", Vector2.ZERO, 11, Color("ed8c82"), false)
+	save_error.hide()
 	_refresh_focus()
-	detail_body.get_child(1).grab_focus()
+	focus.grab_focus()
+
 
 func _equip_weapon(id: StringName) -> void:
-	if id not in [&"blade", &"scatter"]:
+	var profile = GlobalProfile.for_tree(get_tree())
+	profile.load_profile()
+	if not Preferences.Weapons.unlocked(id, profile.data.skills):
 		return
-	preferences.selected_weapon = id
-	preferences.save()
-	_show_loadout()
-	save_error.text = "Could not save weapon choice." if preferences.last_error != OK else ""
+	var old_ranged: StringName = preferences.selected_weapon
+	var old_melee: StringName = preferences.selected_melee
+	if Preferences.Weapons.WEAPONS[id].slot == &"melee":
+		preferences.selected_melee = id
+	else:
+		preferences.selected_weapon = id
+	var error: Error = preferences.save()
+	if error != OK:
+		preferences.selected_weapon = old_ranged
+		preferences.selected_melee = old_melee
+	_show_loadout(id)
+	if error != OK:
+		save_error.text = "Could not save weapon choice."
+		save_error.show()
 
 
 func _show_modes() -> void:
@@ -421,7 +447,7 @@ func _build_hub_overview() -> void:
 	_label(panel, "THE EXILE'S PATH", Vector2(16, 15), 12, GOLD)
 	_label(panel, "LEVEL %d" % GlobalProfile.level(profile.data.xp), Vector2(16, 45), 16, IVORY)
 	_label(panel, "GLOBAL XP %d / 1900" % profile.data.xp, Vector2(16, 76), 8, GOLD)
-	_label(panel, "SKILL POINTS %d" % (GlobalProfile.level(profile.data.xp) - 1), Vector2(16, 96), 8, IVORY)
+	_label(panel, "SKILL POINTS %d" % profile.skill_points(), Vector2(16, 96), 8, IVORY)
 	var caption := "XP endures. Blessings reset each run."
 	if profile.last_error != OK:
 		caption = "Progression unavailable. Check your save."
@@ -452,7 +478,7 @@ func _show_progression() -> void:
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	detail_body.add_child(bar)
 	_label(detail_body, "MAXIMUM LEVEL" if profile.data.xp == 1900 else "%d / 100 XP TO NEXT LEVEL" % (profile.data.xp % 100), Vector2.ZERO, 8, IVORY)
-	_label(detail_body, "SKILL POINTS AVAILABLE: %d" % (GlobalProfile.level(profile.data.xp) - 1), Vector2.ZERO, 8, GOLD)
+	_label(detail_body, "SKILL POINTS AVAILABLE: %d" % profile.skill_points(), Vector2.ZERO, 8, GOLD)
 	_label(detail_body, "Victories and defeats earn global XP in both arenas.", Vector2.ZERO, 12, MUTED, false)
 	_label(detail_body, "Blessings last one run. Global XP lasts between runs.", Vector2.ZERO, 12, MUTED, false)
 	if profile.last_error != OK:

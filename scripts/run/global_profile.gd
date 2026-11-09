@@ -1,5 +1,6 @@
 extends RefCounted
 ## Transactional local progression store; combat integration is a separate layer.
+const Skills = preload("res://scripts/data/skill_catalog.gd")
 const VERSION := 1
 const XP_CAP := 1900
 const SEQUENCE_LIMIT := 1000000000
@@ -124,11 +125,51 @@ static func _clean(parsed: Dictionary) -> Dictionary:
 		return {}
 	if (active.id == 0 and active.get("mode") != "") or (active.id > 0 and (active.id <= parsed.last_settled_run_id or active.get("mode") not in ["courtyard", "endless"])):
 		return {}
-	# No purchasable definitions exist yet; reserved ID lists must remain empty.
-	for field in ["skills", "unlocks"]:
-		if not parsed.get(field) is Array or not parsed[field].is_empty():
+	var skills = parsed.get("skills")
+	if not skills is Array or skills.size() > Skills.NODES.size():
+		return {}
+	var seen: Array[String] = []
+	for id in skills:
+		if not id is String or id in seen or Skills.node(id).is_empty():
 			return {}
-	return {"version": VERSION, "xp": int(parsed.xp), "next_run_id": int(parsed.next_run_id), "last_settled_run_id": int(parsed.last_settled_run_id), "active_run": {"id": int(active.id), "mode": String(active.mode)}, "skills": [], "unlocks": []}
+		seen.append(id)
+	for id in seen:
+		var requirement: String = Skills.node(id).requires
+		if requirement != "" and requirement not in seen:
+			return {}
+	if Skills.spent(seen) > level(int(parsed.xp)) - 1:
+		return {}
+	# Weapon IDs remain reserved until priority 4 implements the arsenal catalogue.
+	if not parsed.get("unlocks") is Array or not parsed.unlocks.is_empty():
+		return {}
+	return {"version": VERSION, "xp": int(parsed.xp), "next_run_id": int(parsed.next_run_id), "last_settled_run_id": int(parsed.last_settled_run_id), "active_run": {"id": int(active.id), "mode": String(active.mode)}, "skills": seen, "unlocks": []}
+
+func skill_points() -> int:
+	return level(int(data.xp)) - 1 - Skills.spent(data.skills)
+
+func purchase_skill(id: String) -> Error:
+	load_profile()
+	if last_error != OK:
+		return last_error
+	var definition: Dictionary = Skills.node(id)
+	if definition.is_empty() or id in data.skills:
+		last_error = ERR_INVALID_PARAMETER
+		return last_error
+	if (definition.requires != "" and definition.requires not in data.skills) or skill_points() < definition.cost:
+		last_error = ERR_UNAVAILABLE
+		return last_error
+	var candidate := data.duplicate(true)
+	candidate.skills.append(id)
+	return _commit(candidate)
+
+func reset_skills() -> Error:
+	load_profile()
+	if last_error != OK:
+		return last_error
+	var candidate := data.duplicate(true)
+	candidate.skills = []
+	return _commit(candidate)
+
 
 
 static func for_tree(tree: SceneTree):

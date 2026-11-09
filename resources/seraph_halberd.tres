@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/melee_settings.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+damage = 3
+reach = 49.0
+half_angle = 0.62
+cooldown = 0.72
+knockback = 245.0

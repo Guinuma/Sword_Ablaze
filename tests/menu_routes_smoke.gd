@@ -26,6 +26,11 @@ func escape(menu: Node) -> void:
 func _run() -> void:
 	for suffix in ["", ".bak", ".tmp"]:
 		DirAccess.remove_absolute(String(get_meta("profile_path")) + suffix)
+	var profile = load("res://scripts/run/global_profile.gd").for_tree(self)
+	var candidate: Dictionary = profile.defaults()
+	candidate.xp = 300
+	candidate.skills = ["michael_edge", "michael_reach"]
+	check(profile._commit(candidate) == OK, "Test profile must unlock Michael's weapons")
 	change_scene_to_file("res://scenes/main/menu.tscn")
 	await scene_changed
 	var menu = current_scene
@@ -56,11 +61,11 @@ func _run() -> void:
 		check(menu.detail_title == entry[1], "Options must preserve access to " + entry[0])
 		if entry[0] == "WEAPON LOADOUT":
 			var depth: int = menu.detail_history.size()
-			press(menu, "EQUIP: EMBER FAN")
-			check(menu.preferences.selected_weapon == &"scatter" and menu.detail_history.size() == depth, "Equipping must save without adding duplicate history")
+			press(menu, "EQUIP: JUDGMENT LANCE")
+			check(menu.preferences.selected_weapon == &"judgment_lance" and menu.detail_history.size() == depth, "Equipping must save without adding duplicate history")
 			var saved = menu.Preferences.new(menu.preferences.path)
 			saved.load_preferences()
-			check(saved.selected_weapon == &"scatter", "Weapon choice must remain persistent through the new menu route")
+			check(saved.selected_weapon == &"judgment_lance", "Weapon choice must remain persistent through the new menu route")
 		escape(menu)
 		check(menu.detail_title == "OPTIONS" and root.gui_get_focus_owner().text == entry[0], "Nested settings must return to Options with focus restored")
 	escape(menu)

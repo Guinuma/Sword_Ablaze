@@ -9,7 +9,9 @@ const AUDIO_BUSES = ["Master", "Music", "SFX", "UI"]
 var volumes: Dictionary = {"Master": 1.0, "Music": 1.0, "SFX": 1.0, "UI": 1.0}
 const REMAPPABLE = [&"move_left", &"move_right", &"move_up", &"move_down", &"fire", &"melee", &"dash", &"reset_sandbox"]
 var bindings: Dictionary = {}
-var selected_weapon: StringName = &"blade"
+const Weapons = preload("res://scripts/data/weapon_catalog.gd")
+var selected_weapon: StringName = Weapons.STARTER_RANGED
+var selected_melee: StringName = Weapons.STARTER_MELEE
 var last_error: Error = OK
 var unsupported_version: bool = false
 
@@ -23,8 +25,8 @@ func load_preferences() -> void:
 	var data := _read(path)
 	if data.is_empty():
 		data = _read(path + ".bak")
-	var weapon_id = data.get("selected_weapon", "blade")
-	selected_weapon = StringName(weapon_id) if weapon_id is String and weapon_id in ["blade", "scatter"] else &"blade"
+	selected_weapon = _load_slot(data.get("selected_weapon"), &"ranged")
+	selected_melee = _load_slot(data.get("selected_melee"), &"melee")
 	reduced_flashes = data.get("reduced_flashes", false)
 	reduced_motion = data.get("reduced_motion", false)
 	hit_stop = data.get("hit_stop", true) if data.get("hit_stop", true) is bool else true
@@ -44,6 +46,14 @@ func load_preferences() -> void:
 	apply_bindings()
 
 
+func _load_slot(value: Variant, slot: StringName) -> StringName:
+	var id := StringName(value) if value is String else &""
+	var entry: Dictionary = Weapons.WEAPONS.get(id, {})
+	if entry.get("slot") == slot:
+		return id
+	return Weapons.resolve(&"", slot, [])
+
+
 func save() -> Error:
 	if unsupported_version:
 		last_error = ERR_UNAVAILABLE
@@ -52,7 +62,7 @@ func save() -> Error:
 	if file == null:
 		last_error = FileAccess.get_open_error()
 		return last_error
-	file.store_string(JSON.stringify({"version": 1, "hit_stop": hit_stop, "screen_shake": screen_shake, "reduced_flashes": reduced_flashes, "reduced_motion": reduced_motion, "volumes": volumes, "bindings": bindings, "selected_weapon": selected_weapon}))
+	file.store_string(JSON.stringify({"version": 1, "hit_stop": hit_stop, "screen_shake": screen_shake, "reduced_flashes": reduced_flashes, "reduced_motion": reduced_motion, "volumes": volumes, "bindings": bindings, "selected_weapon": selected_weapon, "selected_melee": selected_melee}))
 	file.flush()
 	last_error = file.get_error()
 	file.close()

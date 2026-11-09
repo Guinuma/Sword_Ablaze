@@ -1,16 +1,33 @@
-# Prototype weapon loadouts
+# Catálogo de armas
 
-Main menu → Weapon Loadout offers two starting weapons. Both are available immediately; no global progression is required. The selected `blade` or `scatter` ID is saved as an optional version-1 preferences field. Missing/invalid IDs select Blade Rifle. Choice takes effect on arena entry, remains through restarts and is preserved when visual/audio/input preferences are saved. Temporary upgrades reset each run and recalculate from the selected weapon Resource.
+O arsenal do Sanctuary e **WEAPON LOADOUT** nas opções permitem equipar uma arma de corpo a corpo (botão direito/E) e outra de distância (botão esquerdo/Espaço).
 
-| Weapon | Shot interval | Damage per projectile | Projectile speed | Knockback per hit | Pattern |
-| --- | --- | --- | --- | --- | --- |
-| Blade Rifle | 0.16 s | 1 | 360 px/s | 135 px/s | One accurate shot |
-| Ember Fan | 0.55 s | 1 | 300 px/s | 85 px/s | Five projectiles equally spaced over 0.5 radians |
+## Michael — jogável
 
-The fan trades long-range precision and repeat-fire frequency for close-range coverage and burst damage. A centered small target 40 px from the player receives all five pellets; at 200 px only the center pellet connects. The rifle hits once at either distance and fires over three times as often. Those geometry differences are verified through real projectile collision in `tests/weapon_smoke.gd`, rather than a stat comparison alone. They establish a mechanical alternative, not final balance: damage upgrades apply per pellet and need combination playtesting.
+| Arma | Tipo | Disponibilidade | Função |
+| --- | --- | --- | --- |
+| **Sword Ablaze** | Corpo a corpo | Inicial | Espada flamejante com arco de 120°, alcance de 32 px, 2 de dano e recuperação de 0,45 s. |
+| Dawn Bow | Distância | Inicial | Arco de precisão com flechas de 1 de dano a cada 0,16 s. |
+| Seraph Halberd | Corpo a corpo | Ember Edge, 1 ponto | Haste dourada de 49 px e 3 de dano base, com arco estreito, forte recuo e recuperação de 0,72 s. |
+| Judgment Lance | Distância | Flame Reach, 2 pontos após Ember Edge | Dispara um dardo veloz de 4 de dano a cada 0,58 s. |
 
-One trigger creates one volley and consumes one fire cooldown. Existing projectile caps, lifetime, nearest-target collision, guardian armor, dash input and release-after-menu rules still apply. If the projectile cap is reached during a volley, remaining pellets are dropped. Audio throttling produces one shot cue for simultaneous pellet events. All pellets share the same muzzle origin and fan around the current aim. The current gun sprite is shared placeholder presentation; a dedicated Ember Fan visual/icon remains future art work.
+## Gabriel e Raphael — em desenvolvimento
 
-Weapon regression checks cover close/distant hit patterns, selected Resource application to player and projectiles, loadout persistence and upgrade/reset behavior. Menu tests cover equipping/saving, and navigation tests include the loadout screen. `tools/capture_loadout.gd` captures its presentation.
+| Ramo | Nó | Arma | Tipo | Tema e função prevista |
+| --- | --- | --- | --- | --- |
+| Gabriel | Clear Sight | Herald’s Bow | Distância | Arco luminoso de precisão. |
+| Gabriel | Clear Sight | Messenger’s Foil | Corpo a corpo | Florete prateado de estocada rápida. |
+| Gabriel | True Aim | Annunciation | Distância | Besta cerimonial para alvos isolados. |
+| Gabriel | True Aim | Choir Blades | Corpo a corpo | Lâminas gémeas de alcance curto. |
+| Raphael | Living Light | Pilgrim Staff | Corpo a corpo | Bastão de peregrino para afastar inimigos. |
+| Raphael | Living Light | Balm Sling | Distância | Funda com sementes luminosas para média distância. |
+| Raphael | Renewed Step | Verdant Crook | Corpo a corpo | Cajado de vinha com varrimento largo para abrir espaço. |
+| Raphael | Renewed Step | Lantern of the Road | Distância | Lanterna de viagem com orbes lentas para controlar corredores. |
 
-The blade now has the shared directional melee attack (right-click/E), independent of starting firearm. Keen Edge adds 10 percentage points of critical chance per rank to both weapon systems (up to 30%); each critical doubles damage before guardian armor. Base critical chance is zero. Fire-rate/damage firearm blessings retain their described firearm effects.
+## Persistência e combate
+
+Os nós comprados no perfil global determinam os desbloqueios. As escolhas ficam nas preferências e são verificadas à entrada e ao reiniciar uma arena. Um respec volta a bloquear as armas afetadas e o jogo usa a arma inicial do respetivo espaço. As escolhas antigas de Blade Rifle e Ember Fan passam para Dawn Bow.
+
+Cadência, dano e recuo das bênçãos de disparo aplicam-se à arma de distância equipada. Keen Edge afeta ambos os ataques. Os bónus permanentes da árvore acumulam com as bênçãos, que desaparecem ao reiniciar.
+
+As quatro armas têm ícones e silhuetas próprias. O Exile mostra a arma de corpo a corpo enquanto se move e a arma de distância durante o disparo. O rasto dos projéteis e o arco dos golpes refletem a arma usada.

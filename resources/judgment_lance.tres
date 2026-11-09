@@ -4,10 +4,8 @@
 
 [resource]
 script = ExtResource("1")
-fire_interval = 0.55
-projectile_speed = 300.0
-damage = 1
-knockback = 85.0
-muzzle_offset = 16.0
-pellets = 5
-spread = 0.5
+fire_interval = 0.58
+projectile_speed = 510.0
+damage = 4
+knockback = 230.0
+muzzle_offset = 19.0

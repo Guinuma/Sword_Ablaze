@@ -19,6 +19,9 @@ const CombatTutorial = preload("res://scripts/ui/combat_tutorial.gd")
 var tutorial = CombatTutorial.new()
 const GlobalProfile = preload("res://scripts/run/global_profile.gd")
 var profile
+const Weapons = preload("res://scripts/data/weapon_catalog.gd")
+var ranged_id: StringName = Weapons.STARTER_RANGED
+var melee_id: StringName = Weapons.STARTER_MELEE
 var active_run_id: int = 0
 var reward_pending: bool = false
 var reward_received: bool = false
@@ -122,6 +125,8 @@ func _ready() -> void:
 	add_child(world)
 	ArenaEnvironment.populate(world, geometry.obstacles)
 	player_visual = ExileVisual.new()
+	player_visual.melee_id = melee_id
+	player_visual.ranged_id = ranged_id
 	player_visual.defeat_finished.connect(_update_hud)
 	player_visual.reduced_flashes = preferences.reduced_flashes
 	player_visual.reduced_motion = preferences.reduced_motion
@@ -311,18 +316,30 @@ func _change_preferences(reduced_flashes: bool, reduced_motion: bool) -> void:
 
 
 func _apply_upgrades() -> void:
-	var base = load("res://resources/scatter_weapon.tres" if preferences.selected_weapon == &"scatter" else "res://resources/default_weapon.tres")
+	var skills: Array = profile.data.skills
+	ranged_id = Weapons.resolve(preferences.selected_weapon, &"ranged", skills)
+	melee_id = Weapons.resolve(preferences.selected_melee, &"melee", skills)
+	var base: Resource = Weapons.WEAPONS[ranged_id].stats
+	if is_instance_valid(player_visual):
+		player_visual.melee_id = melee_id
+		player_visual.ranged_id = ranged_id
 	var weapon = base.duplicate()
+	weapon.projectile_speed = base.projectile_speed * (1.0 + GlobalProfile.Skills.bonus(skills, "projectile_speed"))
 	weapon.fire_interval = upgrades.value("fire_interval", base.fire_interval)
 	weapon.damage = int(upgrades.value("damage", base.damage))
-	weapon.critical_chance = clampf(upgrades.value("critical_chance", base.critical_chance), 0.0, 1.0)
+	weapon.critical_chance = clampf(upgrades.value("critical_chance", base.critical_chance + GlobalProfile.Skills.bonus(skills, "critical_chance")), 0.0, 1.0)
 	weapon.knockback = upgrades.value("knockback", base.knockback)
 	player.weapon = weapon
 	projectiles.weapon = weapon
 	melee.weapon = weapon
+	var blade = Weapons.WEAPONS[melee_id].stats.duplicate()
+	blade.damage += int(GlobalProfile.Skills.bonus(skills, "melee_damage"))
+	blade.reach += GlobalProfile.Skills.bonus(skills, "melee_reach")
+	player.melee_settings = blade
+	melee.settings = blade
 	player.move_speed = upgrades.value("move_speed", player.SPEED)
-	run.set_max_health(int(upgrades.value("max_health", run.MAX_HEALTH)))
-	player.dash_recharge = upgrades.value("dash_cooldown", player.DASH_COOLDOWN)
+	run.set_max_health(int(upgrades.value("max_health", run.MAX_HEALTH + GlobalProfile.Skills.bonus(skills, "max_health"))))
+	player.dash_recharge = upgrades.value("dash_cooldown", player.DASH_COOLDOWN * (1.0 + GlobalProfile.Skills.bonus(skills, "dash_cooldown")))
 	if is_instance_valid(player_visual):
 		player_visual.walk_rate = 8.0 * player.move_speed / player.SPEED
 
@@ -433,8 +450,8 @@ func _update_hud() -> void:
 	hud_view.present_reward(run.phase in [RunState.Phase.WON, RunState.Phase.DEAD], reward_pending, reward_received, reward_awarded, GlobalProfile.level(profile.data.xp), active_run_id == 0)
 	hud_view.control_hint.text = tutorial.hint() if active_run_id > 0 else "GLOBAL XP UNAVAILABLE THIS RUN"
 	hud_view.control_hint.visible = run.is_active() and (tutorial.step < 5 or active_run_id == 0)
-	hud_view.weapon_icon.texture = hud_view.GameIcons.get_icon(preferences.selected_weapon)
-	hud_view.weapon_icon.tooltip_text = "Ember Fan" if preferences.selected_weapon == &"scatter" else "Blade Rifle"
+	hud_view.weapon_icon.texture = hud_view.GameIcons.get_icon(melee_id)
+	hud_view.weapon_icon.tooltip_text = "%s / %s" % [Weapons.WEAPONS[melee_id].name, Weapons.WEAPONS[ranged_id].name]
 	hud_view.dash_key.text = CombatTutorial.key_name(&"dash")
 	hud_view.menu_hint.text = "ESC RESUME    %s RESTART" % CombatTutorial.key_name(&"reset_sandbox")
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
@@ -462,7 +479,12 @@ func _draw() -> void:
 
 func _draw_overlay() -> void:
 	for bullet in projectiles.items:
-		overlay.draw_rect(Rect2(Vector2(bullet["position"]).round() - Vector2(2, 2), Vector2(4, 4)), Color("ffb454"))
+		var point: Vector2 = bullet.position.round()
+		var direction: Vector2 = bullet.direction
+		var heavy := ranged_id == &"judgment_lance"
+		overlay.draw_line(point - direction * (12.0 if heavy else 6.0), point, Weapons.WEAPONS[ranged_id].color, 3.0 if heavy else 1.0)
+		if heavy:
+			overlay.draw_circle(point, 2.0, Color("fff3da"))
 
 	for bullet in hostile_projectiles.items:
 		var point: Vector2 = Vector2(bullet["position"]).round()
@@ -516,7 +538,7 @@ func _swing_melee(origin: Vector2, direction: Vector2) -> void:
 	if not run.is_active():
 		return
 	sounds.play(&"melee")
-	feedback.add(&"melee", origin, direction)
+	feedback.add(&"melee", origin, direction, {"reach": melee.settings.reach, "angle": melee.settings.half_angle, "color": Weapons.WEAPONS[melee_id].color})
 	melee.swing(origin, direction, enemies.items)
 
 func _on_critical_hit(point: Vector2) -> void:

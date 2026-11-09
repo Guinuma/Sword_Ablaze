@@ -8,7 +8,7 @@ The finite run uses the existing nine encounter recipes in order, followed by a 
 
 Target duration is 10–15 minutes for a successful early playtest, including upgrade selection and the boss. This is a tuning target, not a timeout, minimum duration or measured result. Faster wins are valid. A run never ends merely because time passes. Current automated timings and spawn budgets do not prove this duration; tune it through human runs after the complete flow exists.
 
-The player selects Blade Rifle or Ember Fan before entering. Movement, aim, dash and damage protection remain the same. Temporary blessings are offered after clearing waves 3, 6 and 9, before the next intermission completes. Clearing wave nine therefore always offers the last eligible blessing before the boss. Exhausting all eligible upgrades skips the choice rather than blocking progression.
+The player selects a melee weapon and a ranged weapon before entering. Movement, aim, dash and damage protection remain the same. Temporary blessings are offered after clearing waves 3, 6 and 9, before the next intermission completes. Clearing wave nine therefore always offers the last eligible blessing before the boss. Exhausting all eligible upgrades skips the choice rather than blocking progression.
 
 Ordinary waves retain the existing three-second intermission and up-to-20-HP recovery on clear. The run does not add shops, currency, rerolls, ammo or a time-pressure economy as a prerequisite for its first complete version. Broader economy decisions remain separate checklist work.
 

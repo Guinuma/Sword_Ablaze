@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c4ss2dfhecb04"
-path="res://.godot/imported/scatter.svg-1310f329ddafd249546406def1f0bdb5.ctex"
+uid="uid://bi60elpg6cxcy"
+path="res://.godot/imported/seraph_halberd.svg-e95a66367be334f162899bb70beb46c3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/icons/scatter.svg"
-dest_files=["res://.godot/imported/scatter.svg-1310f329ddafd249546406def1f0bdb5.ctex"]
+source_file="res://assets/art/icons/seraph_halberd.svg"
+dest_files=["res://.godot/imported/seraph_halberd.svg-e95a66367be334f162899bb70beb46c3.ctex"]
 
 [params]
 

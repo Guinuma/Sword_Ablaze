@@ -84,7 +84,7 @@ func _build_status_bar() -> void:
 	weapon_icon.position = Vector2(208, 34)
 	weapon_icon.size = Vector2(16, 16)
 	weapon_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	weapon_icon.texture = GameIcons.get_icon(&"blade")
+	weapon_icon.texture = GameIcons.get_icon(&"sword_ablaze")
 	add_child(weapon_icon)
 	var melee_icon := TextureRect.new()
 	melee_icon.position = Vector2(426, 34)

@@ -8,7 +8,7 @@ signal defeated(point: Vector2)
 
 const WeaponSettings = preload("res://scripts/data/weapon_settings.gd")
 var geometry: RefCounted
-var weapon: WeaponSettings = load("res://resources/default_weapon.tres")
+var weapon: WeaponSettings = load("res://resources/dawn_bow.tres")
 const EnemySettings = preload("res://scripts/data/enemy_settings.gd")
 var enemy_settings: EnemySettings = load("res://resources/default_enemy.tres")
 const HitRules = preload("res://scripts/combat/hit_rules.gd")

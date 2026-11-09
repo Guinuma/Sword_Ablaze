@@ -13,6 +13,8 @@ var defeat_done: bool = false
 var defeat_time: float = 0.0
 const PlayerState = preload("res://scripts/player/player_state.gd")
 var melee_time: float = 0.0
+var melee_id: StringName = &"sword_ablaze"
+var ranged_id: StringName = &"dawn_bow"
 var dash_clock: float = 0.0
 var hurt_clock: float = 0.0
 var body_direction: StringName = &"side"
@@ -162,12 +164,22 @@ func _draw_weapon(bob: float) -> void:
 	draw_line(Vector2(side * 5, -8 + bob), trigger_hand, Color("176578"), 3)
 	draw_line(Vector2(-side * 4, -7 + bob), support_hand, Color("23858d"), 2)
 	draw_set_transform(mount, angle)
-	draw_rect(Rect2(3, -2, 12, 4), Color("263747"))
-	draw_rect(Rect2(5, -2, 7, 1), Color("b88d4d"))
-	draw_line(Vector2(13, 1), Vector2(21, 1), Color("fff3da"), 2.0)
-	draw_line(Vector2(15, 2), Vector2(21, 1), Color("ed874b"), 1.0)
-	draw_rect(Rect2(4, 1, 2, 2), Color("eee5cb"))
-	draw_rect(Rect2(9, 0, 2, 2), Color("eee5cb"))
+	if firing and melee_time <= 0.0:
+		if ranged_id == &"judgment_lance":
+			draw_line(Vector2(2, 0), Vector2(21, 0), Color("eeb365"), 3)
+			draw_colored_polygon(PackedVector2Array([Vector2(15, -4), Vector2(24, 0), Vector2(15, 4)]), Color("fff3da"))
+		else:
+			draw_arc(Vector2(5, 0), 10, -0.9, 0.9, 10, Color("eeb365"), 2)
+			draw_line(Vector2(11, -8), Vector2(11, 8), Color("fff3da"))
+	else:
+		draw_line(Vector2(2, 0), Vector2(10, 0), Color("b88d4d"), 3)
+		if melee_id == &"seraph_halberd":
+			draw_line(Vector2(5, 0), Vector2(26, 0), Color("b88d4d"), 2)
+			draw_colored_polygon(PackedVector2Array([Vector2(16, -5), Vector2(25, -3), Vector2(29, 0), Vector2(16, 4)]), Color("ffcb65"))
+		else:
+			draw_line(Vector2(9, -4), Vector2(9, 4), Color("b88d4d"), 2)
+			draw_colored_polygon(PackedVector2Array([Vector2(10, -2), Vector2(17, -3), Vector2(23, 0), Vector2(14, 3), Vector2(10, 2)]), Color("ff8744"))
+			draw_line(Vector2(11, 0), Vector2(21, 0), Color("fff3da"), 1)
 	draw_set_transform(Vector2.ZERO)
 
 func draw_ellipse_shadow() -> void:

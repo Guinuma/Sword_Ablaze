@@ -1,6 +1,6 @@
 # Global progression contract
 
-Prototype decision, 2026-11-03. Global XP and the profile are now integrated with terminal results in both modes. The Sanctuary hub displays progression and connects modes/settings; skill purchases remain pending. Local records and loadout/preferences remain independent.
+Prototype decision, 2026-11-03. Global XP and the profile are now integrated with terminal results in both modes. The Sanctuary hub displays progression and connects modes/settings; a six-node prototype skill tree now supports purchases and free reset through Gabriel. Local records and loadout/preferences remain independent.
 
 ## Global XP and levels
 
@@ -61,7 +61,7 @@ Concurrent application instances editing one profile are outside this first impl
 
 ## Storage implementation status
 
-`scripts/run/global_profile.gd` now implements profile creation/loading, strict version-1 validation, bounded IDs/XP, safe transactional writes, backup recovery and identity-based reward settlement. It is connected to combat terminal results and the mode/results UI. `skills` and `unlocks` are reserved empty arrays until their definition sets exist; unknown IDs are rejected rather than applied. Profiles recovered from corruption expose `recovered`/`reset` status; future versions expose a write-blocking status. Sequence exhaustion refuses allocation.
+`scripts/run/global_profile.gd` now implements profile creation/loading, strict version-1 validation, bounded IDs/XP, safe transactional writes, backup recovery and identity-based reward settlement. It is connected to combat terminal results and the mode/results UI. `skills` now validates six known prototype knowledge IDs, their prerequisites and total cost; `unlocks` remains reserved empty until weapons are implemented. Unknown IDs are rejected rather than applied. Profiles recovered from corruption expose `recovered`/`reset` status; future versions expose a write-blocking status. Sequence exhaustion refuses allocation.
 
 `tests/profile_smoke.gd` verifies reward and level boundaries, initial saves, failed writes with unchanged in-memory state, retry, duplicate callbacks/reloads, abandoned IDs, mismatched mode/outcome, capped awards, corruption/incomplete data recovery, backup preservation, future-version protection, cross-field validation, ignored partial temporary data and sequence exhaustion. Test files use isolated `user://profile_smoke.json` paths. Physical power-loss testing and game integration remain pending.
 
@@ -77,4 +77,7 @@ A failed terminal write keeps the result pending and exposes RETRY XP SAVE. Rest
 
 ## Walkable Sanctuary integration (priority 2)
 
-The home now exposes progression through Gabriel and preserves the existing profile/reward contract. Walking, dialogue, the read-only Michael skill-tree introduction and loadout menus never allocate a run, spend points or grant XP. Skill buying remains priority 3. Door-launched Arenas use the same existing allocation/settlement path and return home after results or abandonment. House position is temporary and resets to its safe entry point on scene entry; no persistent schema change is introduced. See docs/hub.md and tests/sanctuary_smoke.gd.
+The home now exposes progression through Gabriel and preserves the existing profile/reward contract. Walking, dialogue, the skill-tree overview and loadout menus never allocate a run, spend points or grant XP. Priority 3 now implements six knowledge purchases and free reset; see docs/skill-trees.md. Door-launched Arenas use the same existing allocation/settlement path and return home after results or abandonment. House position is temporary and resets to its safe entry point on scene entry; no persistent schema change is introduced. See docs/hub.md and tests/sanctuary_smoke.gd.
+
+
+The small tree costs nine points across three branches while retaining the level-20 cap. Skills spend derived points, not XP. Purchases and free reset are safe profile transactions; all effects are rebuilt from base combat data before temporary blessings. Tests cover both persistence and actual gameplay effects.

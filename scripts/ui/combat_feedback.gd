@@ -4,13 +4,13 @@ const MAX_CUES := 32
 const DURATION := 0.55
 var items: Array[Dictionary] = []
 
-func add(kind: StringName, point: Vector2, direction: Vector2 = Vector2.RIGHT) -> void:
+func add(kind: StringName, point: Vector2, direction: Vector2 = Vector2.RIGHT, style: Dictionary = {}) -> void:
 	if kind not in [&"spawn", &"dash", &"upgrade", &"heal", &"wave", &"melee", &"critical"]:
 		return
 	if items.size() == MAX_CUES:
 		items.pop_front()
 	var duration: float = {&"melee": 0.16, &"critical": 0.24, &"spawn": 0.28, &"dash": 0.2, &"heal": 0.45, &"upgrade": 0.5, &"wave": DURATION}[kind]
-	items.append({"kind": kind, "position": point, "life": duration, "duration": duration, "direction": direction})
+	items.append({"kind": kind, "position": point, "life": duration, "duration": duration, "direction": direction, "style": style})
 
 func advance(delta: float) -> void:
 	for index in range(items.size() - 1, -1, -1):
@@ -31,7 +31,11 @@ func draw_on(canvas: Node2D, reduced_motion: bool, reduced_flashes: bool) -> voi
 		match item.kind:
 			&"melee":
 				var direction: Vector2 = item.direction
-				canvas.draw_arc(point, 32.0, direction.angle() - PI / 3, direction.angle() + PI / 3, 16, tint, 2)
+				var style: Dictionary = item.style
+				var angle: float = style.get("angle", PI / 3)
+				var color: Color = style.get("color", tint)
+				color.a = tint.a
+				canvas.draw_arc(point, style.get("reach", 32.0), direction.angle() - angle, direction.angle() + angle, 16, color, 2)
 			&"critical":
 				var center := point + Vector2(0, -18)
 				canvas.draw_line(center + Vector2(-5, -5), center + Vector2(5, 5), tint, 2)

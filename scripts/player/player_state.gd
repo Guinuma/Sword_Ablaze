@@ -8,7 +8,7 @@ const SPEED: float = 120.0
 var geometry: RefCounted
 var move_speed: float = SPEED
 const WeaponSettings = preload("res://scripts/data/weapon_settings.gd")
-var weapon: WeaponSettings = load("res://resources/default_weapon.tres")
+var weapon: WeaponSettings = load("res://resources/dawn_bow.tres")
 var player_position := Vector2(320, 200)
 var aim := Vector2.RIGHT
 var fire_cooldown: float = 0.0
@@ -25,7 +25,7 @@ var dash_direction := Vector2.RIGHT
 var hurt_cooldown: float = 0.0
 var fire_requires_release: bool = false
 var muzzle_time: float = 0.0
-var melee_settings = load("res://resources/default_melee.tres")
+var melee_settings = load("res://resources/sword_ablaze.tres")
 var melee_cooldown: float = 0.0
 var melee_time: float = 0.0
 var melee_requires_release: bool = false

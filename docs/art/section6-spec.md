@@ -27,7 +27,7 @@ Enemy sheets are 2 × 2 transparent atlases; individual AtlasTexture regions wer
 
 ## Icons, verification and provenance
 
-Seven 16 × 16 SVG icons cover Blade Rifle, Ember Fan, global XP, healing feather, healing wings, dash and melee. They appear in loadout, progression, HUD or world pickups; temporary blessing badges retain their existing symbols, ranks and effect tooltips. No unimplemented currencies or skills are presented as usable systems.
+16 × 16 SVG icons cover the four playable Michael weapons, global XP, healing feather, healing wings, dash and melee. They appear in loadout, progression, HUD or world pickups; temporary blessing badges retain their existing symbols, ranks and effect tooltips. No unimplemented currencies or skills are presented as usable systems.
 
 Review captures: section6-arena.png and section6-warden-phase2.png. tools/capture_section6.gd also creates a collision-overlay review. tools/validate_section6_visuals.gd rendered 512 type/facing/state/reduced-effect combinations; the player sweep rendered 1,024 combinations. Obstacle regressions cover five physics rates, dash tunneling, navigation, line of sight, cover priority, melee and fast projectiles. Full finite/endless, pause, reward and long-session checks remain required. The rendered section-6 performance sample is recorded under docs/performance.
 

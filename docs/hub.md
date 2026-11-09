@@ -6,8 +6,8 @@ PLAY → SANCTUARY now opens a walkable, non-combat home. The Exile uses the exi
 
 Walk with WASD/arrows or your remapped movement keys. Approach a station and press Enter/Space, or click the contextual action at the bottom of the screen. The prompt enables only within 46 logical pixels and with a clear line to the interaction point. Walking onto the threshold alone never starts or abandons a run.
 
-- Gabriel opens a mentor conversation, a read-only skill-tree introduction and the existing global progression screen. Michael and the flaming sword are introduced as the main path. Purchases and unlocks explicitly say WORK IN PROGRESS until priority 3; no points are spent or fake skills granted here.
-- The arsenal opens the existing persistent Blade Rifle/Ember Fan loadout. Saved equipment applies when entering an arena and survives retries and return home.
+- Gabriel opens a mentor conversation, a small functional skill tree and the existing global progression screen. Michael and the flaming sword are introduced as the main path. Three prototype branches (Michael, Gabriel and Raphael) offer six persistent knowledge nodes, with point costs, prerequisites and free reset. New weapon unlocks remain priority 4; see docs/skill-trees.md.
+- The arsenal opens the persistent melee and ranged loadout. Saved equipment applies when entering an arena and survives retries and return home.
 - The door opens Arenas, Roguelite, Campaign and Title Screen. Arenas leads to the existing finite/Endless selection; the unfinished modes retain WORK IN PROGRESS.
 
 Escape or Menu opens Resume, Options, Title Screen and Quit. Options retains feedback, audio, bindings, help and loadout. Menus freeze house movement; Back/Escape restores their immediate parent and focus. Closing the final panel releases UI focus back to walking, at the same position. Losing application focus also opens the hub menu. There are no shots, melee attacks, dashes, enemies or combat rewards in the home. The Sanctuary music continues through its menus and scene transitions.
@@ -22,9 +22,9 @@ Runs launched from the door return home from pause or results. Retry stays in th
 
 ## Verification
 
-`tests/sanctuary_smoke.gd` verifies movement action/speed, normalized diagonals, long-step bounds and solid collision, reachable paths to every station, line-of-sight/range gating, real Enter/Escape input, mentor/preview/focus flow, modal movement freeze, arsenal persistence, door WIP routes, options/resume, focus-loss pause, visual reductions and zero exploration rewards. `tests/hub_smoke.gd` now launches through actual door/menu buttons and retains finite victory, both-mode defeat/retry, abandonment and saved-XP checks. Menu routes, reward, navigation and full-suite checks remain required.
+`tests/sanctuary_smoke.gd` verifies movement action/speed, normalized diagonals, long-step bounds and solid collision, reachable paths to every station, line-of-sight/range gating, real Enter/Escape input, mentor/tree/focus flow, modal movement freeze, arsenal persistence, door WIP routes, options/resume, focus-loss pause, visual reductions and zero exploration rewards. `tests/hub_smoke.gd` now launches through actual door/menu buttons and retains finite victory, both-mode defeat/retry, abandonment and saved-XP checks. Menu routes, reward, navigation and full-suite checks remain required.
 
-`tools/capture_hub.gd` captures the home, Gabriel, knowledge preview, progression, arsenal, departure and options with isolated preferences and a 300-XP profile fixture. Current review images live in docs/art/priority2. Human usability, art and balance playtests remain useful; skill purchases and new weapons are later priorities.
+`tools/capture_hub.gd` captures the home, Gabriel, knowledge preview, progression, arsenal, departure and options with isolated preferences and a 300-XP profile fixture. Current review images live in docs/art/priority2. Human usability, art and balance playtests remain useful; additional branches and new weapons remain later work.
 
 ## Priority 1 menu routes (2026-11-06)
 

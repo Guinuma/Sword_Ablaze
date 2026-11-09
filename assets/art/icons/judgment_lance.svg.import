@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bstmwitwkqyb1"
-path="res://.godot/imported/blade.svg-74c43050e8e251c06152d0eca1269894.ctex"
+uid="uid://cq83mu5yemfsk"
+path="res://.godot/imported/judgment_lance.svg-f83a6d66a995c43feec82500669b9920.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/icons/blade.svg"
-dest_files=["res://.godot/imported/blade.svg-74c43050e8e251c06152d0eca1269894.ctex"]
+source_file="res://assets/art/icons/judgment_lance.svg"
+dest_files=["res://.godot/imported/judgment_lance.svg-f83a6d66a995c43feec82500669b9920.ctex"]
 
 [params]
 

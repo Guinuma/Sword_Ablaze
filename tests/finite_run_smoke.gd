@@ -32,7 +32,12 @@ func _run() -> void:
 			system.advance(boss.windup, Vector2(320, 280), 10, bounds)
 			check(shots.size() == (8 if phase == 1 else 12) if attack == 0 else shots.size() == (3 if phase == 1 else 5), "Boss volley count must follow phase and attack")
 			check(shots == directions, "Released boss projectiles must match locked warning directions")
-	for weapon in [&"blade", &"scatter"]:
+	var profile = load("res://scripts/run/global_profile.gd").for_tree(self)
+	var candidate: Dictionary = profile.defaults()
+	candidate.xp = 300
+	candidate.skills = ["michael_edge", "michael_reach"]
+	check(profile._commit(candidate) == OK, "Test profile must unlock Michael's weapons")
+	for weapon in [&"dawn_bow", &"judgment_lance"]:
 		root.set_meta("finite_run", true)
 		set_meta("finite_run", true)
 		var arena = load("res://scenes/main/main.tscn").instantiate()

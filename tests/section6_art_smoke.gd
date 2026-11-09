@@ -18,7 +18,7 @@ func _run() -> void:
 			check(texture.region.size.x > 0 and texture.region.size.y > 0, "Integrated sprite crops must be nonempty")
 		check(frames.get_frame_texture(&"poses", 0).atlas.get_image().get_pixel(0, 0).a == 0.0, "Enemy sheet must retain genuine transparency")
 	var icons = load("res://scripts/ui/game_icons.gd")
-	check(icons.TEXTURES.size() == 7, "Current weapon, healing, XP and ability icons must all be available")
+	check(icons.TEXTURES.size() == 9, "Current weapon, healing, XP and ability icons must all be available")
 	for texture in icons.TEXTURES.values():
 		check(texture.get_size() == Vector2(16, 16), "UI icons must share the native 16px grid")
 	print("Section 6 art checks complete: %d failures" % failures)

@@ -4,8 +4,8 @@ signal defeated(point: Vector2)
 signal critical_hit(point: Vector2)
 const HitRules = preload("res://scripts/combat/hit_rules.gd")
 var geometry: RefCounted
-var settings = load("res://resources/default_melee.tres")
-var weapon = load("res://resources/default_weapon.tres")
+var settings = load("res://resources/sword_ablaze.tres")
+var weapon = load("res://resources/dawn_bow.tres")
 var fallback_profile = load("res://resources/default_enemy.tres")
 var random := RandomNumberGenerator.new()
 func _init() -> void:

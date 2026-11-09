@@ -451,7 +451,7 @@ func _run() -> void:
 	var upgraded_speed: float = arena.player.move_speed
 	arena._apply_upgrades()
 	check(arena.player.move_speed == upgraded_speed and arena.projectiles.weapon.damage == 2, "Reapplying upgrades must not compound already modified stats")
-	check(load("res://resources/default_weapon.tres").damage == 1, "Upgrades must leave shared default resources untouched")
+	check(load("res://resources/dawn_bow.tres").damage == 1, "Upgrades must leave shared default resources untouched")
 	arena._reset_run()
 	check(arena.upgrades.stacks.is_empty() and arena.player.move_speed == 120.0 and arena.projectiles.weapon.damage == 1, "Restart must remove all temporary upgrades")
 	for definition in arena.upgrades.definitions:

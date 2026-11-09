@@ -74,7 +74,7 @@ Os recordes de onda, eliminações e sobrevivência são máximos independentes 
 
 Options → Keyboard Bindings permite remapear movimento, disparo, dash e reinício, com deteção de conflitos e reposição dos valores iniciais. Escape e o disparo pelo rato mantêm-se disponíveis. Ver [controlos](docs/controls.md).
 
-O menu **WEAPON LOADOUT** permite escolher Blade Rifle (tiro preciso a cada 0,16 s) ou Ember Fan (cinco projéteis num leque de 0,5 rad a cada 0,55 s). A escolha é guardada; as melhorias temporárias aplicam-se à arma escolhida e desaparecem ao reiniciar. Ver [armas](docs/weapons.md).
+O arsenal do Sanctuary e **WEAPON LOADOUT** nas opções permitem equipar separadamente armas de corpo a corpo e de distância. Sword Ablaze e Dawn Bow são iniciais. A árvore de Michael desbloqueia Seraph Halberd e Judgment Lance. Ver o [catálogo](docs/weapons.md).
 
 Os valores são provisórios e precisam de playtesting.
 
@@ -223,7 +223,7 @@ A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a p
 - [x] Aplicar modificadores temporários a partir dos valores base, com limites por melhoria.
 - [x] Oferecer três melhorias elegíveis após cada terceira onda, com descrição e limite de stacks.
 - [x] Criar seis melhorias: movimento, cadência, dano, recuo, recarga do dash e vida máxima.
-- [x] Criar segunda arma e validar a alternativa mecânica: Ember Fan de curta distância; equilíbrio em playtests pendente.
+- [x] Validar alternativas de combate no catálogo de Michael. Equilíbrio em playtests pendente.
 - [ ] Definir raridade, pré-requisitos e exclusões de melhorias, se necessários.
 - [x] Recalcular melhorias sem duplicação e removê-las ao reiniciar.
 - [ ] **Decidir:** recuperação, moeda temporária, lojas, rerolls e outros sistemas de economia.
@@ -237,12 +237,12 @@ A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a p
 - [x] Distinguir GLOBAL XP persistente de melhorias temporárias da run, no perfil, regras e apresentação.
 - [x] Garantir regras globais partilhadas entre Courtyard Run e Endless Arena, com bónus explícito de vitória.
 - [x] Prevenir entrega duplicada de recompensas ao repetir ecrãs ou carregar saves, com identidade persistente e transação única.
-- [x] Criar Sanctuary jogável como casa do Exile, com movimento, colisões, Gabriel, arsenal, saída para os modos e menus de configurações; compras da skill tree continuam pendentes.
-- [ ] Desenhar skill trees com custos, requisitos e efeitos compreensíveis.
-- [ ] Implementar compra e aplicação dos nós desbloqueados.
-- [ ] **Decidir:** respec, limites de poder e desbloqueios de conteúdo versus bónus diretos.
-- [ ] Apresentar estado bloqueado, disponível e adquirido de cada nó.
-- [ ] Validar comportamento com pontos insuficientes, pré-requisitos e compras repetidas.
+- [x] Criar Sanctuary jogável como casa do Exile, com movimento, colisões, Gabriel, arsenal, saída para os modos e menus de configurações; Gabriel abre agora a pequena skill tree funcional.
+- [x] Criar uma pequena skill tree funcional com três ramos, seis nós, custos, pré-requisitos e efeitos; ver [skill trees](docs/skill-trees.md).
+- [x] Implementar compra persistente e aplicação dos seis nós no combate, sem acumulação indevida com melhorias temporárias.
+- [x] **Decisão provisória:** respec gratuito, bónus diretos limitados dos seis nós e armas novas apenas na prioridade 4.
+- [x] Apresentar estados bloqueado, disponível, sem pontos e adquirido de cada nó.
+- [x] Validar pontos, pré-requisitos, compras repetidas, gravação falhada, reposição e efeitos nas runs.
 - [ ] Equilibrar progressão inicial e evitar tornar as primeiras partidas demasiado fracas.
 
 ### 10. Save e dados persistentes
@@ -254,7 +254,7 @@ A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a p
 - [x] Criar e carregar perfil inicial quando não existir save, com caminhos isolados nos testes.
 - [x] Validar dados do perfil e recuperar saves incompletos/corrompidos através do backup, com proteção de versões futuras.
 - [ ] Implementar migrações entre versões do esquema.
-- [ ] Guardar nos momentos de recompensa, compra e alteração de preferências.
+- [x] Guardar nos momentos de recompensa, compra/reposição de skills e alteração de preferências.
 - [ ] Oferecer reposição de progresso com confirmação explícita.
 - [ ] Testar encerramento durante gravação e recuperação sem perder todo o perfil.
 - [ ] **Decidir:** suporte a vários perfis e continuação de runs interrompidas.
@@ -348,26 +348,28 @@ Direção definida pelo utilizador em 2026-11-06. Executar pela ordem abaixo, te
 - [x] Garantir o fluxo menu Play → Sanctuary → Arena → resultados/recompensa → Sanctuary, sem duplicar XP ou perder preferências.
 - [x] Validar movimento, colisões, interações, abertura/fecho de menus e regresso ao hub após vitória, derrota ou abandono.
 
-#### Prioridade 3 — Gabriel e estrutura das skill trees
+#### Prioridade 3 — Gabriel e estrutura das skill trees (versão pequena concluída)
 
-- [ ] Definir Gabriel como o mentor que transmite conhecimento ao Exile através das skill trees.
-- [ ] Fazer do **arcanjo Michael** o ramo principal, centrado na **espada flamejante** que dá identidade a **Sword Ablaze**.
-- [ ] Definir os restantes ramos e o arcanjo ou santo associado a cada um, mantendo uma identidade e função próprias.
-- [ ] Definir custos, pré-requisitos e ligações entre nós; distinguir estados bloqueado, disponível e adquirido.
-- [ ] Rever os limites atuais de nível/pontos face à dimensão das árvores antes de fixar os custos; decidir também respec e limites de poder.
-- [ ] Implementar compras e desbloqueios persistentes com validação de pontos, pré-requisitos, compras repetidas e falhas de gravação.
-- [ ] Integrar a consulta e compra dos nós na interação com Gabriel, preservando a separação entre progressão permanente e melhorias temporárias das runs.
+Versão de teste: **Michael, Gabriel e Raphael**, com dois nós por ramo. [Regras e efeitos](docs/skill-trees.md). Não é a árvore final; mais ramos e as novas armas ficam para expansão posterior.
+
+- [x] Definir Gabriel como o mentor que transmite conhecimento ao Exile através das skill trees.
+- [x] Fazer do **arcanjo Michael** o ramo principal, centrado na **espada flamejante** que dá identidade a **Sword Ablaze**.
+- [x] Definir os restantes ramos e o arcanjo ou santo associado a cada um, mantendo uma identidade e função próprias.
+- [x] Definir custos, pré-requisitos e ligações entre nós; distinguir estados bloqueado, disponível e adquirido.
+- [x] Rever os limites atuais de nível/pontos face à dimensão das árvores antes de fixar os custos; manter nível 20/19 pontos nesta versão, com nove pontos de custo total e respec gratuito no Sanctuary.
+- [x] Implementar compras e desbloqueios persistentes com validação de pontos, pré-requisitos, compras repetidas e falhas de gravação.
+- [x] Integrar a consulta e compra dos nós na interação com Gabriel, preservando a separação entre progressão permanente e melhorias temporárias das runs.
 
 #### Prioridade 4 — Catálogo alargado de armas por ramo
 
-- [ ] Criar uma lista extensa de armas desbloqueáveis nas skill trees, incluindo **armas de distância e armas de corpo a corpo**.
-- [ ] Associar cada arma ao arcanjo ou santo do respetivo ramo, com nome, tema, função em combate e nó de desbloqueio definidos.
-- [ ] Dar destaque à espada flamejante de Michael como arma central da identidade do jogo.
-- [ ] Definir uma sequência de desbloqueios por ramo e distinguir as armas iniciais das obtidas por progressão.
-- [ ] Implementar e validar primeiro o conjunto inicial do ramo de Michael; acrescentar os restantes ramos gradualmente, seguindo o catálogo.
-- [ ] Integrar seleção/equipamento das armas desbloqueadas no arsenal e aplicar os respetivos atributos e comportamentos no combate.
-- [ ] Criar os visuais, animações, ícones e feedback necessários para distinguir as armas; identificar claramente as entradas ainda em desenvolvimento.
-- [ ] Testar persistência dos desbloqueios, restrições de equipamento, interação com melhorias temporárias e equilíbrio entre distância e corpo a corpo.
+- [x] Definir o [catálogo por ramo](docs/weapons.md), com **armas de distância e armas de corpo a corpo** e indicação das armas planeadas.
+- [x] Associar cada arma ao arcanjo ou santo do respetivo ramo, com nome, tema, função em combate e nó de desbloqueio definidos.
+- [x] Dar destaque à espada flamejante de Michael como arma central da identidade do jogo.
+- [x] Definir uma sequência de desbloqueios por ramo e distinguir as armas iniciais das obtidas por progressão.
+- [x] Implementar e validar o conjunto inicial de Michael. Os ramos de Gabriel e Raphael ficam planeados para implementação gradual.
+- [x] Integrar seleção/equipamento das armas desbloqueadas no arsenal e aplicar os respetivos atributos e comportamentos no combate.
+- [x] Criar os visuais, animações, ícones e feedback necessários para distinguir as armas; identificar claramente as entradas ainda em desenvolvimento.
+- [ ] Concluir playtests de equilíbrio entre distância e corpo a corpo. Persistência, restrições de equipamento e melhorias temporárias têm testes automatizados.
 
 #### Prioridade 5 — Modos futuros e validação da experiência
 
