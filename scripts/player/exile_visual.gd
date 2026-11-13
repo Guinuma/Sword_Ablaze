@@ -14,6 +14,7 @@ var defeat_time: float = 0.0
 const PlayerState = preload("res://scripts/player/player_state.gd")
 var melee_time: float = 0.0
 var melee_id: StringName = &"sword_ablaze"
+const Weapons = preload("res://scripts/data/weapon_catalog.gd")
 var ranged_id: StringName = &"dawn_bow"
 var dash_clock: float = 0.0
 var hurt_clock: float = 0.0
@@ -152,24 +153,27 @@ func _draw_pixel_cape(neck: Vector2, tip: Vector2) -> void:
 
 func _draw_weapon(bob: float) -> void:
 	# Upward aim places the weapon behind the body at the right-hand grip.
-	var grip := PlayerState.weapon_grip(facing) + Vector2(0, bob)
-	var recoil := -2.0 if firing and not reduced_motion else 0.0
+	var ranged_pose := firing and melee_time <= 0.0
+	var grip := PlayerState.weapon_grip(facing)
+	if not ranged_pose:
+		grip += Vector2(0, bob)
 	var angle := facing.angle()
 	if melee_time > 0.0 and not reduced_motion:
 		angle += lerpf(-0.65, 0.65, 1.0 - melee_time / 0.16)
-	var mount := (grip + facing * recoil).round()
+	var mount := grip if ranged_pose else grip.round()
 	var side := -1.0 if facing.x < 0.0 else 1.0
 	var trigger_hand := (mount + Vector2(5, 2).rotated(angle)).round()
 	var support_hand := (mount + Vector2(10, 1).rotated(angle)).round()
 	draw_line(Vector2(side * 5, -8 + bob), trigger_hand, Color("176578"), 3)
 	draw_line(Vector2(-side * 4, -7 + bob), support_hand, Color("23858d"), 2)
 	draw_set_transform(mount, angle)
-	if firing and melee_time <= 0.0:
+	if ranged_pose:
+		var tip: float = Weapons.WEAPONS[ranged_id].stats.muzzle_offset
 		if ranged_id == &"judgment_lance":
-			draw_line(Vector2(2, 0), Vector2(21, 0), Color("eeb365"), 3)
-			draw_colored_polygon(PackedVector2Array([Vector2(15, -4), Vector2(24, 0), Vector2(15, 4)]), Color("fff3da"))
+			draw_line(Vector2(2, 0), Vector2(tip - 3.0, 0), Color("eeb365"), 3)
+			draw_colored_polygon(PackedVector2Array([Vector2(tip - 9.0, -4), Vector2(tip, 0), Vector2(tip - 9.0, 4)]), Color("fff3da"))
 		else:
-			draw_arc(Vector2(5, 0), 10, -0.9, 0.9, 10, Color("eeb365"), 2)
+			draw_arc(Vector2(5, 0), tip - 5.0, -0.9, 0.9, 10, Color("eeb365"), 2)
 			draw_line(Vector2(11, -8), Vector2(11, 8), Color("fff3da"))
 	else:
 		draw_line(Vector2(2, 0), Vector2(10, 0), Color("b88d4d"), 3)

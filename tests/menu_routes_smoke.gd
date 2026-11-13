@@ -44,7 +44,7 @@ func _run() -> void:
 	for button in buttons(menu.detail):
 		labels.append(button.text)
 	check(labels == ["SANCTUARY", "ARENAS", "ROGUELITE", "CAMPAIGN", "SOUNDTRACK", "QUIT", "BACK"], "Play must expose all six actions in order and Back")
-	for feature in ["ROGUELITE", "CAMPAIGN", "SOUNDTRACK"]:
+	for feature in ["CAMPAIGN", "SOUNDTRACK"]:
 		press(menu, feature)
 		check(menu.detail_title == feature and menu.detail_body.get_child(1).text == "WORK IN PROGRESS", "Unfinished features must show WIP")
 		check(current_scene == menu and not has_meta("finite_run"), "WIP must not launch combat or change mode")
@@ -89,6 +89,22 @@ func _run() -> void:
 		arena.hud_view.main_menu_requested.emit()
 		await scene_changed
 		check(current_scene.scene_file_path == "res://scenes/main/menu.tscn", "Arena pause must return to title")
+	menu = current_scene
+	press(menu, "PLAY")
+	press(menu, "ROGUELITE")
+	check(menu.detail_title == "ROGUELITE", "Roguelite must open its own run page")
+	escape(menu)
+	check(menu.detail_title == "PLAY" and root.gui_get_focus_owner().text == "ROGUELITE", "Roguelite Back must restore the Play entry")
+	press(menu, "ROGUELITE")
+	press(menu, "START RUN")
+	await scene_changed
+	var roguelite = current_scene
+	roguelite.set_physics_process(false)
+	check(roguelite.finite_mode and get_meta("return_to_hub"), "Title Roguelite must launch the finite run with Sanctuary return")
+	roguelite._set_paused(true)
+	roguelite.hud_view.main_menu_requested.emit()
+	await scene_changed
+	check(current_scene.is_hub, "Title Roguelite must return to Sanctuary")
 	current_scene.free()
 	await create_timer(0.35).timeout
 	for path in [String(get_meta("profile_path")), "user://menu_routes_records.json", "user://menu_routes_preferences.json"]:

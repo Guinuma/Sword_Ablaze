@@ -175,3 +175,29 @@ Completed 2026-11-06 at the user's explicitly requested small prototype scope, n
 Implementation: known-ID/prerequisite/budget validation extends the reserved profile skills field without invalidating empty-skill saves. Purchase/reset use the existing atomic save/backup path and refuse duplicate, unknown, unaffordable or future-version writes. UI shows learned/available/locked/insufficient states, visible effects and separate permanent points. Learned melee damage/reach, projectile speed, crit chance, maximum HP and dash recovery apply to both weapon loadouts from base Resources, then temporary blessings compose once; retry clears only temporary effects.
 
 Verification: profile and Sanctuary checks plus skills_smoke cover save failure/retry, forged IDs/prerequisites/overspending, free refunds/reload, actual extended melee hits, permanent run attributes, blessing composition and nonduplicating retries. Available/learned tree screenshots were reviewed at the existing game scale. This documents a small testing tree, with balance and larger patron/weapon roster deliberately left for later work.
+
+
+## Section 8 and current priority 5 — First playable Roguelite route
+
+PLAY → ROGUELITE and the Sanctuary departure menu now open a Courtyard Run briefing with a start action. Both routes use the existing finite run, loadout, learned skills, local finite records and global XP settlement. Victory, defeat and abandonment lead back to Sanctuary. Existing direct Arena routes retain their original return destinations.
+
+The menu route test covers entry, Back focus, launch and Sanctuary return. Sanctuary and hub tests exercise the departure button, a full win with the saved reward, defeat, retry and return. Human playtests, measured run duration, blessing rarity and broader economy decisions remain open.
+
+
+## Sections 10–12 — Profile migration, reset and integration checks
+
+Profile v2 removes the reserved empty unlock list. Migration preserves version 1 progress and run identities, including data loaded from backup. The next successful profile commit writes v2. Sanctuary offers a confirmed reset of global XP and learned skills using the same transactional save.
+
+Profile regression fixtures cover migration, a complete staged write with a torn backup, monotonic run IDs and stale reward rejection after reset. Sanctuary tests cover cancel, default focus and explicit confirmation. Existing reward, skill and complete hub-flow checks support the related checklist entries.
+
+## Section 11 — Combat danger cues
+
+Spawn crosshairs, charge lanes, shot chevrons and outlined hostile diamonds distinguish hazards by shape and movement. Reduced motion keeps the warning markers stationary. The graphical sweep rendered 640 combinations across five enemy types, sixteen directions, four poses and both motion settings. Timing and collision rules remain governed by the existing combat tests.
+
+## Section 12 — Player and weapon alignment at arena edges
+
+Dawn Bow and Judgment Lance use the same grip and weapon Resource muzzle offset for the rendered firing pose and the projectile origin. Muzzle flash and projectile creation both require a muzzle inside the arena with a clear path from the player. The obstacle regression exercises both weapons at each arena edge, checking the player collision inset, blocked outward shots and inward shots spawned at the muzzle. The graphical sweep rendered 1,040 combinations, including both weapons aimed inward and outward at each edge.
+
+## Current priority 4 — Michael weapon balance
+
+The Judgment Lance interval changed from 0.58 s to 0.48 s. The weapon regression compares both ranged weapons against the Ruin Ram and Guardian, including the Heavy Rounds armor breakpoint, and both melee weapons against near, flanking and distant targets in one swing. The documented comparison holds progression constant for the pending human playtest.

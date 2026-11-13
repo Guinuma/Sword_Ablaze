@@ -1,7 +1,7 @@
 extends RefCounted
 ## Transactional local progression store; combat integration is a separate layer.
 const Skills = preload("res://scripts/data/skill_catalog.gd")
-const VERSION := 1
+const VERSION := 2
 const XP_PER_LEVEL := 100
 const STORED_XP_LIMIT := 2147483647
 const SEQUENCE_LIMIT := 1000000000
@@ -15,7 +15,7 @@ func _init(file_path: String = "user://profile.json") -> void:
 	path = file_path
 
 static func defaults() -> Dictionary:
-	return {"version": VERSION, "xp": 0, "next_run_id": 1, "last_settled_run_id": 0, "active_run": {"id": 0, "mode": ""}, "skills": [], "unlocks": []}
+	return {"version": VERSION, "xp": 0, "next_run_id": 1, "last_settled_run_id": 0, "active_run": {"id": 0, "mode": ""}, "skills": []}
 
 @warning_ignore("integer_division")
 static func max_level(total_cost: int = Skills.total_cost()) -> int:
@@ -125,6 +125,12 @@ func _read(file_path: String) -> Dictionary:
 	var parsed: Dictionary = json.data
 	if (parsed.get("version") is int or parsed.get("version") is float) and parsed.version > VERSION:
 		unsupported_version = true
+	# Version 1 reserved an empty unlock list. Access is derived from skills.
+	if _integer(parsed.get("version"), 1, 1):
+		if not parsed.get("unlocks") is Array or not parsed.unlocks.is_empty():
+			return {}
+		parsed.erase("unlocks")
+		parsed.version = VERSION
 	return _clean(parsed)
 
 static func _integer(value: Variant, minimum: int, maximum: int) -> bool:
@@ -156,10 +162,7 @@ static func _clean(parsed: Dictionary) -> Dictionary:
 	var earned_points: int = int(parsed.xp) / XP_PER_LEVEL
 	if Skills.spent(seen) > earned_points:
 		return {}
-	# Weapon IDs remain reserved until priority 4 implements the arsenal catalogue.
-	if not parsed.get("unlocks") is Array or not parsed.unlocks.is_empty():
-		return {}
-	return {"version": VERSION, "xp": int(parsed.xp), "next_run_id": int(parsed.next_run_id), "last_settled_run_id": int(parsed.last_settled_run_id), "active_run": {"id": int(active.id), "mode": String(active.mode)}, "skills": seen, "unlocks": []}
+	return {"version": VERSION, "xp": int(parsed.xp), "next_run_id": int(parsed.next_run_id), "last_settled_run_id": int(parsed.last_settled_run_id), "active_run": {"id": int(active.id), "mode": String(active.mode)}, "skills": seen}
 
 func skill_points() -> int:
 	return maxi(0, level(int(data.xp)) - 1 - Skills.spent(data.skills))
@@ -187,6 +190,17 @@ func reset_skills() -> Error:
 	candidate.skills = []
 	return _commit(candidate)
 
+
+
+func reset_progression() -> Error:
+	load_profile()
+	if last_error != OK:
+		return last_error
+	var candidate := data.duplicate(true)
+	candidate.xp = 0
+	candidate.skills = []
+	candidate.active_run = {"id": 0, "mode": ""}
+	return _commit(candidate)
 
 
 static func for_tree(tree: SceneTree):

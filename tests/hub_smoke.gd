@@ -14,9 +14,14 @@ func launch_from_door(hub: Node, finite: bool) -> void:
 	hub.player.player_position = Vector2(320, 294)
 	hub._interact_nearest()
 	check(hub.detail_title == "LEAVE SANCTUARY", "Walkable door must open the departure menu")
-	hub.detail_body.get_child(1).pressed.emit()
-	check(hub.detail_title == "CHOOSE ARENA", "Departure Arenas button must open mode selection")
-	hub.detail_body.get_child(1 if finite else 3).pressed.emit()
+	if finite:
+		hub.detail_body.get_child(2).pressed.emit()
+		check(hub.detail_title == "ROGUELITE", "Departure Roguelite button must open the run page")
+		root.gui_get_focus_owner().pressed.emit()
+	else:
+		hub.detail_body.get_child(1).pressed.emit()
+		check(hub.detail_title == "CHOOSE ARENA", "Departure Arenas button must open mode selection")
+		hub.detail_body.get_child(3).pressed.emit()
 func _run() -> void:
 	change_scene_to_file("res://scenes/main/menu.tscn")
 	await scene_changed

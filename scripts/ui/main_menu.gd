@@ -120,12 +120,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		_back()
 		get_viewport().set_input_as_handled()
 
-func _start_game(finite: bool = false) -> void:
+func _start_game(finite: bool = false, return_to_sanctuary: bool = false) -> void:
 	if starting:
 		return
 	starting = true
 	get_tree().set_meta("finite_run", finite)
-	get_tree().set_meta("return_to_hub", is_hub)
+	get_tree().set_meta("return_to_hub", is_hub or return_to_sanctuary)
 	var error := get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 	if error != OK:
 		starting = false
@@ -457,7 +457,7 @@ func _build_hub_overview() -> void:
 	_label(panel, caption, Vector2(16, 127), 12, MUTED, false)
 	_label(panel, "Prepare a weapon. Choose your arena.", Vector2(16, 151), 12, MUTED, false)
 
-func _show_progression() -> void:
+func _show_progression(message: String = "") -> void:
 	_open_detail("GLOBAL PROGRESSION")
 	detail_body.add_theme_constant_override("separation", 9)
 	var profile = GlobalProfile.for_tree(get_tree())
@@ -483,11 +483,31 @@ func _show_progression() -> void:
 	_label(detail_body, "MAXIMUM LEVEL" if capped else "%d / %d XP TO NEXT LEVEL" % [xp % GlobalProfile.XP_PER_LEVEL, GlobalProfile.XP_PER_LEVEL], Vector2.ZERO, 8, IVORY)
 	_label(detail_body, "SKILL POINTS AVAILABLE: %d" % profile.skill_points(), Vector2.ZERO, 8, GOLD)
 	_label(detail_body, "Victories and defeats earn global XP in both arenas.", Vector2.ZERO, 12, MUTED, false)
-	_label(detail_body, "Blessings last one run. Global XP lasts between runs.", Vector2.ZERO, 12, MUTED, false)
+	var reset := _button(detail_body, "RESET GLOBAL PROGRESS", _show_progress_reset)
+	reset.disabled = profile.last_error != OK or profile.data.xp == 0
 	if profile.last_error != OK:
-		_label(detail_body, "Profile cannot be saved. XP is unavailable.", Vector2.ZERO, 12, Color("ed8c82"), false)
+		message = "Profile cannot be saved. XP is unavailable."
+	if not message.is_empty():
+		_label(detail_body, message, Vector2.ZERO, 12, MUTED, false)
 	_refresh_focus()
 	back_button.grab_focus()
+
+func _show_progress_reset(message: String = "") -> void:
+	_open_detail("RESET GLOBAL PROGRESS")
+	_label(detail_body, "Erase global XP and learned skills?\nArena records and settings are kept.", Vector2.ZERO, 12, IVORY, false)
+	_button(detail_body, "ERASE XP AND SKILLS", _reset_progression)
+	if not message.is_empty():
+		_label(detail_body, message, Vector2.ZERO, 12, MUTED, false)
+	_refresh_focus()
+	back_button.grab_focus()
+
+func _reset_progression() -> void:
+	var profile = GlobalProfile.for_tree(get_tree())
+	if profile.reset_progression() != OK:
+		_show_progress_reset("Could not save the reset. Try again.")
+		return
+	_back()
+	_show_progression("Global progress reset.")
 
 func _show_feedback_options() -> void:
 	_open_detail("COMBAT FEEDBACK")
@@ -508,11 +528,19 @@ func _show_feedback_options() -> void:
 func _show_play() -> void:
 	_open_detail("PLAY")
 	detail_body.add_theme_constant_override("separation", 4)
-	for entry in [["SANCTUARY", _enter_hub], ["ARENAS", _show_modes], ["ROGUELITE", _show_work_in_progress.bind("ROGUELITE")], ["CAMPAIGN", _show_work_in_progress.bind("CAMPAIGN")], ["SOUNDTRACK", _show_work_in_progress.bind("SOUNDTRACK")], ["QUIT", func(): Music.for_tree(get_tree()).quit_game()]]:
+	for entry in [["SANCTUARY", _enter_hub], ["ARENAS", _show_modes], ["ROGUELITE", _show_roguelite], ["CAMPAIGN", _show_work_in_progress.bind("CAMPAIGN")], ["SOUNDTRACK", _show_work_in_progress.bind("SOUNDTRACK")], ["QUIT", func(): Music.for_tree(get_tree()).quit_game()]]:
 		var button := _button(detail_body, entry[0], entry[1])
 		button.custom_minimum_size = Vector2(392, 24)
 	_refresh_focus()
 	detail_body.get_child(1).grab_focus()
+
+func _show_roguelite() -> void:
+	_open_detail("ROGUELITE")
+	_label(detail_body, "COURTYARD RUN", Vector2.ZERO, 12, IVORY)
+	_label(detail_body, "Clear nine waves, choose blessings and defeat the Warden.\nReturn to Sanctuary with the XP earned on your run.", Vector2.ZERO, 10, MUTED)
+	var start := _button(detail_body, "START RUN", _start_game.bind(true, true))
+	_refresh_focus()
+	start.grab_focus()
 
 func _show_work_in_progress(feature: String) -> void:
 	_open_detail(feature)

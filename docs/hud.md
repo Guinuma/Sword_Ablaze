@@ -22,3 +22,9 @@ Enemy kills roll one exclusive drop: 15% feather (+10 HP), 1% paired angel wings
 
 
 Section 6 adds shared 16px weapon/resource/ability icons: selected weapon and melee in the HUD, dash beside its recharge, weapon icons in loadout, XP in progression, and feather/wings on world pickups. Existing ranked blessing badges are retained. Source and palette: docs/art/section6-spec.md.
+
+## Combat warnings
+
+Spawn warnings use a crosshair inside a contracting circle. The Ruin Ram shows a two-rail charge lane with an advancing chevron. Ranged, elite and Warden windups show a chevron moving outward on each announced firing line. Hostile projectiles use outlined diamonds aligned with their trajectory. Player shots retain a short shaft, with a bright round tip on the Judgment Lance.
+
+Reduce visual motion holds the spawn circle and warning chevrons still. The attack direction and warning duration stay visible. The graphical sweep in `tools/validate_section6_visuals.gd` covers enemy orientations and warning poses with reduced motion both enabled and disabled.

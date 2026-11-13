@@ -488,7 +488,9 @@ func _draw() -> void:
 	if player.dash_time > 0.0 and not preferences.reduced_motion:
 		draw_line(player.player_position - player.dash_direction * 26.0, player.player_position, Color("388fba"), 10.0)
 	if player.muzzle_time > 0.0 and not preferences.reduced_flashes:
-		draw_circle(player.muzzle_position().round(), 3.0, Color(1.0, 0.94, 0.69, 0.75))
+		var muzzle: Vector2 = player.muzzle_position()
+		if _can_fire_from(muzzle):
+			draw_circle(muzzle.round(), 3.0, Color(1.0, 0.94, 0.69, 0.75))
 	for item in healing_drops.items:
 		_draw_healing_drop(item)
 	for particle in particles:
@@ -526,7 +528,15 @@ func _draw_overlay() -> void:
 
 	for bullet in hostile_projectiles.items:
 		var point: Vector2 = Vector2(bullet["position"]).round()
-		overlay.draw_colored_polygon(PackedVector2Array([point + Vector2(0, -4), point + Vector2(4, 0), point + Vector2(0, 4), point + Vector2(-4, 0)]), Color("ee8de8"))
+		var direction: Vector2 = bullet["direction"]
+		var side := direction.orthogonal()
+		var diamond := PackedVector2Array([
+			point + direction * 5.0, point + side * 3.0,
+			point - direction * 5.0, point - side * 3.0,
+		])
+		overlay.draw_colored_polygon(diamond, Color("ee8de8"))
+		diamond.append(diamond[0])
+		overlay.draw_polyline(diamond, Color("24152c"), 1.0)
 	feedback.draw_on(overlay, preferences.reduced_motion, preferences.reduced_flashes)
 	if run.phase == RunState.Phase.DEAD and not player_visual.defeat_done:
 		return
@@ -586,8 +596,11 @@ func _on_critical_hit(point: Vector2) -> void:
 
 
 func _fire_player_projectile(origin: Vector2, direction: Vector2) -> void:
-	if is_inf(geometry.segment_hit(player.player_position, origin)):
+	if _can_fire_from(origin):
 		projectiles.fire(origin, direction)
+
+func _can_fire_from(origin: Vector2) -> bool:
+	return ARENA.has_point(origin) and is_inf(geometry.segment_hit(player.player_position, origin))
 
 func _accent_impact() -> void:
 	if run.phase == RunState.Phase.COMBAT:

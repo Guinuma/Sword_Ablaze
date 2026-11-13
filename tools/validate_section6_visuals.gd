@@ -13,7 +13,7 @@ func _run() -> void:
 	root.add_child(visual)
 	var random := RandomNumberGenerator.new()
 	var count := 0
-	for kind in [&"charger", &"guardian", &"elite", &"boss"]:
+	for kind in [&"charger", &"guardian", &"ranged", &"elite", &"boss"]:
 		system.clear()
 		system.spawn(Vector2(320, 180), Rect2(0, 0, 640, 360), random, kind)
 		var enemy: Dictionary = system.items[0]
@@ -26,6 +26,7 @@ func _run() -> void:
 					enemy.charge_direction = enemy.facing
 					enemy.shot_direction = enemy.facing
 					enemy.charge_phase = ["approach", "warning", "charge", "recovery"][pose]
+					enemy.charge_timer = enemy.profile.attack_warning * 0.5
 					enemy.boss_phase = 1 if pose < 2 else 2
 					enemy.boss_attack = "ring" if pose % 2 == 0 else "fan"
 					enemy.windup = 0.5 if pose % 2 else 0.0

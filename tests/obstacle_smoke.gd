@@ -94,6 +94,23 @@ func _run() -> void:
 	check(arena.projectiles.items.is_empty(), "A muzzle beyond cover cannot create a shot on the far side")
 	arena._fire_player_projectile(Vector2(250, 180), Vector2.RIGHT)
 	check(arena.projectiles.items.size() == 1, "An unobstructed muzzle path must still fire")
+	arena.geometry.obstacles.clear()
+	for weapon_id in [&"dawn_bow", &"judgment_lance"]:
+		arena.player.weapon = arena.Weapons.WEAPONS[weapon_id].stats
+		for outward in [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]:
+			arena.player.reset()
+			arena.player.fire_requires_release = false
+			arena.projectiles.clear()
+			arena.player.player_position = arena.ARENA.get_center()
+			var outside: Vector2 = arena.player.player_position + outward * 1000.0
+			arena.player.advance(10.0, outward, outside, false, true, arena.ARENA)
+			var point: Vector2 = arena.player.player_position
+			var inner: Rect2 = arena.ARENA.grow(-8.0)
+			check(point == inner.get_center() + outward * (inner.size * 0.5), "Player hitbox must stay within the arena")
+			check(not arena.ARENA.has_point(arena.player.muzzle_position()) and arena.projectiles.items.is_empty(), "Outward shot at each wall must not spawn beyond the arena")
+			arena.player.fire_cooldown = 0.0
+			arena.player.advance(0.0, Vector2.ZERO, arena.ARENA.get_center(), false, true, arena.ARENA)
+			check(arena.projectiles.items.size() == 1 and arena.projectiles.items[0].position == arena.player.muzzle_position(), "Inward shot must spawn at the aligned muzzle")
 	arena.free()
 	await create_timer(0.35).timeout
 	for path in [String(get_meta("profile_path")), "user://obstacle_smoke_preferences.json", "user://obstacle_smoke_records.json"]:

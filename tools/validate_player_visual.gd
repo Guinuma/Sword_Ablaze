@@ -17,6 +17,15 @@ func _run() -> void:
 				visual.present(Vector2(320, 200), Vector2.RIGHT.rotated(index * TAU / 16), Vector2.RIGHT.rotated(movement * TAU / 16), 0.1, state == 1, state == 2, state == 3, 0.1 if state == 3 else 0.0)
 				await process_frame
 				await RenderingServer.frame_post_draw
+	var bounds := Rect2(34, 70, 572, 258).grow(-8.0)
+	for weapon in [&"dawn_bow", &"judgment_lance"]:
+		visual.ranged_id = weapon
+		for outward in [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]:
+			var point: Vector2 = bounds.get_center() + outward * (bounds.size * 0.5)
+			for aim in [outward, -outward]:
+				visual.present(point, aim, Vector2.ZERO, 0.1, false, false, true)
+				await process_frame
+				await RenderingServer.frame_post_draw
 	visual.free()
-	print("Player visual sweep complete: 1024 rendered combinations")
+	print("Player visual sweep complete: 1040 rendered combinations")
 	quit()

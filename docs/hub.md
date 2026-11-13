@@ -8,7 +8,7 @@ Walk with WASD/arrows or your remapped movement keys. Approach a station and pre
 
 - Gabriel opens a mentor conversation, a small functional skill tree and the existing global progression screen. Michael and the flaming sword are introduced as the main path. Three prototype branches (Michael, Gabriel and Raphael) offer six persistent knowledge nodes, with point costs, prerequisites and free reset. New weapon unlocks remain priority 4; see docs/skill-trees.md.
 - The arsenal opens the persistent melee and ranged loadout. Saved equipment applies when entering an arena and survives retries and return home.
-- The door opens Arenas, Roguelite, Campaign and Title Screen. Arenas leads to the existing finite/Endless selection; the unfinished modes retain WORK IN PROGRESS.
+- The door opens Arenas, Roguelite, Campaign and Title Screen. Arenas leads to the existing finite/Endless selection; Roguelite opens the Courtyard Run briefing, and Campaign retains WORK IN PROGRESS.
 
 Escape or Menu opens Resume, Options, Title Screen and Quit. Options retains feedback, audio, bindings, help and loadout. Menus freeze house movement; Back/Escape restores their immediate parent and focus. Closing the final panel releases UI focus back to walking, at the same position. Losing application focus also opens the hub menu. There are no shots, melee attacks, dashes, enemies or combat rewards in the home. The Sanctuary music continues through its menus and scene transitions.
 
@@ -28,6 +28,6 @@ Runs launched from the door return home from pause or results. Retry stays in th
 
 ## Priority 1 menu routes (2026-11-06)
 
-Title offers PLAY, OPTIONS and QUIT. Play contains SANCTUARY, ARENAS, ROGUELITE, CAMPAIGN, SOUNDTRACK and QUIT, plus Back. ROGUELITE, CAMPAIGN and SOUNDTRACK are visible entries that open WORK IN PROGRESS, without starting combat or altering the selected mode. Soundtrack is a future page; background music and independent audio sliders already work.
+Title offers PLAY, OPTIONS and QUIT. Play contains SANCTUARY, ARENAS, ROGUELITE, CAMPAIGN, SOUNDTRACK and QUIT, plus Back. ROGUELITE opens the Courtyard Run briefing and starts the finite run on confirmation. CAMPAIGN and SOUNDTRACK open WORK IN PROGRESS. Soundtrack is a future page; background music and independent audio sliders already work.
 
 `tests/menu_routes_smoke.gd` activates actual buttons to verify the requested ordering, WIP behavior, parent/focus restoration, Options routes, Sanctuary entry and both direct arena modes. Navigation checks cover closed focus cycles; startup checks activate Quit from both title and Play. `tools/capture_menu_routes.gd` reproduces the priority-1 menu screenshots.

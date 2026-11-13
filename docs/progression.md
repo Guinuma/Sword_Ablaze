@@ -18,23 +18,22 @@ Global XP, levels, purchased skills and permanent unlock IDs belong to the profi
 
 The HUD should label global XP as GLOBAL XP when it is introduced. Result summaries show the run reward and resulting global level. The hub shows cumulative XP and available skill points. No temporary XP/currency is introduced by this contract. Preferences stay in their existing safe file and are not reset by restarting a run.
 
-## Profile version 1
+## Profile version 2
 
-The global profile will live at `user://profile.json`. Its initial schema is:
+The global profile lives at `user://profile.json`. The current schema is:
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "xp": 0,
   "next_run_id": 1,
   "last_settled_run_id": 0,
   "active_run": {"id": 0, "mode": ""},
-  "skills": [],
-  "unlocks": []
+  "skills": []
 }
 ```
 
-`xp` is a nonnegative bounded integer. New rewards stop at the current XP cap. Existing saves keep previously earned XP and skills even if the cap falls. Sequence fields are nonnegative bounded integers, with next_run_id strictly greater than last_settled_run_id and any active ID. Active ID zero means no pending run; otherwise mode is `courtyard` or `endless`. Purchased skill and unlock IDs must be unique strings drawn from their eventual known definition sets. Do not store a duplicate level or point balance that can disagree with XP/purchases. Validation must include cross-field constraints and reasonable file/array/number limits.
+`xp` is a nonnegative bounded integer. New rewards stop at the current XP cap. Existing saves keep previously earned XP and skills even if the cap falls. Sequence fields are nonnegative bounded integers, with next_run_id strictly greater than last_settled_run_id and any active ID. Active ID zero means no pending run; otherwise mode is `courtyard` or `endless`. Purchased skill IDs must be unique strings from the skill catalogue. Learned skills determine weapon access. Do not store a duplicate level or point balance that can disagree with XP/purchases. Validation must include cross-field constraints and reasonable file/array/number limits.
 
 Visual/audio/input/loadout preferences remain in `user://preferences.json`, independently versioned and loaded with the existing validator. This is the profile-to-preferences boundary, not a second copy of user settings. Local finite/endless records likewise remain separate files; failure to write a record must not cause a global reward to be delivered twice.
 
@@ -46,7 +45,7 @@ Settlement accepts only the active ID/mode, a valid terminal outcome and current
 
 On write failure, preserve the pending reward identity and unchanged global XP so the same result can retry. After a successful settlement, repeated callbacks or a reloaded profile grant zero additional XP. The result screen should report a failed save and offer a way to retry it; it must not pretend an unsaved reward is permanent. Sequence numbers must never wrap or be reused when their limit is reached.
 
-Load valid primary data, else valid backup, else a clearly reported initial profile. Do not promote partial `.tmp` data automatically. Do not overwrite an unknown future version. First version has no prior global-profile schema to migrate; future migrations need explicit version steps and regression fixtures. Preferences and arena records are not legacy global profiles and must not be silently converted into XP.
+Load valid primary data, else valid backup, else a clearly reported initial profile. Do not promote partial `.tmp` data automatically. Do not overwrite an unknown future version. Version 1 profiles are upgraded on read by removing the reserved empty `unlocks` field. The next successful write stores version 2. XP, skills and run identities carry over, including when loading a version 1 backup. Preferences and arena records are not legacy global profiles and must not be silently converted into XP.
 
 Concurrent application instances editing one profile are outside this first implementation and must be documented; sequential scene changes/reloads must remain safe. A later concurrency feature needs locking or compare-and-swap, not an assumption that rename solves stale writers.
 
@@ -56,15 +55,18 @@ Concurrent application instances editing one profile are outside this first impl
 - Verify initial profile creation, strict validation, incomplete/corrupt primary recovery, valid backup preservation, malformed/mismatched fields and future-version write refusal.
 - Verify run allocation, abandonment, mode mismatch, duplicate settlement before/after reload and failed writes followed by retry.
 - Verify complete finite victory/defeat and Endless defeat apply the same base rules, with explicit completed-wave counters and one terminal receipt.
-- Keep skill purchases, hub integration, interrupted-write simulation, migration support and full hub → combat → result → reward → hub tests as separate open work until implemented.
 
 
 ## Storage implementation status
 
-`scripts/run/global_profile.gd` now implements profile creation/loading, strict version-1 validation, bounded IDs/XP, safe transactional writes, backup recovery and identity-based reward settlement. It is connected to combat terminal results and the mode/results UI. `skills` now validates the known skill IDs, their prerequisites and total cost. Weapon access is derived from purchased nodes, so the reserved `unlocks` array stays empty. Unknown IDs are rejected rather than applied. Profiles recovered from corruption expose `recovered`/`reset` status; future versions expose a write-blocking status. Sequence exhaustion refuses allocation.
+`scripts/run/global_profile.gd` now implements profile creation/loading, strict version-2 validation and version-1 migration, bounded IDs/XP, safe transactional writes, backup recovery and identity-based reward settlement. It is connected to combat terminal results and the mode/results UI. `skills` now validates the known skill IDs, their prerequisites and total cost. Weapon access is derived from purchased nodes. Unknown IDs are rejected rather than applied. Profiles recovered from corruption expose `recovered`/`reset` status; future versions expose a write-blocking status. Sequence exhaustion refuses allocation.
 
-`tests/profile_smoke.gd` verifies reward and level boundaries, initial saves, failed writes with unchanged in-memory state, retry, duplicate callbacks/reloads, abandoned IDs, mismatched mode/outcome, capped awards, corruption/incomplete data recovery, backup preservation, future-version protection, cross-field validation, ignored partial temporary data and sequence exhaustion. Test files use isolated `user://profile_smoke.json` paths. Physical power-loss testing and game integration remain pending.
+`tests/profile_smoke.gd` verifies reward and level boundaries, initial saves, failed writes with unchanged in-memory state, retry, duplicate callbacks/reloads, abandoned IDs, mismatched mode/outcome, capped awards, corruption/incomplete data recovery, backup preservation, future-version protection, cross-field validation, ignored partial temporary data and sequence exhaustion. Test files use isolated `user://profile_smoke.json` paths. Regression fixtures simulate interrupted writes with staged data and a torn backup, and verify that the last committed profile still loads. Physical power-loss testing remains pending.
 
+
+## Reset global progress
+
+In Sanctuary, open Gabriel → Global Progression → Reset Global Progress. The confirmation opens with Back focused. Confirming clears global XP and learned skills and invalidates any unsettled run. The next run ID stays monotonic. Arena records and preferences live in separate files and are preserved.
 
 ## Game integration
 

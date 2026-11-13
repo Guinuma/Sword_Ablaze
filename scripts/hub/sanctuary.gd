@@ -322,9 +322,13 @@ func _reset_skills() -> void:
 	_show_skill_tree("All skill points refunded. XP preserved." if error == OK else "Could not save reset. Skills unchanged.")
 	_refresh_profile()
 
+func _reset_progression() -> void:
+	super._reset_progression()
+	_refresh_profile()
+
 func _show_departure() -> void:
 	_open_detail("LEAVE SANCTUARY")
-	for entry in [["ARENAS", _show_modes], ["ROGUELITE", _show_work_in_progress.bind("ROGUELITE")], ["CAMPAIGN", _show_work_in_progress.bind("CAMPAIGN")], ["TITLE SCREEN", _return_to_title]]:
+	for entry in [["ARENAS", _show_modes], ["ROGUELITE", _show_roguelite], ["CAMPAIGN", _show_work_in_progress.bind("CAMPAIGN")], ["TITLE SCREEN", _return_to_title]]:
 		_button(detail_body, entry[0], entry[1])
 	_refresh_focus()
 	detail_body.get_child(1).grab_focus()

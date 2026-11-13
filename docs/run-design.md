@@ -1,6 +1,6 @@
 # First finite run: prototype decisions
 
-Decision date: 2026-11-03. This defines the implementation target for the first complete run. Finite Courtyard Run, the Warden boss, terminal victory, separate local win records and mode selection are now implemented. Global XP is now awarded through the shared profile contract; the Sanctuary hub is implemented and skill purchases remain pending. User full-run feedback was received on 2026-11-04; exact run duration remains unmeasured.
+Decision date: 2026-11-03. This defines the implementation target for the first complete run. Finite Courtyard Run, the Warden boss, terminal victory, separate local win records and mode selection are now implemented. Global XP is now awarded through the shared profile contract; the Sanctuary hub and permanent skill purchases are implemented. User full-run feedback was received on 2026-11-04; exact run duration remains unmeasured.
 
 ## Structure and duration
 
@@ -20,7 +20,7 @@ Defeat occurs at zero HP, including the boss encounter. Keep the existing fall a
 
 Retry starts wave one with the selected loadout, full base HP and no temporary upgrades, enemies, projectiles, drops or feedback left from the previous run. It requires a fresh firing trigger. Leaving a live run abandons it; it does not award a victory or defeat completion reward.
 
-The result screen returns to the main menu while a hub is absent. Once the minimal hub exists, the same Return action leads there. No fake hub or permanent-reward claim is needed to finish the combat prototype; the full hub/reward loop stays unchecked until it is actually implemented and tested.
+PLAY → ROGUELITE and the Sanctuary door both open the Courtyard Run briefing. START RUN uses the equipped loadout and learned skills. Both routes return to Sanctuary from victory, defeat or pause. The Arenas menu also keeps Courtyard Run available. Both entries share finite records and use the same global XP reward rules.
 
 ## Endless variant
 
@@ -44,7 +44,7 @@ Global XP, skill trees, global reward amounts, boss permanent drops, save migrat
 
 The Warden has 120 HP, a 22 px projectile hit radius, a 25 px contact radius and no knockback. It appears with a 1.5 s safe spawn warning in the upper center of the arena. It remains stationary and alternates radial rings and aimed fans, each with fixed warning lines. Phase one uses eight ring shots or three fan shots, a 1.1 s warning and 2.4 s cooldown. At half HP, the next announced attack enters phase two: twelve ring shots or five fan shots, a 0.8 s warning and 1.6 s cooldown. Projectiles deal 20 damage and travel at 130 px/s (156 in phase two). A phase change never changes an already announced pattern mid-warning.
 
-The result includes the local victory count, “Crown broken” summary and saved global XP under [the shared progression contract](progression.md). Permanent combat upgrades still await skill-tree implementation. Finite outcomes save to `user://finite_records.json`, separately from endless records. Successful completion increments optional version-1 `wins`; defeats increment runs without wins. Old records without `wins` load with zero. The menu mode selector shows finite victories. The result is delivered once; no projectile or contact can damage a won run. Death already registered before the final-clear event takes precedence.
+The result includes the local victory count, “Crown broken” summary and saved global XP under [the shared progression contract](progression.md). Permanent combat upgrades are learned from Gabriel in Sanctuary. Finite outcomes save to `user://finite_records.json`, separately from endless records. Successful completion increments optional version-1 `wins`; defeats increment runs without wins. Old records without `wins` load with zero. The menu mode selector shows finite victories. The result is delivered once; no projectile or contact can damage a won run. Death already registered before the final-clear event takes precedence.
 
 Boss art now uses a dedicated generated crowned-armor atlas with intact/broken-halo idle/cast poses. See docs/art/section6-spec.md and CREDITS.md for source and conditions. `tests/finite_run_smoke.gd` checks both attack phases, matching telegraph/projectile directions, complete automated runs with both weapons, three blessing choices, pause, victory persistence/deduplication, retry and death precedence. Menu tests check finite entry and return. `tools/capture_finite.gd` captures both phases and victory. These tests do not measure the 10–15-minute target or establish fair difficulty.
 

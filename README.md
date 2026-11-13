@@ -2,7 +2,7 @@
 
 Top-down pixel-art shooter em GDScript, ambientado num Céu em ruínas. Combate rápido, arenas e progressão roguelite são o foco inicial. O protagonista escolhido é **The Exile**: capuz e máscara claros, capa turquesa, equipamento leve e arma com lâmina.
 
-**Arena Shooter + Roguelite primeiro. Campaign mais tarde.** O XP é transversal às Arenas atuais; o Sanctuary concentra a consulta de progressão e receberá as skill trees funcionais. Melhorias temporárias de uma run serão separadas da progressão global.
+**Arena Shooter + Roguelite primeiro. Campaign mais tarde.** As Arenas e o Roguelite partilham o XP global. No Sanctuary, Gabriel dá acesso às árvores de habilidades. As bênçãos temporárias duram apenas uma run.
 
 ## Estado atual
 
@@ -219,7 +219,7 @@ A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a p
 
 - [x] Prototipar escolhas a cada três ondas, configuráveis no Resource de ondas.
 - [x] **Decidido:** primeira run com nove encontros, três escolhas de melhoria e boss final; alvo de 10–15 minutos, sujeito a playtesting. Ver [estrutura da run](docs/run-design.md).
-- [ ] Definir início, vitória, derrota e retorno ao hub da run.
+- [x] Lançar a run pelo menu Roguelite ou pela porta do Sanctuary. A vitória sobre o Warden e a derrota dão acesso ao resultado, à repetição e ao regresso ao Sanctuary.
 - [x] Aplicar modificadores temporários a partir dos valores base, com limites por melhoria.
 - [x] Oferecer três melhorias elegíveis após cada terceira onda, com descrição e limite de stacks.
 - [x] Criar seis melhorias: movimento, cadência, dano, recuo, recarga do dash e vida máxima.
@@ -253,11 +253,11 @@ A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a p
 - [x] Aplicar escrita segura ao perfil global, com transações de identidade da run e XP.
 - [x] Criar e carregar perfil inicial quando não existir save, com caminhos isolados nos testes.
 - [x] Validar dados do perfil e recuperar saves incompletos/corrompidos através do backup, com proteção de versões futuras.
-- [ ] Implementar migrações entre versões do esquema.
+- [x] Migrar perfis globais v1 para v2, preservando XP, habilidades e identificadores de recompensa.
 - [x] Guardar nos momentos de recompensa, compra/reposição de skills e alteração de preferências.
-- [ ] Oferecer reposição de progresso com confirmação explícita.
-- [ ] Testar encerramento durante gravação e recuperação sem perder todo o perfil.
-- [ ] **Decidir:** suporte a vários perfis e continuação de runs interrompidas.
+- [x] Repor XP global e habilidades no Sanctuary mediante confirmação explícita. Recordes locais e preferências são preservados.
+- [x] Simular gravações interrompidas e verificar recuperação a partir do perfil principal ou do backup.
+- [x] **Decidido para o protótipo:** um perfil local, sem retomar runs interrompidas. A próxima run substitui a identidade abandonada.
 
 ### 11. Menus, HUD e acessibilidade
 
@@ -268,14 +268,14 @@ A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a p
 - [x] Criar botões de pausa para retomar, reiniciar e sair, com foco por teclado.
 - [x] Partilhar preferências visuais entre menu principal e pausa.
 - [x] Integrar escolha de melhorias e indicadores das melhorias adquiridas no HUD.
-- [ ] Integrar futuros menus de skill tree e recompensas.
+- [x] Integrar a árvore de habilidades de Gabriel e mostrar o XP guardado no ecrã de resultados.
 - [x] Aplicar HUD e menus em marinho, ouro e marfim, com fonte pixel e hierarquia de informação.
 - [x] Oferecer remapeamento de teclas e guardar preferências.
 - [ ] **Decidir:** suporte de comando; se incluído, implementar mira, foco e navegação completos.
 - [x] Garantir navegação por teclado e foco visível nos menus.
 - [x] Rever HUD e menus a 640 × 360 e 1280 × 720, incluindo vida crítica e contadores maiores.
 - [ ] Oferecer opções de escala de UI e testar fullscreen e outras proporções.
-- [ ] Distinguir perigos por forma e movimento, além da cor.
+- [x] Distinguir avisos de aparecimento, investidas e disparos por forma e movimento. A opção de movimento reduzido mantém os indicadores estáticos.
 - [x] Guardar opções de redução de flashes e movimento decorativo no menu de pausa.
 - [x] Criar tutorial curto para mover, apontar, disparar, dash e escolher melhorias.
 - [ ] **Decidir:** idiomas suportados e preparar textos para localização.
@@ -289,9 +289,9 @@ A [checklist de prioridades atuais](#checklist-de-prioridades-atuais) define a p
 - [x] Executar importação e arranque gráfico no Godot 4.5.1.
 - [x] Acrescentar regressões de simulação separada, estados, ataques à distância, animações e HUD.
 - [x] Testar melhorias temporárias e recordes locais, incluindo backup, corrupção e versão futura.
-- [ ] Criar testes de recompensas, skill trees, perfil global e migrações.
-- [ ] Testar a run completa: hub → combate → resultado → recompensa → hub.
-- [ ] Verificar alinhamento visual e hitboxes nas quatro direções e junto aos limites.
+- [x] Testar recompensas, árvores de habilidades, perfil global e migração v1 → v2.
+- [x] Testar a run completa: Sanctuary → combate → resultado → recompensa guardada → Sanctuary.
+- [x] Verificar o alinhamento da arma, a origem dos projéteis e os limites do Exilado nas quatro direções, com Dawn Bow e Judgment Lance.
 - [x] Registar baseline de tempo de simulação e memória com entidades no limite.
 - [x] Medir renderização e frame time em combate denso real.
 - [ ] Definir hardware mínimo e objetivo de desempenho com base em medições.
@@ -369,11 +369,12 @@ Versão de teste: **Michael, Gabriel e Raphael**, com dois nós por ramo. [Regra
 - [x] Implementar e validar o conjunto inicial de Michael. Os ramos de Gabriel e Raphael ficam planeados para implementação gradual.
 - [x] Integrar seleção/equipamento das armas desbloqueadas no arsenal e aplicar os respetivos atributos e comportamentos no combate.
 - [x] Criar os visuais, animações, ícones e feedback necessários para distinguir as armas; identificar claramente as entradas ainda em desenvolvimento.
-- [ ] Concluir playtests de equilíbrio entre distância e corpo a corpo. Persistência, restrições de equipamento e melhorias temporárias têm testes automatizados.
+- [x] Comparar as quatro armas de Michael em testes de combate e afinar a cadência da Judgment Lance.
+- [ ] Concluir o playtest humano de equilíbrio entre distância e corpo a corpo com as quatro armas.
 
 #### Prioridade 5 — Modos futuros e validação da experiência
 
-- [ ] Desenvolver o modo **Roguelite** como entrada própria, apoiado no Sanctuary e na progressão definidos acima; detalhar o trabalho na secção 8.
+- [x] Ligar a entrada **Roguelite** à primeira Courtyard Run, com retorno ao Sanctuary e XP global. Ver secção 8.
 - [ ] Desenvolver **Campaign** depois do núcleo Arena/Roguelite, seguindo a secção 14.
 - [ ] Definir e implementar a experiência da entrada **Soundtrack** antes de retirar o aviso de desenvolvimento.
 - [ ] Substituir **WORK IN PROGRESS** apenas quando a funcionalidade correspondente estiver implementada e validada.

@@ -55,7 +55,7 @@ func _draw() -> void:
 		var duration: float = profile.spawn_warning if profile != null else 0.7
 		var progress := clampf(1.0 - warning / duration, 0.0, 1.0)
 		draw_circle(Vector2.ZERO, 12.0, Color(0.5, 0.12, 0.3, 0.2))
-		draw_arc(Vector2.ZERO, 13.0 - progress * 3.0, 0.0, TAU, 24, Color("ffb454"), 1.0)
+		draw_arc(Vector2.ZERO, 13.0 if reduced_motion else 13.0 - progress * 3.0, 0.0, TAU, 24, Color("ffb454"), 1.0)
 		draw_line(Vector2(-4, 0), Vector2(4, 0), Color("ffe0a3"))
 		draw_line(Vector2(0, -4), Vector2(0, 4), Color("ffe0a3"))
 		return
@@ -78,9 +78,9 @@ func _draw() -> void:
 		if profile.kind == "elite":
 			for index in range(8):
 				var spoke := direction.rotated(index * TAU / 8)
-				draw_line(spoke * 14, spoke * profile.attack_range, Color(0.95, 0.35, 0.8, 0.5), 1)
+				_draw_shot_warning(spoke, 14.0, profile.attack_range, windup / profile.attack_warning)
 		else:
-			draw_line(Vector2.ZERO, direction * profile.attack_range, Color(0.95, 0.35, 0.8, 0.65), 1.0)
+			_draw_shot_warning(direction, 11.0, profile.attack_range, windup / profile.attack_warning)
 		draw_arc(Vector2.ZERO, 11.0, 0.0, TAU, 20, Color("ed99eb"), 1.0)
 	var bob: float = 0.0
 	if not reduced_motion:
@@ -119,8 +119,9 @@ func _draw_charger(profile: Resource) -> void:
 		var side: Vector2 = direction.orthogonal() * profile.contact_radius
 		draw_line(side, end + side, Color("ffb454"), 1.0)
 		draw_line(-side, end - side, Color("ffb454"), 1.0)
-		draw_line(end + side, end, Color("ffe0a3"), 2.0)
-		draw_line(end - side, end, Color("ffe0a3"), 2.0)
+		_draw_chevron(end, direction, profile.contact_radius, Color("ffe0a3"))
+		var progress := _warning_progress(state.get("charge_timer", profile.attack_warning) / profile.attack_warning)
+		_draw_chevron(direction * lerpf(24.0, length - 12.0, progress), direction, 6.0, Color("ffe0a3"))
 	draw_circle(Vector2(0, 7), 11, Color(0.02, 0.03, 0.06, 0.6))
 	var pose: int = {"approach": 0, "warning": 1, "charge": 2, "recovery": 3}.get(phase, 0)
 	_draw_pose(CHARGER, pose, 28.0, direction.x < 0.0 if phase != "approach" else state.get("facing", Vector2.RIGHT).x < 0.0, 40.0)
@@ -156,7 +157,7 @@ func _draw_boss(profile: Resource) -> void:
 	var gold := Color("ed8c82") if second else Color("c5a46c")
 	if state.get("windup", 0.0) > 0.0:
 		for direction in EnemySystem.boss_directions(state):
-			draw_line(direction * 27, direction * 600, Color(0.95, 0.35, 0.8, 0.55), 1)
+			_draw_shot_warning(direction, 27.0, 600.0, state.windup / (0.8 if second else profile.attack_warning))
 	draw_set_transform(Vector2(0, 12), 0.0, Vector2(1, 0.4))
 	draw_circle(Vector2.ZERO, 25, Color(0.02, 0.03, 0.06, 0.65))
 	draw_set_transform(Vector2.ZERO)
@@ -164,6 +165,24 @@ func _draw_boss(profile: Resource) -> void:
 	_draw_pose(WARDEN, pose, 65.0)
 	draw_rect(Rect2(-25, -65, 50, 4), Color("101421"))
 	draw_rect(Rect2(-25, -65, 50.0 * state.health / profile.health, 4), gold)
+
+
+func _warning_progress(remaining: float) -> float:
+	return 0.4 if reduced_motion else clampf(1.0 - remaining, 0.0, 1.0)
+
+
+func _draw_shot_warning(direction: Vector2, start: float, length: float, remaining: float) -> void:
+	draw_line(direction * start, direction * length, Color(0.95, 0.35, 0.8, 0.55), 1.0)
+	var tip := direction * lerpf(start + 10.0, minf(length, start + 68.0), _warning_progress(remaining))
+	_draw_chevron(tip, direction, 4.0, Color("f9c1f2"))
+
+
+func _draw_chevron(tip: Vector2, direction: Vector2, width: float, color: Color) -> void:
+	var base := tip - direction * width
+	var side := direction.orthogonal() * width
+	var points := PackedVector2Array([base + side, tip, base - side])
+	draw_polyline(points, Color("101421"), 3.0)
+	draw_polyline(points, color, 1.0)
 
 
 func _draw_pose(frames: SpriteFrames, index: int, height: float, mirror: bool = false, max_width: float = 100.0) -> void:
